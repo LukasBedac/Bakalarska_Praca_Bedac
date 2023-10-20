@@ -1,0 +1,59 @@
+﻿@page "/vytvorKviz"
+<PageTitle>Vytvorenie Kvizu</PageTitle>
+
+<form>
+    <div class="mb-3">
+        <label for="TypKvizu" class="form-label">Vyberte si typ kvizu:</label>
+        <br/>   
+        <div class="form-check">
+            <input type="radio" class="form-check-input livekviz" name="flexRadioDefault" id="livekviz" @onclick="ToggleDisplay" checked="@isLiveKviz" />
+            <label for="livekviz" class="form-check-label">Live Kviz</label>
+        </div>
+        <div class="form-check">
+            <input type="radio" class="form-check-input" name="flexRadioDefault" id="normalkviz" @onclick="ToggleDisplay" checked="@(!isLiveKviz)"/>
+            <label for="normalkviz" class="form-check-label">Normalny kviz</label>
+        </div>
+    </div>
+    @if (isLiveKviz)
+    {
+        <div class="mb-3">
+            <label for="Nazov kvizu" class="form-label">Nazov kvizu:</label>
+            <input type="text" class="form-control" id="idKvizu">
+        </div>
+
+        <div class="mb-3">
+            <label for="Otazka" class="form-label">Text otazky...</label>
+            <textarea type="text" class="form-control" id="otazka"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Submit</button>
+        <button type="submit" class="btn btn-primary"> Add</button>
+
+        <div class="mb-1">
+            <label>Po pridani otazky sa zobrazi tabulka/form otazok -> zatial nebudem robit pretoze bude treba databaza </label>
+            <!--TODO: 1.0 DATABAZA otazok-->
+
+        </div>
+    }
+    else
+    {
+        <div class="mb-3">
+            <label for="Nazov kvizu" class="form-label">Nazov kvizu:</label>
+            <input type="text" class="form-control" id="idKvizu">
+        </div>
+        <div class="mb-3">
+            <label for="Otazka" class="form-label">Text otazky...</label>
+            <textarea type="text" class="form-control" id="otazka"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    }
+
+</form>
+
+@code {
+    private bool isLiveKviz = true;
+    private void ToggleDisplay()
+    {
+        isLiveKviz = !isLiveKviz;
+    }
+}

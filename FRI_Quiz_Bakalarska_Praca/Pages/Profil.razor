@@ -1,0 +1,66 @@
+﻿@page "/profil"
+
+<PageTitle>Profile</PageTitle>
+
+<h1>Your profile</h1>
+
+<p>Profil uzivatela</p>
+
+@if (loginName != null)
+{
+    <div class="ms-3">
+        <label>Meno: @loginName</label>
+        
+    </div>
+    <div class="ms-3">
+        <label>Email: @loginName@@stud.uniza.sk</label>
+    </div>
+    <div class="ms-3">
+        <label id="password">Password</label>
+        <input for="password" type="password" />
+        <button type="submit" class="btn btn-primary" @onclick="PasswordChange" >Zmenit heslo</button>
+    </div>
+    @if(passwordChange)
+    {
+   
+    <div class="ms-3">
+        <label>Stare heslo</label>
+        <input type="text"/>
+    </div>
+    <div class="ms-3">
+        <label>Nove heslo</label>
+        <input type="text" />
+    </div>
+    <div class="ms-3">
+        <label>Zopakuj nove heslo</label>
+        <input type="text" />
+    </div>
+    <div class="ms-3">
+        <button type="submit">Potvrd</button>
+    </div>
+ 
+    }
+    else
+    {
+
+    }
+    
+        
+       
+
+}
+else
+{
+    <div class="ms-1">Aktualne ste odhlaseny, ak chete sa prihlaste
+        <a href="MicrosoftIdentity/Account/SignIn">tu</a>
+    </div>
+}
+
+@code {
+    private string? loginName = "Lukas";
+    private bool passwordChange = false;
+    public void PasswordChange()
+    {
+        passwordChange = !passwordChange;
+    }
+}

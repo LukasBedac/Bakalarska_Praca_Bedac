@@ -1,5 +1,5 @@
-using FRI_Quiz_Bakalarska_Praca.Data;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Facebook;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
@@ -15,7 +15,6 @@ builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
     .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
 builder.Services.AddControllersWithViews()
     .AddMicrosoftIdentityUI();
-
 builder.Services.AddAuthorization(); //Vypnutie autorizacie k microsoftu a ponechanie stareho kodu nizsie
 /*{
     // By default, all incoming requests will be authorized according to the default policy
@@ -25,7 +24,6 @@ builder.Services.AddAuthorization(); //Vypnutie autorizacie k microsoftu a ponec
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor()
     .AddMicrosoftIdentityConsentHandler();
-builder.Services.AddSingleton<WeatherForecastService>();
 
 var app = builder.Build();
 
