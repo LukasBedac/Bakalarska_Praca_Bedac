@@ -2,7 +2,7 @@
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">FRI Quiz</a>
+        <a class="navbar-brand" href="">FRIVIA</a>
         <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -22,17 +22,19 @@
             </NavLink>
         </div>
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
+            <NavLink class="nav-link" href="counter" Match="NavLinkMatch.All">
                 <span class="oi oi-plus" aria-hidden="true"></span> Counter
             </NavLink>
         </div>
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="profil">
+            <NavLink class="nav-link" href="profil" Match="NavLinkMatch.All">
                 <span class="oi oi-person" aria-hidden="true"></span> Profil
             </NavLink>
         </div>
     </nav>
+    
 </div>
+
 
 @code {
     private bool collapseNavMenu = true;

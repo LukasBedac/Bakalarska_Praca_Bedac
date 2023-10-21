@@ -3,7 +3,7 @@
 
 <form>
     <div class="mb-3">
-        <label for="TypKvizu" class="form-label">Vyberte si typ kvizu:</label>
+        <label class="form-label">Vyberte si typ kvizu:</label>
         <br/>   
         <div class="form-check">
             <input type="radio" class="form-check-input livekviz" name="flexRadioDefault" id="livekviz" @onclick="ToggleDisplay" checked="@isLiveKviz" />
@@ -17,13 +17,19 @@
     @if (isLiveKviz)
     {
         <div class="mb-3">
-            <label for="Nazov kvizu" class="form-label">Nazov kvizu:</label>
+            <label class="form-label">Nazov kvizu:</label>
             <input type="text" class="form-control" id="idKvizu">
         </div>
 
         <div class="mb-3">
-            <label for="Otazka" class="form-label">Text otazky...</label>
+            <label class="form-label">Text otazky...</label>
             <textarea type="text" class="form-control" id="otazka"></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label>
+
+            </label>
         </div>
 
         <button type="submit" class="btn btn-primary">Submit</button>

@@ -16,8 +16,11 @@
         <label>Email: @loginName@@stud.uniza.sk</label>
     </div>
     <div class="ms-3">
-        <label id="password">Password</label>
-        <input for="password" type="password" />
+        <label id="password">Heslo</label>
+        <span data-hidden-value="54372.23">
+            <span class="display">********</span>
+        </span>
+        <!--<input for="password" type="password" />-->
         <button type="submit" class="btn btn-primary" @onclick="PasswordChange" >Zmenit heslo</button>
     </div>
     @if(passwordChange)
@@ -40,13 +43,7 @@
     </div>
  
     }
-    else
-    {
-
-    }
-    
-        
-       
+    else{}
 
 }
 else
