@@ -14,24 +14,17 @@
             <label for="normalkviz" class="form-check-label">Normalny kviz</label>
         </div>
     </div>
+
+    <div class="mb-3">
+        <label class="form-label">Nazov kvizu:</label>
+        <input type="text" class="form-control" id="idKvizu">
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Text otazky...</label>
+        <textarea type="text" class="form-control" id="otazka"></textarea>
+    </div>
     @if (isLiveKviz)
     {
-        <div class="mb-3">
-            <label class="form-label">Nazov kvizu:</label>
-            <input type="text" class="form-control" id="idKvizu">
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Text otazky...</label>
-            <textarea type="text" class="form-control" id="otazka"></textarea>
-        </div>
-
-        <div class="mb-3">
-            <label>
-
-            </label>
-        </div>
-
         <button type="submit" class="btn btn-primary">Submit</button>
         <button type="submit" class="btn btn-primary"> Add</button>
 
@@ -43,16 +36,28 @@
     }
     else
     {
-        <div class="mb-3">
-            <label for="Nazov kvizu" class="form-label">Nazov kvizu:</label>
-            <input type="text" class="form-control" id="idKvizu">
-        </div>
-        <div class="mb-3">
-            <label for="Otazka" class="form-label">Text otazky...</label>
-            <textarea type="text" class="form-control" id="otazka"></textarea>
-        </div>
         <button type="submit" class="btn btn-primary">Submit</button>
     }
+
+    <div class="mb-3 questionNumber">
+        <div class="d-inline-flex">
+            <label class="form-check-label">1</label>
+            <input type="radio" class="form-check-input" />
+        </div>
+        <div class="d-inline-flex">
+            <label class="form-check-label">2</label>
+            <input type="radio" class="form-check-input" />
+        </div>
+        <div class="d-inline-flex">
+            <label class="form-check-label">3</label>
+            <input type="radio" class="form-check-input" />
+        </div>
+        <div class="d-inline-flex">
+            <label class="form-check-label">4</label>
+            <input type="radio" class="form-check-input" />
+        </div>
+
+    </div>
 
 </form>
 
