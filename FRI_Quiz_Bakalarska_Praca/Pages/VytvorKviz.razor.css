@@ -1,0 +1,76 @@
+﻿body {
+
+}
+
+.nastaveniaCasu {
+    display: flex;
+    flex-direction:row;
+    padding-bottom: 2rem;
+}
+.nastaveniaCasuText {
+    align-items:center;
+    padding-top: 0.5rem;
+    padding-right: 1rem;
+}
+
+.casOd {
+    display: flex;
+    flex-direction: row;
+    grid-row: 1;
+    padding-right: 1rem;
+    padding-top: 0.5rem;
+}
+
+.casDo {
+    display: flex;
+    flex-direction: row;
+    grid-row: 1;
+    padding-top: 0.5rem;
+}
+.datum {
+    display: flex;
+    flex-direction: row;
+    grid-row: 1;
+    padding-right: 1rem;
+    padding-top: 0.5rem;
+}
+
+.nastaveniaKvizu {
+    display: flex;
+    grid-column: 1;
+    grid-row: 1;
+}
+
+.pdright-2rem {
+    padding-right: 2rem;
+}
+.odpovede-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.odpoved {
+    display:flex;
+    
+}
+
+.form-text {
+    flex-grow: 1;
+    max-width: 70%;
+    min-height: 40px;
+}
+
+.livekviz-button {
+    margin: 0.2rem 0.5rem 0.2rem 0.5rem;
+}
+
+.odpoved-checkbox {
+    margin-left: 1.5rem;
+}
+
+.kviz {
+    display: flex;
+    flex-direction: column;
+    grid-column: 1;
+    grid-row: 2;
+}
