@@ -4,7 +4,6 @@
 
 .nastaveniaCasu {
     display: flex;
-    flex-direction:row;
     padding-bottom: 2rem;
 }
 .nastaveniaCasuText {
@@ -73,4 +72,59 @@
     flex-direction: column;
     grid-column: 1;
     grid-row: 2;
+}
+@media (max-width: 640.98px) {
+
+    .nastaveniaCasu {
+        flex-direction: column;
+        padding-bottom: 1rem;
+    }
+
+    .nastaveniaCasuText {
+        align-items: center;
+    }
+
+    .casOd {
+        flex-direction: column;
+        padding-top: 0.5rem;
+    }
+
+    .casDo {
+        flex-direction: column;
+        padding-top: 0.5rem;
+    }
+
+    .datum {
+        flex-direction: column;
+    }
+
+}
+
+@media (min-width: 641px) {
+
+    .nastaveniaCasu {
+        flex-direction: row;
+        padding-bottom: 2rem;
+    }
+
+    .nastaveniaCasuText {
+        align-items: center;
+        padding-top: 0.5rem;
+        padding-right: 1rem;
+    }
+
+    .casOd {
+        flex-direction: row;
+    }
+
+    .casDo {
+        display: flex;
+        flex-direction: row;
+    }
+
+    .datum {
+        display: flex;
+        flex-direction: row;
+    }
+
 }
