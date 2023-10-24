@@ -3,7 +3,6 @@
 
 <PageTitle>Vytvorenie Kvizu</PageTitle>
 
-
 <form>
     <div class="mb-3">
         <label class="form-label">Vyberte si typ kvizu:</label>
@@ -56,7 +55,7 @@
    
     <div class="mb-3">
         <label class="form-label">Text otazky...</label>
-       <Editor/>
+        <Editor Conf="@textConf"></Editor>
         
     </div>
 
@@ -64,22 +63,22 @@
         <label>Zadajte odpovede</label>
         <div class="odpoved">
             <label class="form-check-label"></label>
-            <Editor class="odpoved-input"></Editor>
+            <Editor Conf="@odpovedeConf"></Editor>
             <input type="checkbox" class="form-check odpoved-checkbox"/>
         </div>
         <div class="odpoved">
             <label class="form-check-label"></label>
-            <Editor class="odpoved-input" />
+            <Editor Conf="@odpovedeConf" />
             <input type="checkbox" class="form-check odpoved-checkbox" />
         </div>
         <div class="odpoved">
             <label class="form-check-label"></label>
-            <Editor class="odpoved-input"/>
+            <Editor Conf="@odpovedeConf" />
             <input type="checkbox" class="form-check odpoved-checkbox" />
         </div>
         <div class="odpoved">
             <label class="form-check-label"></label>
-            <Editor class="odpoved-input"/>
+            <Editor Conf="@odpovedeConf" />
             <input type="checkbox" class="form-check odpoved-checkbox" />
         </div>
 
@@ -110,5 +109,25 @@
     {
         isLiveKviz = !isLiveKviz;
     }
-    
+
+    private Dictionary<string, object> odpovedeConf = new Dictionary<string, object>{
+   {"plugins", "autolink media link image emoticons table paste"},
+        {"toolbar", "undo redo | styles | bold italic underline | table | link image paste "},
+        {"paste_data_images", "true"},
+        {"height", "250px"},
+        {"automatic_uploads", true },
+        {"images_upload_url", "/UploadImage/"}
+    };
+
+
+    private Dictionary<string, object> textConf = new Dictionary<string, object>{
+   {"plugins", "autolink media link image emoticons table paste"},
+        {"toolbar", "undo redo | styles | bold italic underline | table | link image paste "},
+        {"paste_data_images", "true"},
+        {"width", "80%"},
+        {"height", "200px"},
+        {"automatic_uploads", true },
+        {"images_upload_url", "/UploadImage/"}
+  };
+
 }
