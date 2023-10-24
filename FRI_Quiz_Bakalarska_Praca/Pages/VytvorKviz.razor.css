@@ -102,6 +102,13 @@
 
 @media (min-width: 641px) {
 
+    .odpoved-input {
+
+        max-height: 200px;
+        min-height:4rem;
+
+    }
+
     .nastaveniaCasu {
         flex-direction: row;
         padding-bottom: 2rem;

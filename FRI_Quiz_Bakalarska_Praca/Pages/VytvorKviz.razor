@@ -1,6 +1,8 @@
 ﻿@page "/vytvorKviz"
 @using TinyMCE.Blazor;
+
 <PageTitle>Vytvorenie Kvizu</PageTitle>
+
 
 <form>
     <div class="mb-3">
@@ -12,6 +14,10 @@
             <input type="radio" class="form-check-input" name="flexRadioDefault" id="normalkviz" @onclick="ToggleDisplay" checked="@(!isLiveKviz)" />
             <label for="normalkviz" class="form-check-label">Kvíz</label>
         </div>
+    </div>
+
+    <div class="users-selector">
+       
     </div>
 
     <div Class="nastaveniaCasu">
@@ -50,30 +56,30 @@
    
     <div class="mb-3">
         <label class="form-label">Text otazky...</label>
-        <!--<Editor />-->
-        <textarea type="text" class="form-control" id="otazka"></textarea>
+       <Editor/>
+        
     </div>
 
     <div class="odpovede-container">
         <label>Zadajte odpovede</label>
         <div class="odpoved">
             <label class="form-check-label"></label>
-            <textarea type="text" class="form-text" />
+            <Editor class="odpoved-input"></Editor>
             <input type="checkbox" class="form-check odpoved-checkbox"/>
         </div>
         <div class="odpoved">
             <label class="form-check-label"></label>
-            <textarea type="text" class="form-text" />
+            <Editor class="odpoved-input" />
             <input type="checkbox" class="form-check odpoved-checkbox" />
         </div>
         <div class="odpoved">
             <label class="form-check-label"></label>
-            <textarea type="text" class="form-text" />
+            <Editor class="odpoved-input"/>
             <input type="checkbox" class="form-check odpoved-checkbox" />
         </div>
         <div class="odpoved">
             <label class="form-check-label"></label>
-            <textarea type="text" class="form-text" />
+            <Editor class="odpoved-input"/>
             <input type="checkbox" class="form-check odpoved-checkbox" />
         </div>
 
@@ -95,11 +101,7 @@
     {
         <button type="submit" class="btn btn-primary">Submit</button>
     }
-
-    
-
 </form>
-
 @code {
     TimePicker<TimeSpan?> ?timePicker;
     DatePicker<DateTime?> ?datePicker;
@@ -108,4 +110,5 @@
     {
         isLiveKviz = !isLiveKviz;
     }
+    
 }
