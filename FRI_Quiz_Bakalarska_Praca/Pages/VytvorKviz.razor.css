@@ -97,7 +97,14 @@
     .datum {
         flex-direction: column;
     }
+    .users {
+        display:none;
+    }
+    .users2 {
+        display:flex;
+        flex-direction:column;
 
+    }
 }
 
 @media (min-width: 641px) {
@@ -133,5 +140,20 @@
         display: flex;
         flex-direction: row;
     }
+    .users {
+        margin-left: 35rem;
+        display: inline-flex;        
+        flex-direction: row;
+    }
+    .users2 {
+        display:none;
+    }
 
+    .users-label {       
+        flex-direction: row-reverse;   
+        padding-right: 2rem;
+    }
+    .user-input {
+        justify-content:end;
+    }
 }

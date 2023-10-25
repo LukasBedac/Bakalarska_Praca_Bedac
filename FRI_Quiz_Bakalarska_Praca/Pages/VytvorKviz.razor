@@ -5,7 +5,11 @@
 
 <form>
     <div class="mb-3">
-        <label class="form-label">Vyberte si typ kvizu:</label>
+        <label class="form-label">Vyberte si typ kvizu:</label> 
+        <div class="users">
+            <label class="form-label users-label">Pridat uzivatela: </label>
+            <input class="users-input" />
+        </div>
         <br />
         <div class="form-check">
             <input type="radio" class="form-check-input livekviz" name="flexRadioDefault" id="livekviz" @onclick="ToggleDisplay" checked="@isLiveKviz" />
@@ -13,10 +17,11 @@
             <input type="radio" class="form-check-input" name="flexRadioDefault" id="normalkviz" @onclick="ToggleDisplay" checked="@(!isLiveKviz)" />
             <label for="normalkviz" class="form-check-label">Kvíz</label>
         </div>
-    </div>
-
-    <div class="users-selector">
-       
+        <div class="users2">
+            <label class="form-label users-label">Pridat uzivatela: </label>
+            <input class="users-input" />
+        </div>
+        
     </div>
 
     <div Class="nastaveniaCasu">

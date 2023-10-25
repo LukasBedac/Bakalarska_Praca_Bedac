@@ -1,0 +1,57 @@
+﻿@page "/mojekvizy"
+<h3>MojeKvizy</h3>
+
+<Accordion>
+    <Collapse Visible="@collapse1Visible">
+        <CollapseHeader>
+            <Heading Size="HeadingSize.Is5">
+                <AccordionToggle>Kviz 1</AccordionToggle>
+                <AccordionToggle Class="disabled"> Pocet bodov: 1/1</AccordionToggle>
+            </Heading>
+        </CollapseHeader>
+        <CollapseBody>
+            Otazka 1: afafbqfqqqqqqqqqe
+        </CollapseBody>
+    </Collapse>
+    <Collapse Visible="@collapse2Visible">
+        <CollapseHeader>
+            <Heading Size="HeadingSize.Is5">
+                <AccordionToggle>Kviz 2</AccordionToggle>
+                <AccordionToggle Class="disabled"> Pocet bodov: 0/1</AccordionToggle>
+            </Heading>
+        </CollapseHeader>
+        <CollapseBody>
+            Otazka 1: What fictional place would you most like to go to?
+        </CollapseBody>
+    </Collapse>
+    <Collapse Visible="@collapse3Visible">
+        <CollapseHeader>
+            <Heading Size="HeadingSize.Is5">
+                <AccordionToggle>VAII kviz prednaska 4</AccordionToggle>
+                <AccordionToggle Class="disabled"> Pocet bodov: 2/3</AccordionToggle>
+            </Heading>
+        </CollapseHeader>
+        <CollapseBody>
+            1: Naco pouzivame HTML?
+            
+            
+        </CollapseBody>
+        
+        <CollapseBody>
+            
+            2: Naco pozuivame CSS?
+
+        </CollapseBody>
+        <CollapseBody>
+
+            3: kafanhfouqbfoqnbfiphqwevfouqbdno;qfb vjwkvdilqbk.
+
+        </CollapseBody>
+    </Collapse>
+</Accordion>
+
+@code {
+    bool collapse1Visible = false;
+    bool collapse2Visible = false;
+    bool collapse3Visible = false;
+}

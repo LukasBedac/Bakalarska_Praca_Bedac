@@ -1,2 +1,16 @@
 ﻿body {
 }
+tr:hover {
+    font: bold;
+    background-color: lightskyblue;
+}
+
+.pocet-otazok-tabulka:hover{
+    color:red;
+
+}
+
+a {
+    color: black;
+    text-decoration: wavy;
+}
