@@ -106,14 +106,65 @@
 
     }
 }
+@media (max-width: 1025px) {
+    .odpoved-input {
+        max-height: 200px;
+        min-height: 4rem;
+    }
 
+    .nastaveniaCasu {
+        flex-direction: row;
+        padding-bottom: 2rem;
+    }
+
+    .nastaveniaCasuText {
+        align-items: center;
+        padding-top: 0.5rem;
+        padding-right: 1rem;
+    }
+
+    .casOd {
+        flex-direction: row;
+    }
+
+    .casDo {
+        display: flex;
+        flex-direction: row;
+    }
+
+    .datum {
+        display: none;
+        flex-direction: column;
+    }
+
+    .users {
+        margin-left: 1rem;
+        display: inline-flex;
+        flex-direction: column;
+    }
+
+    .users2 {
+        display: flex;
+    }
+
+    .users-label {
+        flex-direction: row-reverse;
+        padding-right: 2rem;
+    }
+
+    .user-input {
+        justify-content: end;
+    }
+    
+
+
+
+}
 @media (min-width: 641px) {
 
     .odpoved-input {
-
         max-height: 200px;
-        min-height:4rem;
-
+        min-height: 4rem;
     }
 
     .nastaveniaCasu {
@@ -140,20 +191,23 @@
         display: flex;
         flex-direction: row;
     }
+
     .users {
         margin-left: 35rem;
-        display: inline-flex;        
+        display: inline-flex;
         flex-direction: row;
     }
+
     .users2 {
-        display:none;
+        display: none;
     }
 
-    .users-label {       
-        flex-direction: row-reverse;   
+    .users-label {
+        flex-direction: row-reverse;
         padding-right: 2rem;
     }
+
     .user-input {
-        justify-content:end;
+        justify-content: end;
     }
 }
