@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace FRI_Quiz_Bakalarska_Praca.Data.Model
@@ -13,6 +14,10 @@ namespace FRI_Quiz_Bakalarska_Praca.Data.Model
         [Required]
         [MaxLength(250)]
         public string? Text { get; set; } = " ";
+        [Required]
+        [Length(2, 6)]
+        [DefaultValue(4)]
+        public LinkedList<Odpoved>? Odpovede { get; set; }
         [Required]
         public int Poradie { get; set; }
 

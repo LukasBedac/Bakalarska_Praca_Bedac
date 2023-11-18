@@ -14,10 +14,15 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
-
+var serverVersion = new MySqlServerVersion(new Version(8, 0, 29)); 
+var connectionString = "server=localhost1;user=root;password=123;database=ef"; //Neskor prehodit do DBCOntext classy ak pojde
 //Treba urobit identity FB, microsoft, lokalny
 
 // Add services to the container.
+builder.Services.AddDbContextFactory<DemoDbContext>(options => options.UseMySql(connectionString, serverVersion)
+        .LogTo(Console.WriteLine, LogLevel.Information) //Debug info -> bude odstranene
+        .EnableSensitiveDataLogging()
+        .EnableDetailedErrors());
 builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
     .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
 builder.Services.AddControllersWithViews()

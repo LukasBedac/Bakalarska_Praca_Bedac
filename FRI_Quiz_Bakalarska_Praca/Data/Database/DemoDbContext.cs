@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using FRI_Quiz_Bakalarska_Praca.Data.Model;
+using Microsoft.EntityFrameworkCore;
 
 namespace FRI_Quiz_Bakalarska_Praca.Data.Database
 {
