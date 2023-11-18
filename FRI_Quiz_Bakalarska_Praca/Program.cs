@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Facebook;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
@@ -10,19 +9,25 @@ using Microsoft.Identity.Web.UI;
 using Blazorise;
 using Blazorise.Bootstrap;
 using Blazorise.Icons.FontAwesome;
+using FRI_Quiz_Bakalarska_Praca.Data.Database;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
+
+//Treba urobit identity FB, microsoft, lokalny
 
 // Add services to the container.
 builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
     .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
 builder.Services.AddControllersWithViews()
     .AddMicrosoftIdentityUI();
-builder.Services.AddAuthorization(); //Vypnutie autorizacie k microsoftu a ponechanie stareho kodu nizsie
-/*{
-    // By default, all incoming requests will be authorized according to the default policy
+/*builder.Services.AddAuthorization( 
+options => //Vypnutie autorizacie k microsoftu a ponechanie stareho kodu nizsie
+{
+// By default, all incoming requests will be authorized according to the default policy
     options.FallbackPolicy = options.DefaultPolicy;
-}); */
+});*/
 builder.Services
     .AddBlazorise(options =>
     {
@@ -33,7 +38,6 @@ builder.Services
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor()
     .AddMicrosoftIdentityConsentHandler();
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

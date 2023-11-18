@@ -1,0 +1,145 @@
+﻿@page "/login"
+
+<Container>
+    <Row>
+        <Column>
+            <Tabs SelectedTab="@selectedTab" SelectedTabChanged="@OnSelectedTabChanged" Pills FullWidth>
+                <Items>
+                    <Tab Name="login">Prihlasit sa</Tab>
+                    <Tab Name="register">Zaregistujte sa</Tab>
+                </Items>
+                <Content>
+                    <TabPanel Name="login">
+                        <Card>
+                            <CardBody>
+                                <CardTitle>
+                                    Prihlaste sa
+                                </CardTitle>
+                            </CardBody>
+                            <CardBody>
+                                <Validations @ref="@loginValidationsRef" Mode="ValidationMode.Manual" ValidateOnLoad="false">
+                                    <Validation Validator="ValidationRule.IsEmail">
+                                        <Field>
+                                            <FieldLabel>Email</FieldLabel>
+                                            <TextEdit @bind-Text="@email" Placeholder="Zadajte email...">
+                                                <Feedback>
+                                                    <ValidationNone>Prosim zadajte svoj Email. </ValidationNone>
+                                                    <ValidationSuccess></ValidationSuccess>
+                                                    <ValidationError>Prosim zadajte platny email</ValidationError>
+                                                </Feedback>
+                                            </TextEdit>
+                                        </Field>
+                                    </Validation>
+                                    <Validation Validator="ValidationRule.IsNotEmpty">
+                                        <Field>
+                                            <FieldLabel>Heslo</FieldLabel>
+                                            <TextEdit @bind-Text="@password" Placeholder="Zadajte heslo.." />
+                                        </Field>
+                                    </Validation>
+                                    <Field>
+                                        <Check TValue="bool" @bind-Checked="@rememberMe">Zapamataj si ma</Check>
+                                    </Field>
+                                </Validations>
+                            </CardBody>
+                            <CardBody>
+                                <Button Color="Color.Primary" Clicked="@OnLoginClicked">Prihlasit sa</Button>
+                                <Button Color="Color.Danger">Zabudol som heslo</Button>
+                            </CardBody>
+                        </Card>
+                    </TabPanel>
+                    <TabPanel Name="register">
+                        <Card>
+                            <CardBody>
+                                <CardTitle>
+                                    Zaregistrujte sa
+                                </CardTitle>
+                            </CardBody>
+                            <CardBody>
+                                <Link To="https://www.facebook.com/login" Target="Target.Blank">
+                                     <a class="bi bi-facebook login-icon"> Prihlasit sa cez facebook</a>
+                                </Link> <br />
+                                <Link To="MicrosoftIdentity/Account/SignIn" Target="Target.Blank">
+                                    <a class="bi bi-microsoft login-icon"> Prihlasit sa cez Microsoft ucet</a>
+                                </Link>
+                            </CardBody>
+                            <CardBody>
+                                <Validations @ref="@registerValidationsRef" Mode="ValidationMode.Manual" ValidateOnLoad="false">
+                                    <Validation Validator="ValidationRule.IsNotEmpty">
+                                        <Field>
+                                            <FieldLabel>Name</FieldLabel>
+                                            <TextEdit @bind-Text="@name" Placeholder="Zadajte meno" />
+                                        </Field>
+                                    </Validation>
+                                    <Validation Validator="ValidationRule.IsEmail">
+                                        <Field>
+                                            <FieldLabel>Email</FieldLabel>
+                                            <TextEdit @bind-Text="@email" Placeholder="Zaajte svoj email">
+                                                <Feedback>
+                                                    <ValidationNone>Prosim zadajte svoj email.</ValidationNone>
+                                                    <ValidationSuccess></ValidationSuccess>
+                                                    <ValidationError>Zadajte platny email </ValidationError>
+                                                </Feedback>
+                                            </TextEdit>
+                                        </Field>
+                                    </Validation>
+                                    <Validation Validator="ValidationRule.IsNotEmpty">
+                                        <Field>
+                                            <FieldLabel>Password</FieldLabel>
+                                            <TextEdit @bind-Text="@password" Placeholder="Zadajte heslo" />
+                                        </Field>
+                                    </Validation>
+                                </Validations>
+                            </CardBody>
+                            <CardBody>
+                                <Button Color="Color.Primary" Clicked="@OnRegisterClicked">
+                                    Vytvorit ucet
+                                </Button>
+                            </CardBody>
+                        </Card>
+                    </TabPanel>
+                </Content>
+            </Tabs>
+        </Column>
+    </Row>
+   </Container>
+
+
+
+@code {
+        Validations? loginValidationsRef;
+        Validations? registerValidationsRef;
+
+        string selectedTab = "login";
+
+        string? name;
+        string? email;
+        string? password;
+        bool rememberMe;
+
+        private Task OnSelectedTabChanged(string name)
+        {
+        selectedTab = name;
+
+        return Task.CompletedTask;
+        }
+
+        async Task OnLoginClicked()
+        {
+        if (await loginValidationsRef.ValidateAll())
+        {
+            // do the real login here
+
+            await loginValidationsRef.ClearAll();
+        }
+        }
+
+        async Task OnRegisterClicked()
+        {
+        if (await registerValidationsRef.ValidateAll())
+        {
+            // do the real login here
+
+            await registerValidationsRef.ClearAll();
+        }
+        }
+}

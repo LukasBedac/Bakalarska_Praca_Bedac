@@ -1,0 +1,19 @@
+﻿
+.login-icon {
+    font-size: 32px;
+    text-decoration: none ; 
+    color: black;
+}
+.top-row-header {
+    display: flex;
+    position: relative;
+    width: 100%;
+}
+
+.header-item {
+    display: flex;
+    align-self: center;
+    flex-direction: row;
+    align-content: space-between;
+}
+

@@ -1,14 +1,16 @@
 ﻿<AuthorizeView>
     <Authorized>
         
-        Hello, @context.User.Identity?.Name!
+         Hello, @context.User.Identity?.Name!
         <a href="MicrosoftIdentity/Account/SignOut">Log out</a>
-        
+         
+         <a href="/profil" class="oi oi-person profil"></a>
+        <a class="userName">@context.User.Identity.Name</a>
     </Authorized>
     <NotAuthorized>
         <div>
             <span class="oi oi-account-login"></span>
         </div>
-        <a href="MicrosoftIdentity/Account/SignIn">Log in</a>
+        <a href="Login">Log in</a>
     </NotAuthorized>
 </AuthorizeView>
