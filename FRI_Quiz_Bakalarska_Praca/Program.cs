@@ -14,15 +14,21 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
-var serverVersion = new MySqlServerVersion(new Version(8, 0, 29)); 
-var connectionString = "server=localhost1;user=root;password=123;database=ef"; //Neskor prehodit do DBCOntext classy ak pojde
+
 //Treba urobit identity FB, microsoft, lokalny
 
 // Add services to the container.
-builder.Services.AddDbContextFactory<DemoDbContext>(options => options.UseMySql(connectionString, serverVersion)
+//-----------------Db Context Dp Injection-----------------//
+var dbHost = Environment.GetEnvironmentVariable("DB_HOST");
+var dbName = Environment.GetEnvironmentVariable("DB_NAME");
+var dbPassword = Environment.GetEnvironmentVariable("DB_SA_PASSWORD");
+//var connectionString = $"server={dbHost};user=sa;password={dbPassword};database={dbName}"; //Neskor prehodit do DBCOntext classy ak pojde
+var connectionString = $"Data Source={dbHost};Initial Catalog={dbName};User ID=sa;Password={dbPassword}";
+builder.Services.AddDbContextFactory<MyDbContext>(options => options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
         .LogTo(Console.WriteLine, LogLevel.Information) //Debug info -> bude odstranene
         .EnableSensitiveDataLogging()
-        .EnableDetailedErrors());
+        .EnableDetailedErrors()) ;
+//--------------End Db Context Dp Injection---------------//
 builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
     .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
 builder.Services.AddControllersWithViews()
