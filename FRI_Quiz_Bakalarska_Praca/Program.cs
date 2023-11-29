@@ -19,11 +19,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 //-----------------Db Context Dp Injection-----------------//
-var dbHost = Environment.GetEnvironmentVariable("DB_HOST");
-var dbName = Environment.GetEnvironmentVariable("DB_NAME");
-var dbPassword = Environment.GetEnvironmentVariable("DB_SA_PASSWORD");
-//var connectionString = $"server={dbHost};user=sa;password={dbPassword};database={dbName}"; //Neskor prehodit do DBCOntext classy ak pojde
-var connectionString = $"Data Source={dbHost};Initial Catalog={dbName};User ID=sa;Password={dbPassword}";
+var dbHost = "user";
+var dbName = "DB";
+var dbPassword = Environment.GetEnvironmentVariable("MYSQL_ROOT_PASSWORD");
+var connectionString = $"server={dbHost};user=sa;password={dbPassword};database={dbName}"; //Neskor prehodit do DBCOntext classy ak pojde
+//var connectionString = $"Data Source={dbHost};Initial Catalog={dbName};User ID=sa;Password={dbPassword}";
 builder.Services.AddDbContextFactory<MyDbContext>(options => options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
         .LogTo(Console.WriteLine, LogLevel.Information) //Debug info -> bude odstranene
         .EnableSensitiveDataLogging()

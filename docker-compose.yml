@@ -3,11 +3,12 @@ version: '3.4'
 
 services:
   database:
-    container_name: app-Db
+    container_name: DB
     image: mysql
     restart: always
     environment:
         MYSQL_ROOT_PASSWORD: FRI!@!222DB
+        MYSQL_USERNAME: user
   adminer:
     image: adminer
     restart: always

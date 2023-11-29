@@ -3,7 +3,11 @@
 
 <PageTitle>Vytvorenie Kvizu</PageTitle>
 
+
+    
 <form>
+    @if (isLiveKviz)
+    {
     <div class="mb-3">
         <label class="form-label">Vyberte si typ kvizu:</label> 
         <div class="users">
@@ -26,13 +30,21 @@
 
     <div Class="nastaveniaCasu">
         <div class="datum">
-            <label class="nastaveniaCasuText">Datum:</label>
+            <label class="nastaveniaCasuText">Datum zaciatku kvizu:</label>
             <Addons>
                 <Addon AddonType="AddonType.Body">
                     <DatePicker @ref="@datePicker" TValue="DateTime?" />
                 </Addon>
             </Addons>
         </div>
+            <div class="datum">
+                <label class="nastaveniaCasuText">Datum konca kvizu:</label>
+                <Addons>
+                    <Addon AddonType="AddonType.Body">
+                        <DatePicker @ref="@datePicker" TValue="DateTime?" />
+                    </Addon>
+                </Addons>
+            </div>
         
         <div class="casOd">
             <label class="nastaveniaCasuText">Zaciatok: </label>
@@ -88,32 +100,55 @@
         </div>
 
     </div>
-
-    @if (isLiveKviz)
-    {
         <div>
             <button type="submit" class="btn btn-primary livekviz-button">Submit</button>
             <button type="submit" class="btn btn-primary livekviz-button"> Add</button>
         </div>
+
+
+    }
+
+    else
+    {
+        <div class="mb-3">
+            <label class="form-label">Vyberte si typ kvizu:</label>
+            <div class="users">
+                <label class="form-label users-label">Pridat uzivatela: </label>
+                <input class="users-input" />
+            </div>
+            <br />
+            <div class="form-check">
+                <input type="radio" class="form-check-input livekviz" name="flexRadioDefault" id="livekviz" @onclick="ToggleDisplay" checked="@isLiveKviz" />
+                <label for="livekviz" class="form-check-label pdright-2rem">Live Kvíz</label>
+                <input type="radio" class="form-check-input" name="flexRadioDefault" id="normalkviz" @onclick="ToggleDisplay" checked="@(!isLiveKviz)" />
+                <label for="normalkviz" class="form-check-label">Kvíz</label>
+            </div>
+            <div class="users2">
+                <label class="form-label users-label">Pridat uzivatela: </label>
+                <input class="users-input" />
+            </div>
+
+        </div>
+        
+        
         <div class="mb-1">
             <label>Po pridani otazky sa zobrazi tabulka/form otazok -> zatial nebudem robit pretoze bude treba databaza </label>
             <!--TODO: 1.0 DATABAZA otazok-->
 
         </div>
-    }
-    else
-    {
+    
         <button type="submit" class="btn btn-primary">Submit</button>
     }
 </form>
 @code {
-    TimePicker<TimeSpan?> ?timePicker;
-    DatePicker<DateTime?> ?datePicker;
     private bool isLiveKviz = true;
     private void ToggleDisplay()
     {
         isLiveKviz = !isLiveKviz;
     }
+    TimePicker<TimeSpan?> ?timePicker;
+    DatePicker<DateTime?> ?datePicker;
+    
 
     private Dictionary<string, object> odpovedeConf = new Dictionary<string, object>{
    {"plugins", "autolink media link image emoticons table paste"},
