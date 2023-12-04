@@ -1,12 +1,14 @@
-﻿namespace FRI_Quiz_Bakalarska_Praca.Data.Database
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace FRI_Quiz_Bakalarska_Praca.Data.Database
 {
     public class DbController
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IDbContextFactory<ApplicationDbContext> _contextFactory;
 
-        public DbController(ApplicationDbContext context)
+        public DbController(IDbContextFactory<ApplicationDbContext> contextFactory)
         {
-            _context = context;
+            _contextFactory = contextFactory;
         }
     }
 }

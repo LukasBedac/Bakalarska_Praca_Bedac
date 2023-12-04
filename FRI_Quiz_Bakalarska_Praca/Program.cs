@@ -13,6 +13,7 @@ using FRI_Quiz_Bakalarska_Praca.Data.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using MySqlConnector;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,17 +21,18 @@ var builder = WebApplication.CreateBuilder(args);
 //Treba urobit identity FB, microsoft, lokalny
 
 // Add services to the container.
+
 //-----------------Db Context Dp Injection-----------------//
-
-
 var serverVersion = new MySqlServerVersion(new Version(8, 0, 34));
-var connectionString = $"server=localhost;user=root;password=FRI!@!222;database=DB"; //Neskor prehodit do DBCOntext classy ak pojde
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
+builder.Services.AddControllers();
+var connectionString = $"server=localhost;userid=bpuser;pwd=FRI!@!222DB;port=3306;database=BPDB"; //Neskor prehodit do DBCOntext classy ak pojde
+builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseMySql(connectionString, serverVersion)
         .LogTo(Console.WriteLine, LogLevel.Information) //Debug info -> bude odstranene
         .EnableSensitiveDataLogging()
         .EnableDetailedErrors());
 //--------------End Db Context Dp Injection---------------//
-
+builder.Services.AddIdentity<IdentityUser<int>, IdentityRole<int>>()
+    .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
     .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
 builder.Services.AddControllersWithViews()

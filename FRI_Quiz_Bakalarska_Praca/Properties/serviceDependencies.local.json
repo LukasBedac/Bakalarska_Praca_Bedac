@@ -3,16 +3,6 @@
     "identityapp1": {
       "type": "identityapp.default",
       "dynamicId": null
-    },
-    "mssql1": {
-      "serviceConnectorResourceId": "",
-      "containerPorts": "1433:1433",
-      "secretStore": "LocalSecretsFile",
-      "containerName": "DB",
-      "containerImage": "mysql",
-      "type": "mssql.container",
-      "connectionId": "connectionString",
-      "dynamicId": null
     }
   }
 }
