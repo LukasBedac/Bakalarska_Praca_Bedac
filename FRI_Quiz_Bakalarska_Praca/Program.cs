@@ -12,23 +12,25 @@ using Blazorise.Icons.FontAwesome;
 using FRI_Quiz_Bakalarska_Praca.Data.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using MySqlConnector;
 
 var builder = WebApplication.CreateBuilder(args);
+
 
 //Treba urobit identity FB, microsoft, lokalny
 
 // Add services to the container.
 //-----------------Db Context Dp Injection-----------------//
-var dbHost = "user";
-var dbName = "DB";
-var dbPassword = Environment.GetEnvironmentVariable("MYSQL_ROOT_PASSWORD");
-var connectionString = $"server={dbHost};user=sa;password={dbPassword};database={dbName}"; //Neskor prehodit do DBCOntext classy ak pojde
-//var connectionString = $"Data Source={dbHost};Initial Catalog={dbName};User ID=sa;Password={dbPassword}";
-builder.Services.AddDbContextFactory<MyDbContext>(options => options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
+
+
+var serverVersion = new MySqlServerVersion(new Version(8, 0, 34));
+var connectionString = $"server=localhost;user=root;password=FRI!@!222;database=DB"; //Neskor prehodit do DBCOntext classy ak pojde
+builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
         .LogTo(Console.WriteLine, LogLevel.Information) //Debug info -> bude odstranene
         .EnableSensitiveDataLogging()
-        .EnableDetailedErrors()) ;
+        .EnableDetailedErrors());
 //--------------End Db Context Dp Injection---------------//
+
 builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
     .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
 builder.Services.AddControllersWithViews()
