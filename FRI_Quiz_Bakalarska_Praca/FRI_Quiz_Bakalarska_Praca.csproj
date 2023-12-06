@@ -33,10 +33,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Images\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Update="..\.dockerignore">
       <DependentUpon>Dockerfile</DependentUpon>
     </None>

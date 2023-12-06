@@ -17,7 +17,10 @@ namespace FRI_Quiz_Bakalarska_Praca.Data.Database
 
     }
         public DbSet<Kviz> Kvizy { get; set; }
-
+        public DbSet<Otazka> Otazky { get; set;}
+        public DbSet<Odpoved> Odpovede { get; set; }
+        public DbSet<User> Users {  get; set; }
+        //Nemigrovane zatial
 
         /*protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

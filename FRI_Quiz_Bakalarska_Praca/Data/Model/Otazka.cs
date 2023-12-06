@@ -18,9 +18,7 @@ namespace FRI_Quiz_Bakalarska_Praca.Data.Model
         public string? Text { get; set; } = " ";
         
         [Required]
-        [Length(2, 6)]
-        [DefaultValue(4)]
-        public LinkedList<Odpoved>? Odpovede { get; set; }
+        public List<Odpoved> Odpovede { get; set; } = new List<Odpoved>();
         
         [Required]
         public int Poradie { get; set; }

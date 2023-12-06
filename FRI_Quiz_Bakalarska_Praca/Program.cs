@@ -12,7 +12,6 @@ using Blazorise.Icons.FontAwesome;
 using FRI_Quiz_Bakalarska_Praca.Data.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using MySqlConnector;
 using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
