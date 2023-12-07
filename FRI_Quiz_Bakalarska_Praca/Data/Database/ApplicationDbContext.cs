@@ -9,26 +9,25 @@ using System.Configuration;
 namespace FRI_Quiz_Bakalarska_Praca.Data.Database
 {
     
-    public class ApplicationDbContext : IdentityDbContext<IdentityUser<int>, IdentityRole<int>, int>
+    public class ApplicationDbContext : IdentityDbContext<IdentityUser<int>, IdentityRole<int>, int>, IDisposable
     {
        
         //protected readonly IConfiguration _config;
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) {
-            //    _config = configuration; -> do konstruktora ako param. IConfiguration configuration
+            //_config = configuration; -> do konstruktora ako param. IConfiguration configuration
 
         }
         public DbSet<Kviz> Kvizy { get; set; }
         public DbSet<Otazka> Otazky { get; set;}
         public DbSet<Odpoved> Odpovede { get; set; }
         public DbSet<User> Users {  get; set; }
-        
+
 
         /*protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
 
             optionsBuilder.UseMySql(_config.GetConnectionString("DbConnectionString");
         }*/
-
     }
 }
 
