@@ -24,8 +24,8 @@ var builder = WebApplication.CreateBuilder(args);
 //-----------------Db Context Dp Injection-----------------//
 var serverVersion = new MySqlServerVersion(new Version(8, 0, 34));
 builder.Services.AddControllers();
-var connectionString = $"server=localhost;userid=bpuser;pwd=FRI!@!222DB;port=3306;database=BPDB"; //Neskor prehodit do DBCOntext classy ak pojde
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseMySql(connectionString, serverVersion)
+var connectionString = $"server=localhost;userid=bpuser;password=FRI!@!222DB;port=3306;database=BPDB"; //Neskor prehodit do DBCOntext classy ak pojde
+builder.Services.AddDbContextFactory<ApplicationDbContext>(options => options.UseMySql(connectionString, serverVersion)
         .LogTo(Console.WriteLine, LogLevel.Information) //Debug info -> bude odstranene
         .EnableSensitiveDataLogging()
         .EnableDetailedErrors());

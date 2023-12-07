@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 
+
 namespace FRI_Quiz_Bakalarska_Praca.Data.Model
 {
     public class Kviz
