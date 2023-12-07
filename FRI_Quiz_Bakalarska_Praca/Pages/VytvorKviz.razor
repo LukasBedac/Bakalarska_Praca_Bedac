@@ -1,122 +1,130 @@
 ﻿@page "/vytvorKviz"
+
 @using FRI_Quiz_Bakalarska_Praca.Data.Database
 @using FRI_Quiz_Bakalarska_Praca.Data.Model
+@using Microsoft.EntityFrameworkCore
 @using TinyMCE.Blazor;
-@inject ApplicationDbContext dbContext
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
 <PageTitle>Vytvorenie Kvizu</PageTitle>
 
-<EditForm Model="@newQuiz" OnValidSubmit="AddQuiz">
-    <div class="mb-3">
-        <label class="form-label">Vyberte si typ kvizu:</label> 
-      
-        <br />
-        <div class="form-check">
-            <input type="radio" class="form-check-input livekviz" name="flexRadioDefault" id="livekviz" @onclick="ToggleDisplay" checked="@isLiveKviz" />
-            <label for="livekviz" class="form-check-label pdright-2rem">Live Kvíz</label>
-            <input type="radio" class="form-check-input" name="flexRadioDefault" id="normalkviz" @onclick="ToggleDisplay" checked="@(!isLiveKviz)" />
-            <label for="normalkviz" class="form-check-label">Kvíz</label>
-        </div>
-    </div>
-    <div class="users">
-        <label class="form-label users-label">Pridat uzivatela: </label>
-        <Field class="users-input">
-                <TextEdit Placeholder="Pridať uživateľa"></TextEdit>
-                <FieldLabel> Tu môžete zadať používateľov, ktorý budú mať prístup na editáciu kvízu</FieldLabel>
-            <Validation>               
-                <ValidationError>Nesprávny uživateľ</ValidationError>
-            </Validation>
-        </Field>
-        
-    </div>
-    <div Class="nastaveniaCasu">
-        <!--<div class="datum">
-            <label class="nastaveniaCasuText">Datum zaciatku kvizu:</label>
-            <Addons>
-                <Addon AddonType="AddonType.Body">
-                    <DatePicker @bind-Date="@dateFrom" @ref="@datePickerFrom" TValue="DateTime?" />
-                </Addon>
-            </Addons>
-        </div>-->
-        <div class="datum">
-            <label class="nastaveniaCasuText">Datum konca kvizu:</label>
-            <Addons>
-                <Addon AddonType="AddonType.Body">
-                        <DatePicker @bind-Value="newQuiz.DatumOd" @bind-Dates[1]="newQuiz.DatumDo" @ref="@datePicker" TValue="DateTime?" 
-                        SelectionMode="DateInputSelectionMode.Range" DisplayFormat="j/n/Y" Placeholder="Formát: DD/MM/YYYY"/>                  
-                </Addon>
-            </Addons>
-        </div>
-    </div>
-    <div class="nastaveniaCasu">
-        <div class="casOd">
-            <label class="nastaveniaCasuText">Zaciatok: </label>
-            <Addons>
-                <Addon AddonType="AddonType.Body">
-                    <TimeEdit @bind-Time="@time" TValue="TimeSpan?" />
-                </Addon>
-            </Addons>
-        </div>
-        <div class="casDo">
-            <label class="nastaveniaCasuText">Koniec:</label>
-            <Addons>
-                <Addon AddonType="AddonType.Body">
-                    <TimePicker  TValue="TimeSpan?" />
-                </Addon>
-            </Addons>
-        </div>
-       
-    </div>
-    <div class="mb-3">
-        <InputText @bind-Value="newQuiz.Nazov" class="form-label">Nazov kvizu:</InputText>
-        <input type="text" class="form-control" id="idKvizu">
-    </div>
-    @if (isLiveKviz)
-    {
-        <Field>
+<Form>
+    <EditForm Model="@newQuiz" >
         <div class="mb-3">
-            <label class="form-label">Text otazky...</label>
-            <Editor Field="() => newQuiz.Popis" Conf="@textConf"></Editor>
+            <label class="form-label">Vyberte si typ kvizu:</label> 
+      
+            <br />
+            <div class="form-check">
+                <input type="radio" @bind-value="@newQuiz.Typ" class="form-check-input livekviz" name="flexRadioDefault" id="livekviz" @onclick="ToggleDisplay" checked="@isLiveKviz" />
+                <label for="livekviz" class="form-check-label pdright-2rem">Live Kvíz</label>
+                <input type="radio" @bind-value="@newQuiz.Typ" class="form-check-input" name="flexRadioDefault" id="normalkviz" @onclick="ToggleDisplay" checked="@(!isLiveKviz)" />
+                <label for="normalkviz" class="form-check-label">Kvíz</label>
+            </div>
         </div>
-        </Field>
-        <div class="odpovede-container">
-            <label>Zadajte odpovede</label>
+        <div class="users">
+            <label class="form-label users-label">Pridat uzivatela: </label>
+            <Field class="users-input">
+                    <TextEdit Placeholder="Pridať uživateľa"></TextEdit>
+                    <FieldLabel> Tu môžete zadať používateľov, ktorý budú mať prístup na editáciu kvízu</FieldLabel>
+                <Validation>               
+                    <ValidationError>Nesprávny uživateľ</ValidationError>
+                </Validation>
+            </Field>
+        
+        </div>
+        <div Class="nastaveniaCasu">
+            <!--<div class="datum">
+                <label class="nastaveniaCasuText">Datum zaciatku kvizu:</label>
+                <Addons>
+                    <Addon AddonType="AddonType.Body">
+                        <DatePicker @bind-Date="@dateFrom" @ref="@datePickerFrom" TValue="DateTime?" />
+                    </Addon>
+                </Addons>
+            </div>-->
+            <div class="datum">
+                <label class="nastaveniaCasuText">Datum konca kvizu:</label>
+                <Addons>
+                    <Addon AddonType="AddonType.Body">
+                            <DatePicker @bind-Dates="@dates" @ref="@datePicker" TValue="DateTime?" 
+                            SelectionMode="DateInputSelectionMode.Range" DisplayFormat="j/n/Y" Placeholder="Formát: DD/MM/YYYY"/>                  
+                    </Addon>
+                </Addons>
+            </div>
+        </div>
+        <div class="nastaveniaCasu">
+            <div class="casOd">
+                <label class="nastaveniaCasuText">Zaciatok: </label>
+                <Addons>
+                    <Addon AddonType="AddonType.Body">
+                        <TimeEdit @bind-Time="@time" TValue="TimeSpan?" />
+                    </Addon>
+                </Addons>
+            </div>
+            <div class="casDo">
+                <label class="nastaveniaCasuText">Koniec:</label>
+                <Addons>
+                    <Addon AddonType="AddonType.Body">
+                        <TimePicker  TValue="TimeSpan?" />
+                    </Addon>
+                </Addons>
+            </div>
+       
+        </div>
+        <div class="mb-3">
+            <InputText @bind-Value="newQuiz.Nazov" class="form-label">Nazov kvizu:</InputText>
+            <input type="text" class="form-control" id="idKvizu">
+        </div>
+    </EditForm>
+        @if (isLiveKviz)
+        {
+            <EditForm Model="newQuestion" OnValidSubmit="AddQuestion">
+            <Field>
+                <div class="mb-3">
+                    <label class="form-label">Text otazky...</label>
+                    <Editor Field="() => newQuiz.Popis" Conf="@textConf"></Editor>
+                </div>
+            </Field>
+            <div class="odpovede-container">
+                <label>Zadajte odpovede</label>
 
-            <!--<div class="odpoved">
+                <!--<div class="odpoved">
                 <Field>
                 <label class="form-check-label"></label>
                 <Editor Conf="@odpovedeConf"></Editor>
                 <input type="checkbox" class="form-check odpoved-checkbox"/>
                 </Field>
-            </div>
-            <div class="odpoved">
+                </div>
+                <div class="odpoved">
                 <Field>
                 <label class="form-check-label"></label>
                 <Editor Conf="@odpovedeConf" />
                 <input type="checkbox" class="form-check odpoved-checkbox" />
                 </Field>
-            </div>
-            <div class="odpoved">
-                 <Field>
-                <label class="form-check-label"></label>
-                <Editor Conf="@odpovedeConf" />
-                <input type="checkbox" class="form-check odpoved-checkbox" />
-                </Field>
-            </div>
-            <div class="odpoved">
+                </div>
+                <div class="odpoved">
                 <Field>
                 <label class="form-check-label"></label>
                 <Editor Conf="@odpovedeConf" />
                 <input type="checkbox" class="form-check odpoved-checkbox" />
                 </Field>
+                </div>
+                <div class="odpoved">
+                <Field>
+                <label class="form-check-label"></label>
+                <Editor Conf="@odpovedeConf" />
+                <input type="checkbox" class="form-check odpoved-checkbox" />
+                </Field>
+                </div>
+                -->
+            
             </div>
-            -->
-        </div>
+        </EditForm>
         <div>
-            <button type="submit" class="btn btn-primary livekviz-button" @onclick="AddQuiz">Submit</button>
-            <button type="submit" class="btn btn-primary livekviz-button"> Add</button>
+            <button type="submit" class="btn btn-primary livekviz-button">Submit</button>
+            <button type="submit" class="btn btn-primary livekviz-button">Add</button>
         </div>
+        
     }
-
+    
     else
     {
         <div class="mb-1">
@@ -127,44 +135,60 @@
 
         <button type="submit" class="btn btn-primary">Submit</button>
     }
-</EditForm>
- 
- 
+</Form>
+
+
+
 @code {
-    protected override void OnInitialized()
-    {
-        base.OnInitialized();
-    }
+    #region Fields 
     private Kviz newQuiz = new Kviz();
-    private string user = string.Empty;
-    private string quizName = string.Empty;
+    private Odpoved newAnswer = new Odpoved();
+    private Otazka newQuestion = new Otazka();
     private bool isLiveKviz = true;
-    private IReadOnlyList<DateTime?> dateFromTo = new List<DateTime?>() { };
-    //private DateTime? dateFrom;
-    //private DateTime? dateTo;
+    private IReadOnlyList<DateTime?> dates = new List<DateTime?>();
+    private TimeSpan? time;
+    private DatePicker<DateTime?>? datePicker;
+    #endregion Fields
+
+    #region HelpMethods
+    private void SetDates(IReadOnlyList<DateTime?> datesWeb)
+    {
+        newQuiz.DatumOd = datesWeb[0];
+        newQuiz.DatumDo = datesWeb[1];
+    }
+    
     private void ToggleDisplay()
     {
         isLiveKviz = !isLiveKviz;
     }
-    TimeSpan? time;
-    DatePicker<DateTime?> ?datePicker;
-    //DatePicker<DateTime?>? datePickerTo;
-
-    Kviz kviz = new Kviz();
+    #endregion HelpMethods
+    
+    #region QuizMethods
     private async Task AddQuiz()
     {
-        newQuiz.Nazov = "Kviz";
+        using var dbContext = DbFactory.CreateDbContext();
+        SetDates(dates);
         newQuiz.Typ = TypKvizu.livekviz;
-        newQuiz.Otazky = new List<Otazka>() { new Otazka()};
-        newQuiz.Id = 1;
+        //newQuiz.Otazky = new List<Otazka>() { new Otazka()};
         newQuiz.Popis = "Novy kviz skuska";
         newQuiz.User = new User();
-        newQuiz.DatumOd = new DateTime();
-        newQuiz.DatumDo = new DateTime();
         dbContext.Kvizy.Add(newQuiz);
         await dbContext.SaveChangesAsync();
     }
+    #endregion QuizMethods
 
+    #region QuestionMethods
+    private  async Task AddQuestion()
+    {
+        using var dbContext = DbFactory.CreateDbContext();
+        newQuestion.Odpovede.Add(newAnswer);
+        dbContext.Otazky.Add(newQuestion);
+        await dbContext.SaveChangesAsync();
+    }
+
+    #endregion QuestionMethods
+
+    #region TinyMCE
     private Dictionary<string, object> odpovedeConf = new Dictionary<string, object>{
    {"plugins", "autolink media link image emoticons table paste"},
         {"toolbar", "undo redo | styles | bold italic underline | table | link image paste "},
@@ -182,6 +206,6 @@
         {"height", "200px"},
         {"automatic_uploads", true },
         {"images_upload_url", "/UploadImage/"}
-  };
-
+    };
+    #endregion TinyMCE
 }

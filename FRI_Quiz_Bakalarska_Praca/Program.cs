@@ -13,6 +13,7 @@ using FRI_Quiz_Bakalarska_Praca.Data.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Identity;
+using System.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 

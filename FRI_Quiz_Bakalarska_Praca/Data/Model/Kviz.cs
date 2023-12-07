@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
+using System.Drawing;
 
 
 namespace FRI_Quiz_Bakalarska_Praca.Data.Model
@@ -27,9 +28,14 @@ namespace FRI_Quiz_Bakalarska_Praca.Data.Model
 
         [Required]
         public DateTime? DatumDo { get; set; }
+        
+        [Required]
+        public TimeSpan TimeFrom { get; set; }
+        
+        [Required]
+        public TimeSpan TimeTo { get; set; }
 
         [Required]
-        [MaxLength(250)]
         public string? Popis { get; set; } = " ";
         
         [Required]
