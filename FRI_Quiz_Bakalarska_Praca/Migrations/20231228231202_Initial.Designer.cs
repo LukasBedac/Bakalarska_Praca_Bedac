@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FRI_Quiz_Bakalarska_Praca.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20231206231339_AllTablesUp")]
-    partial class AllTablesUp
+    [Migration("20231228231202_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -22,31 +22,86 @@ namespace FRI_Quiz_Bakalarska_Praca.Migrations
                 .HasAnnotation("ProductVersion", "7.0.14")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
-            modelBuilder.Entity("FRI_Quiz_Bakalarska_Praca.Data.Model.Kviz", b =>
+            modelBuilder.Entity("FRI_Quiz_Bakalarska_Praca.Data.Model.Answer", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("DatumDo")
-                        .IsRequired()
-                        .HasColumnType("datetime(6)");
+                    b.Property<bool>("Correct")
+                        .HasColumnType("tinyint(1)");
 
-                    b.Property<DateTime?>("DatumOd")
-                        .IsRequired()
-                        .HasColumnType("datetime(6)");
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
 
-                    b.Property<string>("Nazov")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
+                    b.Property<int?>("QuestionId")
+                        .HasColumnType("int");
 
-                    b.Property<string>("Popis")
+                    b.Property<string>("Text")
                         .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("varchar(250)");
 
-                    b.Property<int>("Typ")
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuestionId");
+
+                    b.ToTable("Odpovede");
+                });
+
+            modelBuilder.Entity("FRI_Quiz_Bakalarska_Praca.Data.Model.Question", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("NameOfQuestion")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("QuizId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("varchar(250)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuizId");
+
+                    b.ToTable("Otazky");
+                });
+
+            modelBuilder.Entity("FRI_Quiz_Bakalarska_Praca.Data.Model.Quiz", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("DateFrom")
+                        .IsRequired()
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("DateTo")
+                        .IsRequired()
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("QuizName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<int>("Type")
                         .HasColumnType("int");
 
                     b.Property<int>("UserId")
@@ -57,62 +112,6 @@ namespace FRI_Quiz_Bakalarska_Praca.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Kvizy");
-                });
-
-            modelBuilder.Entity("FRI_Quiz_Bakalarska_Praca.Data.Model.Odpoved", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<int?>("OtazkaId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Poradie")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("Spravna")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<string>("Text")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("varchar(250)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OtazkaId");
-
-                    b.ToTable("Odpovede");
-                });
-
-            modelBuilder.Entity("FRI_Quiz_Bakalarska_Praca.Data.Model.Otazka", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<int?>("KvizId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Nazov")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
-
-                    b.Property<int>("Poradie")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Text")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("varchar(250)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("KvizId");
-
-                    b.ToTable("Otazky");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<int>", b =>
@@ -188,9 +187,6 @@ namespace FRI_Quiz_Bakalarska_Praca.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<int?>("KvizId")
-                        .HasColumnType("int");
-
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("tinyint(1)");
 
@@ -214,6 +210,9 @@ namespace FRI_Quiz_Bakalarska_Praca.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("tinyint(1)");
 
+                    b.Property<int?>("QuizId")
+                        .HasColumnType("int");
+
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("longtext");
 
@@ -226,14 +225,14 @@ namespace FRI_Quiz_Bakalarska_Praca.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("KvizId");
-
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
 
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
+
+                    b.HasIndex("QuizId");
 
                     b.ToTable("AspNetUsers", (string)null);
 
@@ -326,7 +325,21 @@ namespace FRI_Quiz_Bakalarska_Praca.Migrations
                     b.HasDiscriminator().HasValue("User");
                 });
 
-            modelBuilder.Entity("FRI_Quiz_Bakalarska_Praca.Data.Model.Kviz", b =>
+            modelBuilder.Entity("FRI_Quiz_Bakalarska_Praca.Data.Model.Answer", b =>
+                {
+                    b.HasOne("FRI_Quiz_Bakalarska_Praca.Data.Model.Question", null)
+                        .WithMany("Answers")
+                        .HasForeignKey("QuestionId");
+                });
+
+            modelBuilder.Entity("FRI_Quiz_Bakalarska_Praca.Data.Model.Question", b =>
+                {
+                    b.HasOne("FRI_Quiz_Bakalarska_Praca.Data.Model.Quiz", null)
+                        .WithMany("Questions")
+                        .HasForeignKey("QuizId");
+                });
+
+            modelBuilder.Entity("FRI_Quiz_Bakalarska_Praca.Data.Model.Quiz", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser<int>", "User")
                         .WithMany()
@@ -335,20 +348,6 @@ namespace FRI_Quiz_Bakalarska_Praca.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("FRI_Quiz_Bakalarska_Praca.Data.Model.Odpoved", b =>
-                {
-                    b.HasOne("FRI_Quiz_Bakalarska_Praca.Data.Model.Otazka", null)
-                        .WithMany("Odpovede")
-                        .HasForeignKey("OtazkaId");
-                });
-
-            modelBuilder.Entity("FRI_Quiz_Bakalarska_Praca.Data.Model.Otazka", b =>
-                {
-                    b.HasOne("FRI_Quiz_Bakalarska_Praca.Data.Model.Kviz", null)
-                        .WithMany("Otazky")
-                        .HasForeignKey("KvizId");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
@@ -362,9 +361,9 @@ namespace FRI_Quiz_Bakalarska_Praca.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUser<int>", b =>
                 {
-                    b.HasOne("FRI_Quiz_Bakalarska_Praca.Data.Model.Kviz", null)
-                        .WithMany("Moderator")
-                        .HasForeignKey("KvizId");
+                    b.HasOne("FRI_Quiz_Bakalarska_Praca.Data.Model.Quiz", null)
+                        .WithMany("Moderators")
+                        .HasForeignKey("QuizId");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
@@ -409,16 +408,16 @@ namespace FRI_Quiz_Bakalarska_Praca.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("FRI_Quiz_Bakalarska_Praca.Data.Model.Kviz", b =>
+            modelBuilder.Entity("FRI_Quiz_Bakalarska_Praca.Data.Model.Question", b =>
                 {
-                    b.Navigation("Moderator");
-
-                    b.Navigation("Otazky");
+                    b.Navigation("Answers");
                 });
 
-            modelBuilder.Entity("FRI_Quiz_Bakalarska_Praca.Data.Model.Otazka", b =>
+            modelBuilder.Entity("FRI_Quiz_Bakalarska_Praca.Data.Model.Quiz", b =>
                 {
-                    b.Navigation("Odpovede");
+                    b.Navigation("Moderators");
+
+                    b.Navigation("Questions");
                 });
 #pragma warning restore 612, 618
         }

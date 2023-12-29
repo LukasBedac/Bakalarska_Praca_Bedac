@@ -8,8 +8,28 @@
 }
 .nastaveniaCasuText {
     align-items:center;
+    width: 20rem;
     padding-top: 0.5rem;
-    padding-right: 1rem;
+}
+.left_side_quiz {
+    display: inline-flex;
+    flex-direction: column;
+    flex-grow: 2;
+    left: 0;
+    top: 0;
+    margin: auto;
+    min-width: 60%;
+}
+.rigt_side_quiz {
+    display: inline-flex;
+    flex-direction: row;
+    right: 0;
+    top: 0;
+    height: 100%;
+    min-width: 30%;
+    justify-content: right;
+    margin:auto;
+    
 }
 
 .casOd {
@@ -23,13 +43,12 @@
     display: inline-flex;
     flex-direction: row;
     width: 20%;
-    padding-left: 1rem;
+    padding-left: 3rem;
     padding-top: 0.5rem;
 }
 .datum {
     display: flex;
     flex-direction: row;
-    grid-row: 1;
     padding-right: 1rem;
     padding-top: 0.5rem;
 }
@@ -81,6 +100,7 @@
 
     .nastaveniaCasuText {
         align-items: center;
+        width: 5rem;
     }
 
     .casOd {
@@ -113,6 +133,7 @@
 
     .nastaveniaCasuText {
         align-items: center;
+        width: 10rem;
         padding-top: 0.5rem;
         padding-right: 1rem;
     }
@@ -127,12 +148,10 @@
     }
 
     .datum {
-        display: none;
         flex-direction: column;
     }
 
     .users {
-        margin-left: 1rem;
         display: inline-flex;
         flex-direction: column;
     }
@@ -147,9 +166,6 @@
         justify-content: end;
     }
     
-
-
-
 }
 @media (min-width: 641px) {
 
@@ -165,6 +181,7 @@
 
     .nastaveniaCasuText {
         align-items: center;
+        width: 20rem;
         padding-top: 0.5rem;
         padding-right: 1rem;
     }

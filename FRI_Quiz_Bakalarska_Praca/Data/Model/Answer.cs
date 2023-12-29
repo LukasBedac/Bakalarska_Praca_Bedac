@@ -2,7 +2,7 @@
 
 namespace FRI_Quiz_Bakalarska_Praca.Data.Model
 {
-    public class Odpoved
+    public class Answer
     {
         [Key]
         public int Id { get; set; }
@@ -12,10 +12,10 @@ namespace FRI_Quiz_Bakalarska_Praca.Data.Model
         public string? Text { get; set; }
         
         [Required]
-        public int Poradie { get; set; }
+        public int Order { get; set; }
         
         [Required]
-        public bool Spravna { get; set; }
+        public bool Correct { get; set; }
 
     }
 }
