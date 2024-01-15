@@ -7,10 +7,11 @@
 @inject IDbContextFactory<ApplicationDbContext> DbFactory
 <PageTitle>Vytvorenie Kvizu</PageTitle>
 
-<Form>
-    <div>    
-        <EditForm Model="@newQuiz" OnValidSubmit="AddQuiz">
-            <div class="left_side_quiz">
+<div>
+    <Validations @ref="quizValidation" Mode="ValidationMode.Auto" ValidateOnLoad="true">
+        <div class="left_side_quiz">
+            <EditForm id="QuizId" Model="@newQuiz" OnValidSubmit="AddQuiz">
+                
                 <div class="mb-3">
                     <label class="form-label">Vyberte si typ kvizu:</label>      
                     <br />
@@ -23,20 +24,16 @@
                 </div>
                 <div class="users">
                     <label class="form-label users-label">Pridat uzivatela: </label>
-                    <Field class="users-input">
-                            <TextEdit Placeholder="Pridať uživateľa"></TextEdit>
-                            <FieldLabel> Tu môžete zadať používateľov, ktorý budú mať prístup na editáciu kvízu</FieldLabel>
-                        <Validation>               
-                            <ValidationError>Nesprávny uživateľ</ValidationError>
-                        </Validation>
-                    </Field>        
+                    <Field class="users-input" >               
+                            <TextEdit Placeholder="Tu môžete zadať používateľov, ktorý budú mať prístup na editáciu kvízu"></TextEdit>                                                            
+                    </Field>
                 </div>
-                <div Class="nastaveniaCasu">
+                <div class="nastaveniaCasu">
                     <div class="datum">
-                        <label class="nastaveniaCasuText">Datum konca kvizu:</label>
+                        <label class="nastaveniaCasuText">Dátum konca kvízu:</label>
                         <Addons>
                             <Addon AddonType="AddonType.Body">
-                                    <DatePicker @bind-Dates="@dates" @ref="@datePicker" TValue="DateTime?" 
+                                    <DatePicker @bind-Dates="@dates" @ref="@datePicker" TValue="DateTime?" Min="DateTime.Now"
                                     SelectionMode="DateInputSelectionMode.Range" DisplayFormat="j/n/Y" Placeholder="Formát: DD/MM/YYYY"/>                  
                             </Addon>
                         </Addons>
@@ -47,103 +44,89 @@
                         <label class="nastaveniaCasuText">Zaciatok: </label>
                         <Addons>
                             <Addon AddonType="AddonType.Body">
-                                <TimeEdit @bind-Time="@timeFrom" @ref="@timePicker" TValue="TimeSpan?" />
+                                <TimeEdit @bind-Time="@timeFrom" @ref="@timePicker" Min="DateTime.Now.TimeOfDay" TValue="TimeSpan?" />
                             </Addon>
                         </Addons>
                     </div>
                     <div class="casDo">
-                        <label class="nastaveniaCasuText">Koniec:</label>
+                        <label class="nastaveniaCasuText">Koniec: </label>
                         <Addons>
                             <Addon AddonType="AddonType.Body">
-                                <TimeEdit @bind-Time="@timeTo" @ref="@timePicker" TValue="TimeSpan?" />
+                                <TimeEdit @bind-Time="@timeTo" @ref="@timePicker" Min="@timeFrom" TValue="TimeSpan?" />
                             </Addon>
                         </Addons>
                     </div>
                 </div>
                 <div class="mb-3">
+                    <label class="nazov-label">Nazov kvízu</label>
                     <InputText @bind-Value="newQuiz.QuizName" class="form-label">Nazov kvizu:</InputText>
                 </div>
-            </div>
-   
+            </EditForm>
+        </div>
             <div class="rigt_side_quiz">
                 <Table Hoverable>
                     <TableHeader>
                         <TableRow>
-                            <TableHeaderCell>#</TableHeaderCell>
+                            <TableHeaderCell>Otazky</TableHeaderCell>
                             <TableHeaderCell>@newQuiz.QuizName</TableHeaderCell>
                             <TableHeaderCell></TableHeaderCell>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         <TableRow>
-                            <TableRowHeader>@newQuiz.Id</TableRowHeader>
+                            <TableRowHeader>1</TableRowHeader>
                             <TableRowCell></TableRowCell>
                             <TableRowCell><Button Class="btn-secondary">Edit</Button></TableRowCell>
                         </TableRow>
                         <TableRow>
                             <TableRowHeader>2</TableRowHeader>
-                            <TableRowCell>Jacob</TableRowCell>
-                            <TableRowCell><Button Class="btn-secondary">Edit</Button></TableRowCell>
-                    
+                            <TableRowCell></TableRowCell>
+                            <TableRowCell><Button Class="btn-secondary">Edit</Button></TableRowCell>                    
                         </TableRow>
                         <TableRow>
                             <TableRowHeader>3</TableRowHeader>
-                            <TableRowCell>Larry</TableRowCell>
-                            <TableRowCell><Button Class="btn-secondary">Edit</Button></TableRowCell>
-                    
+                            <TableRowCell></TableRowCell>
+                            <TableRowCell><Button Class="btn-secondary">Edit</Button></TableRowCell>                   
                         </TableRow>
                     </TableBody>
                 </Table>
             </div>
+        <EditForm id="QuestionForm" Model="newQuestion" OnValidSubmit="AddQuestion">
+            @if (isLiveKviz)
+            {
+                <div class="mb-3">
+                    <label class="form-label">Otázka</label>
+                    <Editor Field="@(() => newQuestion.NameOfQuestion)" Conf="@textConf"></Editor>
+                </div>
+                <div class="odpovede-container">
+                    <label>Zadajte odpovede</label>
 
-                @if (isLiveKviz)
-                {
-                <!--<EditForm Model="newQuestion" OnValidSubmit="AddQuestion">-->
-                    <Field>
-                        <div class="mb-3">
-                            <label class="form-label">Text otazky...</label>
-                            <Editor Field="() => newQuiz.Description" Conf="@textConf"></Editor>
-                        </div>
-                    </Field>
-                    <div class="odpovede-container">
-                        <label>Zadajte odpovede</label>
-
-                        <!--<div class="odpoved">
-                        <Field>
+                    <!--<div class="odpoved">
                         <label class="form-check-label"></label>
-                        <Editor Conf="@odpovedeConf"></Editor>
-                        <input type="checkbox" class="form-check odpoved-checkbox"/>
-                        </Field>
+                        <Editor Field="() => newAnswer.Text" Conf="@odpovedeConf"></Editor>
+                        <div>
+                            <label class="odpoved-label">Spravna/Nespravna</label>
+                            <input @bind-value="@newAnswer.Correct" type="checkbox" class="form-check odpoved-checkbox"/>
+                            <input @bind-value="@newAnswer.Correct" type="checkbox" class="form-check odpoved-checkbox" />
                         </div>
-                        <div class="odpoved">
-                        <Field>
-                        <label class="form-check-label"></label>
-                        <Editor Conf="@odpovedeConf" />
-                        <input type="checkbox" class="form-check odpoved-checkbox" />
-                        </Field>
-                        </div>
-                        <div class="odpoved">
-                        <Field>
-                        <label class="form-check-label"></label>
-                        <Editor Conf="@odpovedeConf" />
-                        <input type="checkbox" class="form-check odpoved-checkbox" />
-                        </Field>
-                        </div>
-                        <div class="odpoved">
-                        <Field>
-                        <label class="form-check-label"></label>
-                        <Editor Conf="@odpovedeConf" />
-                        <input type="checkbox" class="form-check odpoved-checkbox" />
-                        </Field>
-                        </div>
-                        -->
-            
                     </div>
-
-                <!--</EditForm>-->
-                <div>
-                    <button type="submit" class="btn btn-primary livekviz-button">Submit</button>
-                    <button type="submit" class="btn btn-primary livekviz-button" >Add</button>
+                    <div class="odpoved">
+                        <label class="form-check-label"></label>
+                        <Editor Field="() => newAnswer.Text" Conf="@odpovedeConf" />
+                        <input @bind-value="@newAnswer.Correct"  type="checkbox" class="form-check odpoved-checkbox" />
+                    </div>
+                    <div class="odpoved">
+                        <label class="form-check-label"></label>
+                        <Editor Field="() => newAnswer.Text" Conf="@odpovedeConf" />
+                        <input @bind-value="@newAnswer.Correct" type="checkbox" class="form-check odpoved-checkbox" />
+                    </div>
+                    <div class="odpoved">
+                        <label class="form-check-label"></label>
+                        <Editor Field="() => newAnswer.Text" Conf="@odpovedeConf" />
+                        <input @bind-value="@newAnswer.Correct" type="checkbox" class="form-check odpoved-checkbox" />
+                    </div>-->
+                        
+            
                 </div>
             }
     
@@ -151,40 +134,52 @@
             {
                 <div class="mb-1">
                     <label>Po pridani otazky sa zobrazi tabulka/form otazok -> zatial nebudem robit pretoze bude treba databaza </label>
-                    <!--TODO: 1.0 DATABAZA otazok-->
-
                 </div>
-
-                <button type="submit" class="btn btn-primary">Submit</button>
+                
             }
+                
         </EditForm>
-    </div>
-</Form>
+        <button type="submit" form="QuizId" class="btn btn-primary">Submit</button>
+        <button type="button" form="QuestionForm" class="btn btn-secondary" >Pridať otázku</button>
+    </Validations>
+</div>
 
 @code {
     #region Fields 
     private Quiz newQuiz = new Quiz();
-    private Answer newAnswer = new Answer();
     private Question newQuestion = new Question();
+    private Answer newAnswer = new Answer();
     private bool isLiveKviz = true;
     private IReadOnlyList<DateTime?> dates = new List<DateTime?>();
     private TimeSpan? timeFrom;
     private TimeSpan? timeTo;
     private DatePicker<DateTime?>? datePicker;
     private TimeEdit<TimeSpan?>? timePicker;
+    private Validations? quizValidation;
+    private int correctAnswersNumbers;
     #endregion Fields
+
 
     #region HelpMethods
     private void SetDates(IReadOnlyList<DateTime?> datesWeb)
     {
         newQuiz.DateFrom = datesWeb[0] + timeFrom;
-        newQuiz.DateTo = datesWeb[1] + timeTo;
+        if (datesWeb.Count < 2)
+        {
+            newQuiz.DateTo = datesWeb[0] + timeTo;
+        } else
+        {
+            newQuiz.DateTo = datesWeb[1] + timeTo;
+        }
+
     }
 
     private void ToggleDisplay()
     {
         isLiveKviz = !isLiveKviz;
     }
+
+
     #endregion HelpMethods
 
     #region QuizMethods
@@ -199,20 +194,25 @@
         {
             newQuiz.Type = TypKvizu.kviz;
         }
+
         if (newQuiz.User == null)
         {
-            User local = new User();
+            User local = dbContext.Users.Find(1);
             newQuiz.User = local;
-        } else
+        }
+
         dbContext.Kvizy.Add(newQuiz);
         await dbContext.SaveChangesAsync();
+
     }
     #endregion QuizMethods
 
     #region QuestionMethods
-    private  async Task AddQuestion()
+    private async Task AddQuestion()
     {
         using var dbContext = DbFactory.CreateDbContext();
+        newQuestion.NameOfQuestion = newQuiz.Description;
+        newQuestion.Order = 1;
         newQuestion.Answers.Add(newAnswer);
         dbContext.Otazky.Add(newQuestion);
         await dbContext.SaveChangesAsync();
