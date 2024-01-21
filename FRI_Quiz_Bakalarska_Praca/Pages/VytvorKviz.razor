@@ -8,10 +8,9 @@
 <PageTitle>Vytvorenie Kvizu</PageTitle>
 
 <div>
-    <Validations @ref="quizValidation" Mode="ValidationMode.Auto" ValidateOnLoad="true">
-        <div class="left_side_quiz">
-            <EditForm id="QuizId" Model="@newQuiz" OnValidSubmit="AddQuiz">
-                
+    <div class="left_side_quiz">
+        <Validations @ref="quizValidation" Mode="ValidationMode.Auto" ValidateOnLoad="true">
+            <EditForm id="QuizId" Model="@newQuiz" OnValidSubmit="SubmitQuiz">
                 <div class="mb-3">
                     <label class="form-label">Vyberte si typ kvizu:</label>      
                     <br />
@@ -25,153 +24,165 @@
                 <div class="users">
                     <label class="form-label users-label">Pridat uzivatela: </label>
                     <Field class="users-input" >               
-                            <TextEdit Placeholder="Tu môžete zadať používateľov, ktorý budú mať prístup na editáciu kvízu"></TextEdit>                                                            
+                        <TextEdit></TextEdit>
+                        <FieldLabel TextSize="TextSize.Small">Tu môžete zadať používateľov, ktorý budú mať prístup na editáciu kvízu</FieldLabel>
                     </Field>
                 </div>
                 <div class="nastaveniaCasu">
                     <div class="datum">
-                        <label class="nastaveniaCasuText">Dátum konca kvízu:</label>
-                        <Addons>
+                        <label class="nastaveniaCasuText">Dátum pre kvíz:</label>
+                        <Addons>         
                             <Addon AddonType="AddonType.Body">
-                                    <DatePicker @bind-Dates="@dates" @ref="@datePicker" TValue="DateTime?" Min="DateTime.Now"
-                                    SelectionMode="DateInputSelectionMode.Range" DisplayFormat="j/n/Y" Placeholder="Formát: DD/MM/YYYY"/>                  
-                            </Addon>
+                                <DatePicker @bind-Dates="@dates" @ref="@datePicker" Date="null" Min="DateTime.Now"
+                                SelectionMode="DateInputSelectionMode.Range" DisplayFormat="j/n/Y" Placeholder="DD/MM/YYYY" />
+                            </Addon>                                                                                 
                         </Addons>
                     </div>
                 </div>
                 <div class="nastaveniaCasu">
+                   
                     <div class="casOd">
                         <label class="nastaveniaCasuText">Zaciatok: </label>
                         <Addons>
-                            <Addon AddonType="AddonType.Body">
-                                <TimeEdit @bind-Time="@timeFrom" @ref="@timePicker" Min="DateTime.Now.TimeOfDay" TValue="TimeSpan?" />
-                            </Addon>
+                            <Validation Validator="ValidationRule.IsSelected">
+                                <Addon AddonType="AddonType.Body">
+                                    <TimeEdit @bind-Time="@timeFrom" @ref="@timePicker" Min="DateTime.Now.TimeOfDay" TValue="TimeSpan?" />     
+                                </Addon>
+                            <ValidationError>Musíte zadať čas</ValidationError>
+                            </Validation>
                         </Addons>
                     </div>
                     <div class="casDo">
                         <label class="nastaveniaCasuText">Koniec: </label>
-                        <Addons>
+                        <Addons>                            
                             <Addon AddonType="AddonType.Body">
-                                <TimeEdit @bind-Time="@timeTo" @ref="@timePicker" Min="@timeFrom" TValue="TimeSpan?" />
-                            </Addon>
-                        </Addons>
-                    </div>
+                                <TimeEdit @bind-Time="@timeTo" @ref="@timePicker" Min="@timeFrom" TValue="TimeSpan?" />  
+                            </Addon>                               
+                        </Addons>  
+                    </div>    
                 </div>
+                
                 <div class="mb-3">
-                    <label class="nazov-label">Nazov kvízu</label>
-                    <InputText @bind-Value="newQuiz.QuizName" class="form-label">Nazov kvizu:</InputText>
+                    <label class="nazov-label">Nazov kvízu</label>                      
+                    <Validation Validator="ValidationRule.IsNotEmpty">
+                        <TextEdit @bind-Text="newQuiz.QuizName" class="form-label" ></TextEdit>
+                        <ValidationError>Nezadali ste názov kvízu</ValidationError>
+                    </Validation>               
                 </div>
             </EditForm>
-        </div>
-            <div class="rigt_side_quiz">
-                <Table Hoverable>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHeaderCell>Otazky</TableHeaderCell>
-                            <TableHeaderCell>@newQuiz.QuizName</TableHeaderCell>
-                            <TableHeaderCell></TableHeaderCell>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        <TableRow>
-                            <TableRowHeader>1</TableRowHeader>
-                            <TableRowCell></TableRowCell>
-                            <TableRowCell><Button Class="btn-secondary">Edit</Button></TableRowCell>
-                        </TableRow>
-                        <TableRow>
-                            <TableRowHeader>2</TableRowHeader>
-                            <TableRowCell></TableRowCell>
-                            <TableRowCell><Button Class="btn-secondary">Edit</Button></TableRowCell>                    
-                        </TableRow>
-                        <TableRow>
-                            <TableRowHeader>3</TableRowHeader>
-                            <TableRowCell></TableRowCell>
-                            <TableRowCell><Button Class="btn-secondary">Edit</Button></TableRowCell>                   
-                        </TableRow>
-                    </TableBody>
-                </Table>
-            </div>
-        <EditForm id="QuestionForm" Model="newQuestion" OnValidSubmit="AddQuestion">
-            @if (isLiveKviz)
-            {
+        </Validations>
+    </div>
+    <div class="rigt_side_quiz">
+        <Table Hoverable>
+            <TableHeader>
+                <TableRow>
+                    <TableHeaderCell>Otazka</TableHeaderCell>
+                    <TableHeaderCell>Nazov</TableHeaderCell>
+                    <TableHeaderCell></TableHeaderCell>
+                </TableRow>
+            </TableHeader>
+            <TableBody>
+                @foreach (var question in questions)
+                {
+                <TableRow>
+                    <TableRowHeader>@question.Order</TableRowHeader>
+                    <TableRowCell>@(question.Text.Length > 20 ? question.Text.Substring(0, 20) + "..." : question.Text)</TableRowCell>
+                    <TableRowCell><Button Class="btn-secondary">Edit</Button></TableRowCell>
+                </TableRow>
+                }
+                        
+                        
+            </TableBody>
+        </Table>
+    </div>
+    <div class="left-side-quiz">
+        <EditForm id="QuestionForm" Model="@questions" OnInvalidSubmit="SubmitQuestion">
+            @foreach (var question in questions) 
+                {
                 <div class="mb-3">
                     <label class="form-label">Otázka</label>
-                    <Editor Field="@(() => newQuestion.NameOfQuestion)" Conf="@textConf"></Editor>
+                <Editor @bind-Text="question.Text" Field="@(() => question.Text)" Conf="@textConf"></Editor>
                 </div>
                 <div class="odpovede-container">
                     <label>Zadajte odpovede</label>
-
-                    <!--<div class="odpoved">
+                    @foreach (var answer in question.Answers)
+                    {
+                    <div class="odpoved">
                         <label class="form-check-label"></label>
-                        <Editor Field="() => newAnswer.Text" Conf="@odpovedeConf"></Editor>
+                        <Editor @bind-Text="answer.Text" Field="() => answer.Text" Conf="@odpovedeConf"></Editor>
                         <div>
-                            <label class="odpoved-label">Spravna/Nespravna</label>
-                            <input @bind-value="@newAnswer.Correct" type="checkbox" class="form-check odpoved-checkbox"/>
-                            <input @bind-value="@newAnswer.Correct" type="checkbox" class="form-check odpoved-checkbox" />
+                            <label class="odpoved-label">Spravna</label>
+                            <input @bind="answer.Correct" type="checkbox" class="form-check odpoved-checkbox" />
                         </div>
+                    </div>                    
+                    }
+                    <div>
+                        <br />
+                        <button type="submit" class="btn btn-dark" @onclick="() => AddAnswer(question)" disabled="@AnswersMaxCount(question)">Pridať odpoveď</button>
+                        @if (@AnswersMaxCount(question))
+                        {
+                            <label class="max-answers-color">Nie je možné pridať viac odpovedí</label>
+                        }
                     </div>
-                    <div class="odpoved">
-                        <label class="form-check-label"></label>
-                        <Editor Field="() => newAnswer.Text" Conf="@odpovedeConf" />
-                        <input @bind-value="@newAnswer.Correct"  type="checkbox" class="form-check odpoved-checkbox" />
-                    </div>
-                    <div class="odpoved">
-                        <label class="form-check-label"></label>
-                        <Editor Field="() => newAnswer.Text" Conf="@odpovedeConf" />
-                        <input @bind-value="@newAnswer.Correct" type="checkbox" class="form-check odpoved-checkbox" />
-                    </div>
-                    <div class="odpoved">
-                        <label class="form-check-label"></label>
-                        <Editor Field="() => newAnswer.Text" Conf="@odpovedeConf" />
-                        <input @bind-value="@newAnswer.Correct" type="checkbox" class="form-check odpoved-checkbox" />
-                    </div>-->
-                        
-            
                 </div>
-            }
-    
-            else
-            {
-                <div class="mb-1">
-                    <label>Po pridani otazky sa zobrazi tabulka/form otazok -> zatial nebudem robit pretoze bude treba databaza </label>
-                </div>
-                
-            }
-                
+            }                   
         </EditForm>
-        <button type="submit" form="QuizId" class="btn btn-primary">Submit</button>
-        <button type="button" form="QuestionForm" class="btn btn-secondary" >Pridať otázku</button>
-    </Validations>
+    </div>
+    <div class="">
+        
+        <button type="submit" form="QuizId" class="btn btn-primary">@(!OnceSubmit ? "Pridať kvíz" : "Update kvízu")</button>
+        <button type="submit" class="btn btn-dark" @onclick="AddQuestion">Pridať otázku</button>
+    </div>
 </div>
 
 @code {
     #region Fields 
     private Quiz newQuiz = new Quiz();
-    private Question newQuestion = new Question();
-    private Answer newAnswer = new Answer();
+    private List<Question> questions = new List<Question>() { new Question() };
     private bool isLiveKviz = true;
-    private IReadOnlyList<DateTime?> dates = new List<DateTime?>();
+    private IReadOnlyList<DateTime?> dates = new List<DateTime?>() { };
     private TimeSpan? timeFrom;
     private TimeSpan? timeTo;
     private DatePicker<DateTime?>? datePicker;
     private TimeEdit<TimeSpan?>? timePicker;
     private Validations? quizValidation;
+    private bool OnceSubmit = false;
     private int correctAnswersNumbers;
     #endregion Fields
 
 
     #region HelpMethods
-    private void SetDates(IReadOnlyList<DateTime?> datesWeb)
+    private bool SetDates()
     {
-        newQuiz.DateFrom = datesWeb[0] + timeFrom;
-        if (datesWeb.Count < 2)
+        if (dates.Count < 1 ||  dates[0] == null || timeFrom == null)
         {
-            newQuiz.DateTo = datesWeb[0] + timeTo;
+            return false;
         } else
         {
-            newQuiz.DateTo = datesWeb[1] + timeTo;
+            newQuiz.DateFrom = dates[0] + timeFrom;
+            if (dates.Count < 2)
+            {
+                if (timeTo == null)
+                {
+                    timeTo = DateTime.Today.AddTicks(TimeSpan.TicksPerDay - 1).TimeOfDay;
+                }
+                newQuiz.DateTo = dates[0] + timeTo;
+            }
+            else
+            {
+                if (timeTo == null)
+                {
+                    timeTo = dates[1].Value.AddTicks(TimeSpan.TicksPerDay - 1).TimeOfDay;
+                }
+                newQuiz.DateTo = dates[1] + timeTo;
+            }
+            return true;
         }
+    }
 
+    private bool AnswersMaxCount(Question question)
+    {
+        return question.Answers.Count >= 6 ? true : false;
     }
 
     private void ToggleDisplay()
@@ -179,46 +190,107 @@
         isLiveKviz = !isLiveKviz;
     }
 
+    protected override void OnInitialized()
+    {
+        questions[0].Order = 1;
+        questions[0].Answers.Add(new Answer());
+        questions[0].Answers[0].Order = 1;
+    }
 
     #endregion HelpMethods
 
     #region QuizMethods
-    private async Task AddQuiz()
+    private async Task SubmitQuiz()
     {
         using var dbContext = DbFactory.CreateDbContext();
-        SetDates(dates);
+
+        if (!SetDates())
+        {
+            return;
+        } 
         if (isLiveKviz)
         {
             newQuiz.Type = TypKvizu.livekviz;
-        } else
+        }
+        else
         {
             newQuiz.Type = TypKvizu.kviz;
         }
-
-        if (newQuiz.User == null)
+        if (!OnceSubmit)
         {
-            User local = dbContext.Users.Find(1);
-            newQuiz.User = local;
+            OnceSubmit = true;
+            if (dbContext.Users.Count() < 1) //Test kod na usera pre kviz
+            {
+                User? local = new User();
+                local.UserName = "Lukas";
+                local.Id = 1;
+                dbContext.Users.Add(local);
+                newQuiz.User = local;
+            }
+            else
+            {
+                User? local = (User) dbContext.Users.Find(1);
+                newQuiz.User = local;
+            }
+            dbContext.Kvizy.Add(newQuiz);
+            await dbContext.SaveChangesAsync();
+            await SubmitQuestion();
+        } else
+        {
+            dbContext.Kvizy.Update(newQuiz);
+            await dbContext.SaveChangesAsync();
+            await SubmitQuestion();
         }
-
-        dbContext.Kvizy.Add(newQuiz);
         await dbContext.SaveChangesAsync();
 
     }
     #endregion QuizMethods
 
     #region QuestionMethods
-    private async Task AddQuestion()
+
+    private void AddQuestion() {
+        Question tempQuestion = new Question();
+        tempQuestion.Order = questions.Count + 1;
+        questions.Add(tempQuestion);
+    }
+
+    private async Task SubmitQuestion()
     {
         using var dbContext = DbFactory.CreateDbContext();
-        newQuestion.NameOfQuestion = newQuiz.Description;
-        newQuestion.Order = 1;
-        newQuestion.Answers.Add(newAnswer);
-        dbContext.Otazky.Add(newQuestion);
+        for (int i = 0; i < questions.Count; i++)
+        {
+            questions[i].Quiz = newQuiz;
+            if (!OnceSubmit)
+            {
+                for (int j = 0; j < questions[i].Answers.Count; j++)
+                {
+                    dbContext.Odpovede.Add(questions[i].Answers[j]);
+                }
+                dbContext.Otazky.Add(questions[i]);
+            } else
+            {
+                for (int j = 0; j < questions[i].Answers.Count; j++)
+                {
+                    dbContext.Odpovede.Update(questions[i].Answers[j]);
+                }
+                dbContext.Otazky.Update(questions[i]);
+            }
+        }
+
         await dbContext.SaveChangesAsync();
     }
 
     #endregion QuestionMethods
+    #region AnswerMethods
+
+    private void AddAnswer(Question question)
+    {
+        Answer tempAnswer = new Answer();
+        tempAnswer.Order = question.Answers.Count + 1;
+        question.Answers.Add(tempAnswer);
+    }
+
+    #endregion AnswerMethods
 
     #region TinyMCE
     private Dictionary<string, object> odpovedeConf = new Dictionary<string, object>{
@@ -236,10 +308,11 @@
         {"plugins", "autolink media link image emoticons table"},
         {"toolbar", "undo redo | styles | bold italic underline | table link image "},
         {"paste_data_images", "true"},     
-        {"width", "80%"},
+        {"width", "60%"},
         {"height", "200px"},
         {"automatic_uploads", true },
         {"images_upload_url", "/UploadImage/"}
     };
     #endregion TinyMCE
+
 }

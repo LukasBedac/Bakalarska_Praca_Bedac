@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Drawing;
 
 
@@ -32,11 +33,15 @@ namespace FRI_Quiz_Bakalarska_Praca.Data.Model
         public string? Description { get; set; } = " ";
         
         [Required]
-        public IdentityUser<int>? User { get; set; }
+        public User User { get; set; }
 
-        public List<IdentityUser<int>> Moderators { get; set; } = new List<IdentityUser<int>>();
+        public List<User> Moderators { get; set; } = new List<User>();
+
+        [NotMapped]
+        public virtual int QuestionCount => Questions?.Count ?? 0;
     }
 
+    
     public enum TypKvizu
     {
         livekviz,

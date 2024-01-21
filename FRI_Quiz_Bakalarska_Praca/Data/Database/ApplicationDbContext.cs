@@ -9,17 +9,25 @@ using System.Configuration;
 namespace FRI_Quiz_Bakalarska_Praca.Data.Database
 {
     
-    public class ApplicationDbContext : IdentityDbContext<IdentityUser<int>, IdentityRole<int>, int>
+    public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, int>
     {
         //protected readonly IConfiguration _config;
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) {
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+        {
             //_config = configuration; -> do konstruktora ako param. IConfiguration configuration
 
         }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+
+            // Additional configurations for your entities
+        }
+
         public DbSet<Quiz> Kvizy { get; set; }
         public DbSet<Question> Otazky { get; set;}
         public DbSet<Answer> Odpovede { get; set; }
-        public DbSet<User> Users {  get; set; }
 
 
         /*protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

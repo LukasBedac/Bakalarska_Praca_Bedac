@@ -1,36 +1,44 @@
 ﻿@page "/zoznamkvizov"
-<h3>Zoznam Kvizov</h3>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th scope="col">#</th>
-            <th scope="col">Kviz</th>
-            <th scope="col">Pocet Otazok</th>
-            <th scope="col">Owner</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <th scope="row">1</th>
-            <td>What fictional place would you most like to go to?</td>
-            <td class="pocet-otazok-tabulka">5</td>
-            <td>@@Aurora Walton</td>
-        </tr>
-        <tr>
-            <th scope="row">2</th>
-            <td><a href="/mojekvizy">VAII kviz prednaska 4</a></td>
-            <td class="pocet-otazok-tabulka">3</td>
-            <td>@@Niamh Quinn</td>
-        </tr>
-        <tr>
-            <th scope="row">3</th>
-            <td>What issue will you always speak your mind about?</td>
-            <td class="pocet-otazok-tabulka">3</td>
-            <td>@@Haris Freeman</td>
-        </tr>
-    </tbody>
-</table>
-@code {
+@using FRI_Quiz_Bakalarska_Praca.Data.Database
+@using FRI_Quiz_Bakalarska_Praca.Data.Model
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
 
+<DataGrid TItem="Quiz"
+          Data="@quizzes"
+          @bind-SelectedRow="@selectedQuiz"
+          Editable
+          Responsive
+          ShowPager          
+          Filterable
+          FilterMethod="DataGridFilterMethod.Contains"
+           CommandMode="DataGridCommandMode.ButtonRow">
+     <DataGridColumns>
+         <DataGridColumn Field="@nameof(Quiz.Id)" Caption="#" Sortable="false" Filterable="false" />
+         <DataGridColumn Field="@nameof(Quiz.QuizName)" Caption="Názov" Editable />
+         <DataGridColumn Field="@nameof(Quiz.Moderators)" DisplayFormat="" Caption="Moderátori" />
+         <DataGridDateColumn Field="@nameof(Quiz.DateFrom)" Caption="Začiatok" />
+         <DataGridDateColumn Field="@nameof(Quiz.DateTo)" Caption="Koniec" />
+         <DataGridColumn Field="@nameof(Quiz.Type)" Caption="Typ" />
+         <!--<DataGridNumericColumn Field="@nameof(Quiz.QuestionCount)" Caption="Počet otázok" />-->
+    </DataGridColumns>
+    <ButtonRowTemplate>
+        <Button Color="Color.Primary" Disabled="(selectedQuiz is null)" Clicked="context.EditCommand.Clicked">Edit</Button>
+         <Button Color="Color.Danger" Disabled="(selectedQuiz is null)" Clicked="context.DeleteCommand.Clicked">Delete</Button>
+    </ButtonRowTemplate>
+</DataGrid>
+ @code {
+
+    public Quiz? Quiz { get; set; }
+    private List<Quiz> quizzes = new List<Quiz>();
+    private Quiz selectedQuiz = new Quiz();
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var dbContext = DbFactory.CreateDbContext();
+        quizzes = await dbContext.Kvizy.ToListAsync();
+        await base.OnInitializedAsync();
+    }
 }
+

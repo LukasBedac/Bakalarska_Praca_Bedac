@@ -1,11 +1,18 @@
 ﻿@page "/login"
-
+@using FRI_Quiz_Bakalarska_Praca.Data.Database
+@using FRI_Quiz_Bakalarska_Praca.Data.Model
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
+@inject UserManager<User> UserManager
+@inject RoleManager<IdentityRole<int>> RoleManager
+@inject SignInManager<User> SignInManager
 <Container>
     <Row>
         <Column>
             <Tabs SelectedTab="@selectedTab" SelectedTabChanged="@OnSelectedTabChanged" Pills FullWidth>
                 <Items>
-                    <Tab Name="login">Prihlasit sa</Tab>
+                    <Tab Name="login">Prihlásite sa</Tab>
                     <Tab Name="register">Zaregistujte sa</Tab>
                 </Items>
                 <Content>
@@ -13,19 +20,18 @@
                         <Card>
                             <CardBody>
                                 <CardTitle>
-                                    Prihlaste sa
+                                    Prihlásiť sa
                                 </CardTitle>
                             </CardBody>
                             <CardBody>
-                                <Validations @ref="@loginValidationsRef" Mode="ValidationMode.Manual" ValidateOnLoad="false">
-                                    <Validation Validator="ValidationRule.IsEmail">
+                                <Validations @ref="@loginValidationsRef" Mode="ValidationMode.Auto" ValidateOnLoad="false">
+                                    <Validation Validator="ValidationRule.IsNotEmpty">
                                         <Field>
-                                            <FieldLabel>Email</FieldLabel>
-                                            <TextEdit @bind-Text="@email" Placeholder="Zadajte email...">
+                                            <FieldLabel>Meno</FieldLabel>
+                                            <TextEdit @bind-Text="@email" Placeholder="Zadajte meno...">
                                                 <Feedback>
-                                                    <ValidationNone>Prosim zadajte svoj Email. </ValidationNone>
-                                                    <ValidationSuccess></ValidationSuccess>
-                                                    <ValidationError>Prosim zadajte platny email</ValidationError>
+
+                                                    <ValidationError></ValidationError>
                                                 </Feedback>
                                             </TextEdit>
                                         </Field>
@@ -33,7 +39,7 @@
                                     <Validation Validator="ValidationRule.IsNotEmpty">
                                         <Field>
                                             <FieldLabel>Heslo</FieldLabel>
-                                            <TextEdit @bind-Text="@password" Placeholder="Zadajte heslo.." />
+                                            <TextEdit @bind-Text="@password" Role="TextRole.Password" Placeholder="Zadajte heslo.." />
                                         </Field>
                                     </Validation>
                                     <Field>
@@ -42,7 +48,7 @@
                                 </Validations>
                             </CardBody>
                             <CardBody>
-                                <Button Color="Color.Primary" Clicked="@OnLoginClicked">Prihlasit sa</Button>
+                                <Button Color="Color.Primary" Clicked="@OnLoginClicked">Prihlásiť sa</Button>
                                 <Button Color="Color.Danger">Zabudol som heslo</Button>
                             </CardBody>
                         </Card>
@@ -56,43 +62,49 @@
                             </CardBody>
                             <CardBody>
                                 <Link To="https://www.facebook.com/login" Target="Target.Blank">
-                                     <a class="bi bi-facebook login-icon"> Prihlasit sa cez facebook</a>
+                                     <a class="bi bi-facebook login-icon"> Prihlásiť sa cez facebook</a>
                                 </Link> <br />
                                 <Link To="MicrosoftIdentity/Account/SignIn" Target="Target.Blank">
-                                    <a class="bi bi-microsoft login-icon"> Prihlasit sa cez Microsoft ucet</a>
+                                    <a class="bi bi-microsoft login-icon"> Prihlásiť sa cez Microsoft účet</a>
                                 </Link>
                             </CardBody>
                             <CardBody>
-                                <Validations @ref="@registerValidationsRef" Mode="ValidationMode.Manual" ValidateOnLoad="false">
+                                <Validations @ref="@registerValidationsRef" Mode="ValidationMode.Auto" ValidateOnLoad="false">
                                     <Validation Validator="ValidationRule.IsNotEmpty">
                                         <Field>
-                                            <FieldLabel>Name</FieldLabel>
-                                            <TextEdit @bind-Text="@name" Placeholder="Zadajte meno" />
+                                            <FieldLabel>Meno</FieldLabel>
+                                            <TextEdit @bind-Text="@newUser.UserName" Placeholder="Zadajte meno" />
                                         </Field>
                                     </Validation>
                                     <Validation Validator="ValidationRule.IsEmail">
                                         <Field>
                                             <FieldLabel>Email</FieldLabel>
-                                            <TextEdit @bind-Text="@email" Placeholder="Zaajte svoj email">
+                                            <TextEdit @bind-Text="@newUser.Email" Placeholder="Zadajte svoj email">
                                                 <Feedback>
-                                                    <ValidationNone>Prosim zadajte svoj email.</ValidationNone>
+                                                    <ValidationNone>Prosím zadajte svoj email.</ValidationNone>
                                                     <ValidationSuccess></ValidationSuccess>
-                                                    <ValidationError>Zadajte platny email </ValidationError>
+                                                    <ValidationError>Zadajte platný email </ValidationError>
                                                 </Feedback>
                                             </TextEdit>
                                         </Field>
                                     </Validation>
                                     <Validation Validator="ValidationRule.IsNotEmpty">
                                         <Field>
-                                            <FieldLabel>Password</FieldLabel>
-                                            <TextEdit @bind-Text="@password" Placeholder="Zadajte heslo" />
+                                            <FieldLabel>Heslo</FieldLabel>
+                                            <TextEdit @bind-Text="@password" Role="TextRole.Password" Placeholder="Zadajte heslo" />
+                                            <ValidationError>
+                                                Heslo musí obsahovať aspoň 8 znakov <br />
+                                                Heslo musí obsahovať 1 veľké písmeno <br />
+                                                Heslo musí obsahovať číslo <br />
+                                                Heslo musí obsahovať špeciálny znak
+                                            </ValidationError>
                                         </Field>
                                     </Validation>
                                 </Validations>
                             </CardBody>
                             <CardBody>
                                 <Button Color="Color.Primary" Clicked="@OnRegisterClicked">
-                                    Vytvorit ucet
+                                    Vytvoriť účet
                                 </Button>
                             </CardBody>
                         </Card>
@@ -106,40 +118,60 @@
 
 
 @code {
-        Validations? loginValidationsRef;
-        Validations? registerValidationsRef;
+    Validations? loginValidationsRef;
+    Validations? registerValidationsRef;
 
-        string selectedTab = "login";
+    private User newUser = new User();
+    private string email;
+    private string password;
+    private bool loginSuceeded = false;
+    string selectedTab = "login";
 
-        string? name;
-        string? email;
-        string? password;
-        bool rememberMe;
+    bool rememberMe;
 
-        private Task OnSelectedTabChanged(string name)
-        {
+    private Task OnSelectedTabChanged(string name)
+    {
         selectedTab = name;
 
         return Task.CompletedTask;
-        }
+    }
 
-        async Task OnLoginClicked()
-        {
+    async Task OnLoginClicked()
+    {
         if (await loginValidationsRef.ValidateAll())
-        {
-            // do the real login here
+        {          
+            var result = await SignInManager.PasswordSignInAsync(email, password, isPersistent: false, lockoutOnFailure: false);
+            if (result.Succeeded)
+            {
+                loginSuceeded = true;
+            } else
+            {
+                loginSuceeded = false;
+            }
 
             await loginValidationsRef.ClearAll();
         }
-        }
+    }
 
-        async Task OnRegisterClicked()
-        {
+    async Task OnRegisterClicked()
+    {
         if (await registerValidationsRef.ValidateAll())
         {
-            // do the real login here
+            using var dbContext = DbFactory.CreateDbContext();
 
+            var result = await UserManager.CreateAsync(newUser, password);
+
+            if (result.Succeeded)
+            {
+                if (!await RoleManager.RoleExistsAsync("User"))
+                {
+                    await RoleManager.CreateAsync(new IdentityRole<int>("User"));
+                }
+
+                await UserManager.AddToRoleAsync(newUser, "User");
+            }
+            await dbContext.SaveChangesAsync();
             await registerValidationsRef.ClearAll();
         }
-        }
+    }
 }
