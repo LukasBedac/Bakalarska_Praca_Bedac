@@ -1,18 +1,40 @@
 ﻿@page "/mojekvizy"
-<h3>MojeKvizy</h3>
-
-<Accordion>
-    <Collapse Visible="@collapse1Visible">
-        <CollapseHeader>
-            <Heading Size="HeadingSize.Is5">
-                <AccordionToggle>Kviz 1</AccordionToggle>
-                <AccordionToggle Class="disabled"> Pocet bodov: 1/1</AccordionToggle>
-            </Heading>
-        </CollapseHeader>
-        <CollapseBody>
-            Otazka 1: afafbqfqqqqqqqqqe
-        </CollapseBody>
-    </Collapse>
+@using FRI_Quiz_Bakalarska_Praca.Data.Database
+@using FRI_Quiz_Bakalarska_Praca.Data.Model
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
+<AuthorizeView>
+    <Authorized>
+        <Accordion>
+            @foreach (var quiz in quizzes)
+            {
+                <Collapse Visible="@collapseVisible">
+                    <CollapseHeader>
+                        <Heading Size="HeadingSize.Is5">
+                            <AccordionToggle>@quiz.QuizName</AccordionToggle>
+                            <AccordionToggle Class="disabled"> Pocet bodov: </AccordionToggle>
+                        </Heading>
+                    </CollapseHeader>
+                    <CollapseBody>
+                    @foreach (var question in quiz.Questions)
+                    {
+                            <p>@question.Text</p>
+                    }
+                    </CollapseBody>
+                </Collapse>
+            }
+    
+        </Accordion>
+    </Authorized>
+    <NotAuthorized>
+        <Heading>
+            Na zobrazenie vám priradených kvízov sa prosím prihláste.
+            <br />
+            <a href="/login">Prihlásiť sa</a>
+        </Heading>
+    </NotAuthorized>
+</AuthorizeView>
+    <!--
     <Collapse Visible="@collapse2Visible">
         <CollapseHeader>
             <Heading Size="HeadingSize.Is5">
@@ -48,13 +70,19 @@
 
         </CollapseBody>
     </Collapse>
-</Accordion>
+    -->
+
 
 @code {
-    bool collapse1Visible = false;
-    bool collapse2Visible = false;
-    bool collapse3Visible = false;
+    bool collapseVisible = false;
 
+    private List<Quiz> quizzes = new List<Quiz>();
 
+    protected override async Task OnInitializedAsync()
+    {
+        using var dbCOntext = DbFactory.CreateDbContext();
 
+        quizzes = await dbCOntext.Kvizy.ToListAsync();
+        await base.OnInitializedAsync();
+    }
 }

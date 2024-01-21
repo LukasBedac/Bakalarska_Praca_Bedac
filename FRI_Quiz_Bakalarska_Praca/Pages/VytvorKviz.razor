@@ -1,10 +1,14 @@
 ﻿@page "/vytvorKviz"
 
+@using FRI_Quiz_Bakalarska_Praca.Data
 @using FRI_Quiz_Bakalarska_Praca.Data.Database
 @using FRI_Quiz_Bakalarska_Praca.Data.Model
+@using Microsoft.AspNetCore.Identity
 @using Microsoft.EntityFrameworkCore
 @using TinyMCE.Blazor;
+@inject AuthenticationStateProvider AuthProvider
 @inject IDbContextFactory<ApplicationDbContext> DbFactory
+@inject UserManager<User> Usermanager
 <PageTitle>Vytvorenie Kvizu</PageTitle>
 
 <div>
@@ -206,7 +210,9 @@
         timePicker = null;
         OnceSubmit = false;
         correctAnswersNumbers = 0;
-        OnInitialized();
+        questions[0].Order = 1;
+        questions[0].Answers.Add(new Answer());
+        questions[0].Answers[0].Order = 1;
     }
 
     #endregion HelpMethods
@@ -231,19 +237,8 @@
         if (!OnceSubmit)
         {
             OnceSubmit = true;
-            if (dbContext.Users.Count() < 1) //Test kod na usera pre kviz
-            {
-                User? local = new User();
-                local.UserName = "Lukas";
-                local.Id = 1;
-                dbContext.Users.Add(local);
-                newQuiz.User = local;
-            }
-            else
-            {
-                User? local = (User) dbContext.Users.Find(1);
-                newQuiz.User = local;
-            }
+            newQuiz.User = await dbContext.Users.FindAsync(6);
+
             dbContext.Kvizy.Add(newQuiz);
             await dbContext.SaveChangesAsync();
             await SubmitQuestion();

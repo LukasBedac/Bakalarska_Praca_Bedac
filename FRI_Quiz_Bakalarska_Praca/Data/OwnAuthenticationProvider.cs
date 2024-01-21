@@ -77,7 +77,7 @@ namespace FRI_Quiz_Bakalarska_Praca.Data
             if (user != null)
             {
                 var name = await _userManager.GetUserNameAsync(user);
-                return name;
+                return name == null ? "" : name;
             }
 
             return "";

@@ -48,8 +48,16 @@
                                     <Field>
                                         <Check TValue="bool" @bind-Checked="@rememberMe">Zapamataj si ma</Check>
                                     </Field>
+                                    @if (!loginSuceeded)
+                                    {
+                                        <Label TextColor="TextColor.Danger">Zadali ste zlé heslo</Label>
+                                    } else if (!userFind)
+                                    {
+                                        <Label TextColor="TextColor.Danger">Zadali ste zlý email</Label>
+                                    }
                                 </Validations>
                             </CardBody>
+                            
                             <CardBody>
                                 <Button Color="Color.Primary" Clicked="@OnLoginClicked">Prihlásiť sa</Button>
                                 <Button Color="Color.Danger">Zabudol som heslo</Button>
@@ -72,11 +80,12 @@
                                 </Link>
                             </CardBody>
                             <CardBody>
-                                <Validations @ref="@registerValidationsRef" Mode="ValidationMode.Auto" ValidateOnLoad="false">
+                                <Validations @ref="@registerValidationsRef" Mode="ValidationMode.Auto" ValidateOnLoad="true">
                                     <Validation Validator="ValidationRule.IsNotEmpty">
                                         <Field>
                                             <FieldLabel>Meno</FieldLabel>
                                             <TextEdit @bind-Text="@newUser.UserName" Placeholder="Zadajte meno" />
+                                             <ValidationError>Zadajte meno </ValidationError>
                                         </Field>
                                     </Validation>
                                     <Validation Validator="ValidationRule.IsEmail">
@@ -101,6 +110,10 @@
                                                 Heslo musí obsahovať číslo <br />
                                                 Heslo musí obsahovať špeciálny znak
                                             </ValidationError>
+                                            @if (!registerPass)
+                                            {
+                                                <Label TextColor="TextColor.Danger">Zadali ste zlé heslo</Label>
+                                            }
                                         </Field>
                                     </Validation>
                                 </Validations>
@@ -127,7 +140,9 @@
     private User newUser = new User();
     private string email;
     private string password;
-    private bool loginSuceeded = false;
+    private bool loginSuceeded = true;
+    private bool userFind = true;
+    private bool registerPass = true;
     string selectedTab = "login";
 
     bool rememberMe;
@@ -139,21 +154,53 @@
         return Task.CompletedTask;
     }
 
-    async Task OnLoginClicked()
+    private async Task OnLoginClicked()
     {
-        if (await loginValidationsRef.ValidateAll())
+        if (await ValidatePassword(password) && await loginValidationsRef.ValidateAll())
         {
-            ((OwnAuthenticationProvider)AuthProvider).UserAuthenticated(email);
-            NavManager.NavigateTo("/mojekvizy");
+            var user = UserManager.FindByEmailAsync(email);
+            if (user != null)
+            {
+                var passValid = await UserManager.CheckPasswordAsync(await user, password);
+                if (passValid)
+                {
+                    await ((OwnAuthenticationProvider)AuthProvider).UserAuthenticated(email);
+                    await sessionStorage.SetItemAsync("email", email);
+                    await loginValidationsRef.ClearAll();
+                    NavManager.NavigateTo("/");
+                } else
+                {
+                    loginSuceeded = false;
+                    password = "";
+                }
 
-            await sessionStorage.SetItemAsync("email", email);
-        await loginValidationsRef.ClearAll();      
+            } else
+            { 
+
+                userFind = false;
+                password = "";
+            } 
         }
+        else
+        {
+            loginSuceeded = false;
+            password = "";
+        }
+
+    }
+    private async Task<bool> ValidatePassword(string password)
+    {
+        var isLengthValid = password.Length >= 8;
+        var hasUppercase = password.Any(char.IsUpper);
+        var hasNumber = password.Any(char.IsDigit);
+        var hasSpecialChar = password.Any(ch => !char.IsLetterOrDigit(ch));
+
+        return isLengthValid && hasUppercase && hasNumber && hasSpecialChar;
     }
 
-    async Task OnRegisterClicked()
+    private async Task OnRegisterClicked()
     {
-        if (await registerValidationsRef.ValidateAll())
+        if (await ValidatePassword(password) && await registerValidationsRef.ValidateAll())
         {
             using var dbContext = DbFactory.CreateDbContext();
 
@@ -170,6 +217,12 @@
             }
             await dbContext.SaveChangesAsync();
             await registerValidationsRef.ClearAll();
+            password = "";
+
+        } else
+        {
+            registerPass = false;
+            password = "";
         }
     }
 }

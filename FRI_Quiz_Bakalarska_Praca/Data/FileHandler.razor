@@ -1,0 +1,24 @@
+﻿@page "/filhandler"
+
+<h3>FileHandler</h3>
+
+@code {
+    private async Task HandleFileUpload(InputFileChangeEventArgs e)
+    {
+        // Get the uploaded file
+        var file = e.GetMultipleFiles().FirstOrDefault();
+
+        if (file != null)
+        {
+            // Handle the file, save to server, etc.
+
+            // For demonstration purposes, you can print some information to the console
+            Console.WriteLine($"File Name: {file.Name}");
+            Console.WriteLine($"File Size: {file.Size} bytes");
+        }
+    }
+}
+
+}
+
+
