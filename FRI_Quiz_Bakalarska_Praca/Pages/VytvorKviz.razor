@@ -40,7 +40,6 @@
                     </div>
                 </div>
                 <div class="nastaveniaCasu">
-                   
                     <div class="casOd">
                         <label class="nastaveniaCasuText">Zaciatok: </label>
                         <Addons>
@@ -128,10 +127,10 @@
             }                   
         </EditForm>
     </div>
-    <div class="">
-        
+    <div class="buttons_group_quiz">        
         <button type="submit" form="QuizId" class="btn btn-primary">@(!OnceSubmit ? "Pridať kvíz" : "Update kvízu")</button>
         <button type="submit" class="btn btn-dark" @onclick="AddQuestion">Pridať otázku</button>
+        <button type="reset" class="btn btn-danger" @onclick="ResetForm">Nový kvíz</button>
     </div>
 </div>
 
@@ -195,6 +194,19 @@
         questions[0].Order = 1;
         questions[0].Answers.Add(new Answer());
         questions[0].Answers[0].Order = 1;
+    }
+    private void ResetForm()
+    {
+        newQuiz = new Quiz();
+        questions = new List<Question>() { new Question()};
+        dates = new List<DateTime?>();
+        timeFrom = null;
+        timeTo = null;
+        datePicker = null;
+        timePicker = null;
+        OnceSubmit = false;
+        correctAnswersNumbers = 0;
+        OnInitialized();
     }
 
     #endregion HelpMethods
@@ -300,7 +312,7 @@
         {"paste_data_images", "true"},
         {"height", "250px"},
         {"automatic_uploads", true },
-        {"images_upload_url", "/UploadImage/"}
+        {"images_upload_url", "/Image"}
     };
 
     private Dictionary<string, object> textConf = new Dictionary<string, object>{
@@ -311,7 +323,7 @@
         {"width", "60%"},
         {"height", "200px"},
         {"automatic_uploads", true },
-        {"images_upload_url", "/UploadImage/"}
+        {"images_upload_url", "/Image"}
     };
     #endregion TinyMCE
 

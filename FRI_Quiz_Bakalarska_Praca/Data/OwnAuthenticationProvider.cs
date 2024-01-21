@@ -1,6 +1,8 @@
 ﻿using Blazored.SessionStorage;
 using Blazorise;
+using FRI_Quiz_Bakalarska_Praca.Data.Model;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
 
 namespace FRI_Quiz_Bakalarska_Praca.Data
@@ -8,9 +10,11 @@ namespace FRI_Quiz_Bakalarska_Praca.Data
     public class OwnAuthenticationProvider : AuthenticationStateProvider
     {
         private ISessionStorageService _sessionStorageService;
-        public OwnAuthenticationProvider(ISessionStorageService sessionStorage)
+        private UserManager<User> _userManager;
+        public OwnAuthenticationProvider(ISessionStorageService sessionStorage, UserManager<User> userManager)
         {
             _sessionStorageService = sessionStorage;
+            _userManager = userManager;
         }
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
@@ -20,8 +24,10 @@ namespace FRI_Quiz_Bakalarska_Praca.Data
             {
                 identity = new ClaimsIdentity(new[]
                 {
-                    new Claim(ClaimTypes.Name, email),
-                }, "apiauth_type");                
+                    new Claim(ClaimTypes.Email, email),
+                    new Claim(ClaimTypes.Role, await GetUserRole(email)),
+                    new Claim(ClaimTypes.Name, await GetUserName(email)),
+                }, "apiauth_type") ;                
             } else
             {
                 identity = new ClaimsIdentity();
@@ -31,11 +37,13 @@ namespace FRI_Quiz_Bakalarska_Praca.Data
             var user = new ClaimsPrincipal(identity);
             return await Task.FromResult(new AuthenticationState(user));
         }
-        public void UserAuthenticated(string email)
+        public async Task UserAuthenticated(string email)
         {
             var identity = new ClaimsIdentity(new[]
             {
-                new Claim(ClaimTypes.Name, email),
+                new Claim(ClaimTypes.Email, email),
+                new Claim(ClaimTypes.Role, await GetUserRole(email)),
+                new Claim(ClaimTypes.Name, await GetUserName(email)),
             }, "apiauth_type");
             var user = new ClaimsPrincipal(identity);
             NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(user)));
@@ -47,6 +55,32 @@ namespace FRI_Quiz_Bakalarska_Praca.Data
             var identity = new ClaimsIdentity();
             var user = new ClaimsPrincipal(identity);
             NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(user)));
+        }
+
+        private async Task<string> GetUserRole(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user != null)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+                return roles.Count > 0 ? roles[0] : ""; 
+            }
+
+            return "";
+        }
+
+        private async Task<string> GetUserName(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user != null)
+            {
+                var name = await _userManager.GetUserNameAsync(user);
+                return name;
+            }
+
+            return "";
         }
     }
    

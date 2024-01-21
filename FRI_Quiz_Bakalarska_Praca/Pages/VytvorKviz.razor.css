@@ -14,6 +14,7 @@
     align-items: center;
     width: 20rem;
     padding-top: 0.5rem;
+    justify-content: space-between;
 }
 .left_side_quiz {
     display: inline-flex;
@@ -49,8 +50,8 @@
 .casDo {
     display: inline-flex;
     flex-direction: row;
-    width: 25%;
-    padding-left: 3rem;
+    width: 30%;
+    padding-left: 5rem;
     padding-top: 0.5rem;
 }
 .datum {
@@ -104,8 +105,14 @@
     grid-column: 1;
     grid-row: 2;
 }
-@media (max-width: 640.98px) {
 
+.buttons_group_quiz {
+    display: flex;
+    margin-top: 1rem;
+    width: 30%;
+    justify-content:space-between;
+}
+@media (max-width: 640.98px) {
     .nastaveniaCasu {
         flex-direction: column;
         padding-bottom: 1rem;

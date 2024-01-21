@@ -31,11 +31,10 @@
                                 <Validations @ref="@loginValidationsRef" Mode="ValidationMode.Auto" ValidateOnLoad="false">
                                     <Validation Validator="ValidationRule.IsNotEmpty">
                                         <Field>
-                                            <FieldLabel>Meno</FieldLabel>
-                                            <TextEdit @bind-Text="@email" Placeholder="Zadajte meno...">
+                                            <FieldLabel>Email</FieldLabel>
+                                            <TextEdit @bind-Text="@email" Placeholder="Zadajte email...">
                                                 <Feedback>
-
-                                                    <ValidationError></ValidationError>
+                                                    <ValidationError>Nesprávny email...</ValidationError>
                                                 </Feedback>
                                             </TextEdit>
                                         </Field>
@@ -148,7 +147,7 @@
             NavManager.NavigateTo("/mojekvizy");
 
             await sessionStorage.SetItemAsync("email", email);
-            await loginValidationsRef.ClearAll();      
+        await loginValidationsRef.ClearAll();      
         }
     }
 
