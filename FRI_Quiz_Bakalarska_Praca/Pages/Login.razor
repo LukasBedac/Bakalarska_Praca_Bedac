@@ -1,4 +1,5 @@
 ﻿@page "/login"
+@using FRI_Quiz_Bakalarska_Praca.Data
 @using FRI_Quiz_Bakalarska_Praca.Data.Database
 @using FRI_Quiz_Bakalarska_Praca.Data.Model
 @using Microsoft.AspNetCore.Identity
@@ -7,6 +8,9 @@
 @inject UserManager<User> UserManager
 @inject RoleManager<IdentityRole<int>> RoleManager
 @inject SignInManager<User> SignInManager
+@inject AuthenticationStateProvider AuthProvider
+@inject NavigationManager NavManager
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 <Container>
     <Row>
         <Column>
@@ -139,17 +143,12 @@
     async Task OnLoginClicked()
     {
         if (await loginValidationsRef.ValidateAll())
-        {          
-            var result = await SignInManager.PasswordSignInAsync(email, password, isPersistent: false, lockoutOnFailure: false);
-            if (result.Succeeded)
-            {
-                loginSuceeded = true;
-            } else
-            {
-                loginSuceeded = false;
-            }
+        {
+            ((OwnAuthenticationProvider)AuthProvider).UserAuthenticated(email);
+            NavManager.NavigateTo("/mojekvizy");
 
-            await loginValidationsRef.ClearAll();
+            await sessionStorage.SetItemAsync("email", email);
+            await loginValidationsRef.ClearAll();      
         }
     }
 

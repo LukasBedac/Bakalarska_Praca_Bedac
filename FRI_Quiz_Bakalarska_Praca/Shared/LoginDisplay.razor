@@ -1,7 +1,10 @@
-﻿<AuthorizeView>
-    <Authorized>
+﻿@using FRI_Quiz_Bakalarska_Praca.Data
+@inject AuthenticationStateProvider AuthProvider
+<AuthorizeView>
+    <Authorized >
          Hello, @context.User.Identity?.Name!
-        <a href="MicrosoftIdentity/Account/SignOut">Log out</a>
+         <a href="/login" @onclick="(() => LogOut())">Log out</a>
+        <!--<a href="MicrosoftIdentity/Account/SignOut">Log out</a>-->
          
     </Authorized>
     <NotAuthorized>
@@ -11,3 +14,10 @@
         <a href="Login">Log in</a>
     </NotAuthorized>
 </AuthorizeView>
+
+@code {
+    public void LogOut()
+    {
+        ((OwnAuthenticationProvider)AuthProvider).UserLoggedOut();
+    }
+}

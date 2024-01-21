@@ -17,6 +17,9 @@ using System.Configuration;
 using FRI_Quiz_Bakalarska_Praca.Data.Model;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Components.Authorization;
+using FRI_Quiz_Bakalarska_Praca.Data;
+using Blazored.SessionStorage;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,15 +41,6 @@ builder.Services.AddIdentity<User, IdentityRole<int>>()
     .AddDefaultTokenProviders();
 builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
     .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultScheme = "CookieScheme";
-    options.DefaultAuthenticateScheme = "CookieScheme";
-    options.DefaultSignInScheme = "CookieScheme";
-    options.DefaultChallengeScheme = "CookieScheme";
-
-})
-    .AddCookie("CookieScheme");
 builder.Services.AddControllersWithViews()
     .AddMicrosoftIdentityUI();
 /*builder.Services.AddAuthorization( 
@@ -63,6 +57,7 @@ builder.Services
     })
     .AddBootstrapProviders()
     .AddFontAwesomeIcons();
+builder.Services.AddBlazoredSessionStorage();
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor()
     .AddMicrosoftIdentityConsentHandler();
@@ -73,10 +68,10 @@ void Configure(IServiceCollection services)
 {
     services.AddScoped<UserManager<User>>();
     services.AddScoped<SignInManager<User>>();
+    services.AddScoped<AuthenticationStateProvider, OwnAuthenticationProvider>();
     var serviceProvider = services.BuildServiceProvider();
     using (var serviceScope = serviceProvider.CreateScope())
     {
-        
         var userManager = serviceScope.ServiceProvider.GetRequiredService<UserManager<User>>();
         var roleManager = serviceScope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<int>>>();
         if (!roleManager.RoleExistsAsync("Admin").Result)
