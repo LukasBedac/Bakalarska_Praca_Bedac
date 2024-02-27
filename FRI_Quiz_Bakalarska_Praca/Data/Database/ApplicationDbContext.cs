@@ -21,19 +21,18 @@ namespace FRI_Quiz_Bakalarska_Praca.Data.Database
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-
-            // Additional configurations for your entities
+            
         }
 
-        public DbSet<Quiz> Kvizy { get; set; }
-        public DbSet<Question> Otazky { get; set;}
         public DbSet<Answer> Odpovede { get; set; }
-
-
+        public DbSet<Question> Otazky { get; set; }
+        public DbSet<Quiz> Kvizy { get; set; }
+        
+        
         /*protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
 
-            optionsBuilder.UseMySql(_config.GetConnectionString("DbConnectionString");
+            
         }*/
     }
 }

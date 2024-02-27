@@ -45,9 +45,6 @@
                                             <TextEdit @bind-Text="@password" Role="TextRole.Password" Placeholder="Zadajte heslo.." />
                                         </Field>
                                     </Validation>
-                                    <Field>
-                                        <Check TValue="bool" @bind-Checked="@rememberMe">Zapamataj si ma</Check>
-                                    </Field>
                                     @if (!loginSuceeded)
                                     {
                                         <Label TextColor="TextColor.Danger">Zadali ste zlé heslo</Label>
@@ -134,6 +131,7 @@
 
 
 @code {
+    //TODO 1.2 JWTokens prerobit, dotiahnut login cez FB a microsoft, treba doriesit viacero funkcii
     Validations? loginValidationsRef;
     Validations? registerValidationsRef;
 

@@ -4,3 +4,15 @@
 .mojekvizy-body {
     padding-right: 20rem;
 }
+
+.question-box {
+    display: inline-flex;
+    justify-content: space-between;
+}
+.question-order {
+    display: inline-flex;
+    padding-right: 3rem;
+}
+.paddng-between-answer {
+    padding-right: 2rem;
+}

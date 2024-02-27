@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace FRI_Quiz_Bakalarska_Praca.Migrations
 {
     /// <inheritdoc />
-    public partial class Init : Migration
+    public partial class init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -204,19 +204,17 @@ namespace FRI_Quiz_Bakalarska_Praca.Migrations
                 name: "Otazky",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Id = table.Column<int>(type: "int", nullable: false),
                     Text = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Order = table.Column<int>(type: "int", nullable: false),
-                    QuizId = table.Column<int>(type: "int", nullable: false)
+                    Order = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Otazky", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Otazky_Kvizy_QuizId",
-                        column: x => x.QuizId,
+                        name: "FK_Otazky_Kvizy_Id",
+                        column: x => x.Id,
                         principalTable: "Kvizy",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -227,22 +225,21 @@ namespace FRI_Quiz_Bakalarska_Praca.Migrations
                 name: "Odpovede",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Id = table.Column<int>(type: "int", nullable: false),
                     Text = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Order = table.Column<int>(type: "int", nullable: false),
-                    Correct = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    QuestionId = table.Column<int>(type: "int", nullable: true)
+                    Correct = table.Column<bool>(type: "tinyint(1)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Odpovede", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Odpovede_Otazky_QuestionId",
-                        column: x => x.QuestionId,
+                        name: "FK_Odpovede_Otazky_Id",
+                        column: x => x.Id,
                         principalTable: "Otazky",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -292,16 +289,6 @@ namespace FRI_Quiz_Bakalarska_Praca.Migrations
                 name: "IX_Kvizy_UserId",
                 table: "Kvizy",
                 column: "UserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Odpovede_QuestionId",
-                table: "Odpovede",
-                column: "QuestionId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Otazky_QuizId",
-                table: "Otazky",
-                column: "QuizId");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_AspNetUserClaims_AspNetUsers_UserId",

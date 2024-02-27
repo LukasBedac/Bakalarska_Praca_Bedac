@@ -2,10 +2,20 @@
 @inject AuthenticationStateProvider AuthProvider
 
 <AuthorizeView>
+    <Authorized>
+        <div class="top-row ps-3 navbar navbar-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="">FRI Quiz</a>
+                <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </div>
+        </div>
+    </Authorized>
     <NotAuthorized>
         <div class="top-row ps-3 navbar navbar-dark">
             <div class="container-fluid">
-                <a class="navbar-brand" href="">FRIVIA</a>
+                <a class="navbar-brand" href="">FRI Quiz</a>
                 <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
                     <span class="navbar-toggler-icon"></span>
                 </button>
@@ -24,8 +34,8 @@
                     </NavLink>
                 </div>
                 <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="nastavenia" Match="NavLinkMatch.All">
-                        <span class="oi oi-cog" aria-hidden="true"></span> Nastavenia
+                    <NavLink class="nav-link" href="QRCode" Match="NavLinkMatch.All">
+                        <span class="oi bi-qr-code-scan" aria-hidden="true"></span> QR Code
                     </NavLink>
                 </div>                
             </nav>
@@ -57,8 +67,8 @@
                 </NavLink>
             </div>
             <div class="nav-item px-3">
-                <NavLink class="nav-link" href="nastavenia" Match="NavLinkMatch.All">
-                    <span class="oi oi-cog" aria-hidden="true"></span> Nastavenia
+                <NavLink class="nav-link" href="QRCode" Match="NavLinkMatch.All">
+                    <span class="oi bi-qr-code-scan" aria-hidden="true"></span> QR Code
                 </NavLink>
             </div>
             <div class="nav-item px-3">
@@ -84,8 +94,8 @@
                 </NavLink>
             </div>
             <div class="nav-item px-3">
-                <NavLink class="nav-link" href="nastavenia" Match="NavLinkMatch.All">
-                    <span class="oi oi-cog" aria-hidden="true"></span> Nastavenia
+                <NavLink class="nav-link" href="QRCode" Match="NavLinkMatch.All">
+                    <span class="oi bi-qr-code-scan" aria-hidden="true"></span> QR Code
                 </NavLink>
             </div>
             <div class="nav-item px-3">

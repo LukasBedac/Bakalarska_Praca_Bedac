@@ -1,10 +1,6 @@
 ﻿@page "/profil"
 
-<PageTitle>Profile</PageTitle>
-
-<h1>Your profile</h1>
-
-<p>Profil uzivatela</p>
+<PageTitle>Profil</PageTitle>
 
 @if (loginName != null)
 {
@@ -23,28 +19,7 @@
         <!--<input for="password" type="password" />-->
         <button type="submit" class="btn btn-primary" @onclick="PasswordChange" >Zmenit heslo</button>
     </div>
-    @if(passwordChange)
-    {
-   
-    <div class="ms-3">
-        <label>Stare heslo</label>
-        <input type="text"/>
-    </div>
-    <div class="ms-3">
-        <label>Nove heslo</label>
-        <input type="text" />
-    </div>
-    <div class="ms-3">
-        <label>Zopakuj nove heslo</label>
-        <input type="text" />
-    </div>
-    <div class="ms-3">
-        <button type="submit">Potvrd</button>
-    </div>
- 
-    }
-    else{}
-
+    
 }
 else
 {
@@ -54,8 +29,9 @@ else
 }
 
 @code {
-    private string? loginName = "Lukas";
-    private bool passwordChange = false;
+    //TODO 1.4 Prerobit na jemne nastavenia, napr. zmena hesla a mena v kvizoch, vymazanie uctu
+    private string? loginName;
+    private bool passwordChange;
     public void PasswordChange()
     {
         passwordChange = !passwordChange;

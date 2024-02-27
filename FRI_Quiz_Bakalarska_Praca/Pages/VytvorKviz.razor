@@ -92,9 +92,7 @@
                     <TableRowCell>@(question.Text.Length > 20 ? question.Text.Substring(0, 20) + "..." : question.Text)</TableRowCell>
                     <TableRowCell><Button Class="btn-secondary">Edit</Button></TableRowCell>
                 </TableRow>
-                }
-                        
-                        
+                }        
             </TableBody>
         </Table>
     </div>
@@ -105,6 +103,9 @@
                 <div class="mb-3">
                     <label class="form-label">Otázka</label>
                 <Editor @bind-Text="question.Text" Field="@(() => question.Text)" Conf="@textConf"></Editor>
+                </div>
+                <div>
+                    <button type="submit" class="btn btn-danger" @onclick="() => DeleteQuestion(question)">Odstrániť otázku</button>
                 </div>
                 <div class="odpovede-container">
                     <label>Zadajte odpovede</label>
@@ -121,7 +122,12 @@
                     }
                     <div>
                         <br />
-                        <button type="submit" class="btn btn-dark" @onclick="() => AddAnswer(question)" disabled="@AnswersMaxCount(question)">Pridať odpoveď</button>
+                        <button type="submit" class="btn btn-success" @onclick="() => AddAnswer(question)" disabled="@AnswersMaxCount(question)">Pridať odpoveď</button>
+                        @if (question.Answers.Count < 2)
+                        { } else
+                        {
+                            <button type="submit" class="btn btn-danger" @onclick="() => DeleteAnswer(question)">Odstrániť odpoveď</button>
+                        }
                         @if (@AnswersMaxCount(question))
                         {
                             <label class="max-answers-color">Nie je možné pridať viac odpovedí</label>
@@ -133,7 +139,7 @@
     </div>
     <div class="buttons_group_quiz">        
         <button type="submit" form="QuizId" class="btn btn-primary">@(!OnceSubmit ? "Pridať kvíz" : "Update kvízu")</button>
-        <button type="submit" class="btn btn-dark" @onclick="AddQuestion">Pridať otázku</button>
+        <button type="submit" class="btn btn-success" @onclick="AddQuestion">Pridať otázku</button>
         <button type="reset" class="btn btn-danger" @onclick="ResetForm">Nový kvíz</button>
     </div>
 </div>
@@ -152,7 +158,6 @@
     private bool OnceSubmit = false;
     private int correctAnswersNumbers;
     #endregion Fields
-
 
     #region HelpMethods
     private bool SetDates()
@@ -221,7 +226,6 @@
     private async Task SubmitQuiz()
     {
         using var dbContext = DbFactory.CreateDbContext();
-
         if (!SetDates())
         {
             return;
@@ -236,21 +240,22 @@
         }
         if (!OnceSubmit)
         {
-            OnceSubmit = true;
-            newQuiz.User = await dbContext.Users.FindAsync(6);
-
-            dbContext.Kvizy.Add(newQuiz);
-            await dbContext.SaveChangesAsync();
+            //TODO 1.7 Prerobit usera, ktory je prihlaseny aby bol owner kvizu
             await SubmitQuestion();
+            newQuiz.User = await dbContext.Users.FindAsync(1);
+            dbContext.Kvizy.Add(newQuiz);
+            OnceSubmit = true;
+            await dbContext.SaveChangesAsync();
+
         } else
         {
+            await SubmitQuestion();
             dbContext.Kvizy.Update(newQuiz);
             await dbContext.SaveChangesAsync();
-            await SubmitQuestion();
-        }
-        await dbContext.SaveChangesAsync();
 
+        }
     }
+
     #endregion QuizMethods
 
     #region QuestionMethods
@@ -264,27 +269,24 @@
     private async Task SubmitQuestion()
     {
         using var dbContext = DbFactory.CreateDbContext();
-        for (int i = 0; i < questions.Count; i++)
+        try
         {
-            questions[i].Quiz = newQuiz;
-            if (!OnceSubmit)
+            foreach (var question in questions)
             {
-                for (int j = 0; j < questions[i].Answers.Count; j++)
-                {
-                    dbContext.Odpovede.Add(questions[i].Answers[j]);
-                }
-                dbContext.Otazky.Add(questions[i]);
-            } else
-            {
-                for (int j = 0; j < questions[i].Answers.Count; j++)
-                {
-                    dbContext.Odpovede.Update(questions[i].Answers[j]);
-                }
-                dbContext.Otazky.Update(questions[i]);
+                question.QuizRef = newQuiz;     
+                newQuiz.Questions.Add(question);           
             }
+
+        } catch (Exception ex)
+        {
+            throw;
         }
 
-        await dbContext.SaveChangesAsync();
+    }
+    private void DeleteQuestion(Question question)
+    {
+        question.Answers.Clear();
+        questions.Remove(question);
     }
 
     #endregion QuestionMethods
@@ -296,6 +298,18 @@
         tempAnswer.Order = question.Answers.Count + 1;
         question.Answers.Add(tempAnswer);
     }
+
+    private void DeleteAnswer(Question question)
+    {        
+        if (question.Answers.Count - 1 < 1)
+        {
+            return;
+        } else
+        {
+            question.Answers.RemoveAt(question.Answers.Count - 1);  
+        }
+    }
+
 
     #endregion AnswerMethods
 

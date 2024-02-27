@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FRI_Quiz_Bakalarska_Praca.Data.Model
 {
@@ -16,6 +17,8 @@ namespace FRI_Quiz_Bakalarska_Praca.Data.Model
         
         [Required]
         public bool Correct { get; set; }
-
+        
+        [Required]
+        public Question Question { get; set; }
     }
 }

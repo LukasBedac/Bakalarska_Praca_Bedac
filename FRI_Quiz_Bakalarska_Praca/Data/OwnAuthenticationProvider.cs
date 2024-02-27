@@ -27,6 +27,7 @@ namespace FRI_Quiz_Bakalarska_Praca.Data
                     new Claim(ClaimTypes.Email, email),
                     new Claim(ClaimTypes.Role, await GetUserRole(email)),
                     new Claim(ClaimTypes.Name, await GetUserName(email)),
+                    new Claim(ClaimTypes.NameIdentifier, await GetID(email)),
                 }, "apiauth_type") ;                
             } else
             {
@@ -44,6 +45,7 @@ namespace FRI_Quiz_Bakalarska_Praca.Data
                 new Claim(ClaimTypes.Email, email),
                 new Claim(ClaimTypes.Role, await GetUserRole(email)),
                 new Claim(ClaimTypes.Name, await GetUserName(email)),
+                new Claim(ClaimTypes.NameIdentifier, await GetID(email)),
             }, "apiauth_type");
             var user = new ClaimsPrincipal(identity);
             NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(user)));
@@ -80,6 +82,16 @@ namespace FRI_Quiz_Bakalarska_Praca.Data
                 return name == null ? "" : name;
             }
 
+            return "";
+        }
+        private async Task<string> GetID(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user != null)
+            {
+                var id = await _userManager.GetUserIdAsync(user);
+                return id;
+            }
             return "";
         }
     }

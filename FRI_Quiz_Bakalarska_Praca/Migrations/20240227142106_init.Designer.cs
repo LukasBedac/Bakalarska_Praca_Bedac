@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FRI_Quiz_Bakalarska_Praca.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240121012946_Init")]
-    partial class Init
+    [Migration("20240227142106_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,16 +25,12 @@ namespace FRI_Quiz_Bakalarska_Praca.Migrations
             modelBuilder.Entity("FRI_Quiz_Bakalarska_Praca.Data.Model.Answer", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
                     b.Property<bool>("Correct")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<int>("Order")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("QuestionId")
                         .HasColumnType("int");
 
                     b.Property<string>("Text")
@@ -44,21 +40,15 @@ namespace FRI_Quiz_Bakalarska_Praca.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("QuestionId");
-
                     b.ToTable("Odpovede");
                 });
 
             modelBuilder.Entity("FRI_Quiz_Bakalarska_Praca.Data.Model.Question", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
                     b.Property<int>("Order")
-                        .HasColumnType("int");
-
-                    b.Property<int>("QuizId")
                         .HasColumnType("int");
 
                     b.Property<string>("Text")
@@ -66,8 +56,6 @@ namespace FRI_Quiz_Bakalarska_Praca.Migrations
                         .HasColumnType("longtext");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("QuizId");
 
                     b.ToTable("Otazky");
                 });
@@ -306,20 +294,24 @@ namespace FRI_Quiz_Bakalarska_Praca.Migrations
 
             modelBuilder.Entity("FRI_Quiz_Bakalarska_Praca.Data.Model.Answer", b =>
                 {
-                    b.HasOne("FRI_Quiz_Bakalarska_Praca.Data.Model.Question", null)
+                    b.HasOne("FRI_Quiz_Bakalarska_Praca.Data.Model.Question", "Question")
                         .WithMany("Answers")
-                        .HasForeignKey("QuestionId");
+                        .HasForeignKey("Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Question");
                 });
 
             modelBuilder.Entity("FRI_Quiz_Bakalarska_Praca.Data.Model.Question", b =>
                 {
-                    b.HasOne("FRI_Quiz_Bakalarska_Praca.Data.Model.Quiz", "Quiz")
+                    b.HasOne("FRI_Quiz_Bakalarska_Praca.Data.Model.Quiz", "QuizRef")
                         .WithMany("Questions")
-                        .HasForeignKey("QuizId")
+                        .HasForeignKey("Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Quiz");
+                    b.Navigation("QuizRef");
                 });
 
             modelBuilder.Entity("FRI_Quiz_Bakalarska_Praca.Data.Model.Quiz", b =>

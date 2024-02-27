@@ -21,7 +21,7 @@ namespace FRI_Quiz_Bakalarska_Praca.Data.Model
         public string? QuizName { get; set; }
 
         [Required]
-        public List<Question> Questions { get; set; } = new List<Question>();
+        public virtual List<Question> Questions { get; set; } = new List<Question>();
 
         [Required]
         public DateTime? DateFrom { get; set; }
@@ -39,6 +39,7 @@ namespace FRI_Quiz_Bakalarska_Praca.Data.Model
 
         [NotMapped]
         public virtual int QuestionCount => Questions?.Count ?? 0;
+
     }
 
     

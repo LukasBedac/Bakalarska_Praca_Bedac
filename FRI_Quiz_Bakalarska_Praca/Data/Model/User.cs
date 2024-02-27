@@ -7,6 +7,4 @@ namespace FRI_Quiz_Bakalarska_Praca.Data.Model
     {
         
     }
-
-
 }

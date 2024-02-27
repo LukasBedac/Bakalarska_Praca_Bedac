@@ -21,7 +21,7 @@
          <DataGridDateColumn Field="@nameof(Quiz.DateFrom)" Caption="Začiatok" />
          <DataGridDateColumn Field="@nameof(Quiz.DateTo)" Caption="Koniec" />
          <DataGridColumn Field="@nameof(Quiz.Type)" Caption="Typ" />
-         <!--<DataGridNumericColumn Field="@nameof(Quiz.QuestionCount)" Caption="Počet otázok" />-->
+         <DataGridNumericColumn Field="@nameof(Quiz.QuestionCount)" Caption="Počet otázok" />
     </DataGridColumns>
     <ButtonRowTemplate>
         <Button Color="Color.Primary" Disabled="(selectedQuiz is null)" Clicked="context.EditCommand.Clicked">Edit</Button>
@@ -29,7 +29,7 @@
     </ButtonRowTemplate>
 </DataGrid>
  @code {
-
+     //TODO 1.6 Ak sa bude dat ,pocet otazok v kvize - asi chyba v DB ze nie su priradene, treba dotiahnut grid do lepsie citatlnej podoby
     public Quiz? Quiz { get; set; }
     private List<Quiz> quizzes = new List<Quiz>();
     private Quiz selectedQuiz = new Quiz();
@@ -37,7 +37,10 @@
     protected override async Task OnInitializedAsync()
     {
         using var dbContext = DbFactory.CreateDbContext();
-        quizzes = await dbContext.Kvizy.ToListAsync();
+        quizzes = await dbContext.Kvizy
+        .Include(Kvizy => Kvizy.Questions)
+        .ThenInclude(Otazky => Otazky.Answers)
+        .ToListAsync();
         await base.OnInitializedAsync();
     }
 }

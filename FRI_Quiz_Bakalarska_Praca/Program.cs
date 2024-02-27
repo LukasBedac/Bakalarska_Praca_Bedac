@@ -65,7 +65,7 @@ Configure(builder.Services);
 var app = builder.Build();
 
 void Configure(IServiceCollection services)
-{
+{   
     services.AddScoped<UserManager<User>>();
     services.AddScoped<SignInManager<User>>();
     services.AddScoped<AuthenticationStateProvider, OwnAuthenticationProvider>();
