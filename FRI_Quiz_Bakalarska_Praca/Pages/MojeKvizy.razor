@@ -114,7 +114,7 @@
 
 
 @code {
-    //TODO 1.3 Dokoncit zobrazenie kvizov, accordion nefunguje, nacitanie kvizov neobsahuje otazky - treba pozriet DB
+    //TODO 2.2 - Zobrazenie kvizov len nacitanych podla QR kodu - nutne dorobenie kvizov predtym   
     private bool collapseVisible = false;
 
     private List<Quiz> quizzes = new List<Quiz>();
@@ -124,9 +124,9 @@
     {
         using var dbContext = DbFactory.CreateDbContext();
 
-        quizzes = await dbContext.Kvizy
-        .Include(Kvizy => Kvizy.Questions)
-        .ThenInclude(Otazky => Otazky.Answers)
+        quizzes = await dbContext.Quizzes
+        .Include(Quiz => Quiz.Questions)
+        .ThenInclude(Question => Question.Answers)
         .ToListAsync();
         /*foreach (var quiz in quizzes)
         {

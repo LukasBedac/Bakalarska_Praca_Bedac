@@ -147,7 +147,7 @@
 @code {
     #region Fields 
     private Quiz newQuiz = new Quiz();
-    private List<Question> questions = new List<Question>() { new Question() };
+    private List<Question> questions = new List<Question>() { };
     private bool isLiveKviz = true;
     private IReadOnlyList<DateTime?> dates = new List<DateTime?>() { };
     private TimeSpan? timeFrom;
@@ -160,6 +160,11 @@
     #endregion Fields
 
     #region HelpMethods
+    //TODO 2.0 - Vytvorenie zgrupovania otazok pri livekvize - moznost nastavenia si otazok do groupy
+    //              ktore budu spolu a budu sa otvarat jednym QR kodom
+
+    //TODO 2.1 - Autocomplete na uzivatelov z uniza.sk domeny - doplnanie uzivatelov podla zadavaneho emailu 
+    //              Pravdepodone autocomplete staci aby ukazal meno, nie email - dohoda
     private bool SetDates()
     {
         if (dates.Count < 1 ||  dates[0] == null || timeFrom == null)
@@ -200,14 +205,15 @@
 
     protected override void OnInitialized()
     {
-        questions[0].Order = 1;
-        questions[0].Answers.Add(new Answer());
-        questions[0].Answers[0].Order = 1;
+        AddQuestion();
+        AddAnswer(questions[0]);
     }
     private void ResetForm()
     {
+
         newQuiz = new Quiz();
-        questions = new List<Question>() { new Question()};
+        questions = new List<Question>() { };
+        AddQuestion();
         dates = new List<DateTime?>();
         timeFrom = null;
         timeTo = null;
@@ -216,8 +222,7 @@
         OnceSubmit = false;
         correctAnswersNumbers = 0;
         questions[0].Order = 1;
-        questions[0].Answers.Add(new Answer());
-        questions[0].Answers[0].Order = 1;
+        AddAnswer(questions[0]);
     }
 
     #endregion HelpMethods
@@ -240,19 +245,24 @@
         }
         if (!OnceSubmit)
         {
+            /*Insert kviz to DB
+            SubmitQuestion metoda - z otazkok vytiahnut odpovede cez foreach a insert into DB
+            Priradit odpovede k otazkam, nasledne insert into DB
+            Update question v DB
+            Update kviz v DB
+            */
+
             //TODO 1.7 Prerobit usera, ktory je prihlaseny aby bol owner kvizu
             await SubmitQuestion();
             newQuiz.User = await dbContext.Users.FindAsync(1);
-            dbContext.Kvizy.Add(newQuiz);
+            await dbContext.Quizzes.AddAsync(newQuiz);
             OnceSubmit = true;
             await dbContext.SaveChangesAsync();
-
         } else
         {
             await SubmitQuestion();
-            dbContext.Kvizy.Update(newQuiz);
+            dbContext.Quizzes.Update(newQuiz);
             await dbContext.SaveChangesAsync();
-
         }
     }
 
@@ -261,8 +271,14 @@
     #region QuestionMethods
 
     private void AddQuestion() {
+        using var dbContext = DbFactory.CreateDbContext();
         Question tempQuestion = new Question();
+
         tempQuestion.Order = questions.Count + 1;
+        /*if (!dbContext.Otazky.Local.Any(a => a.Id == tempQuestion.Id))
+        {
+            dbContext.Otazky.Attach(tempQuestion);
+        }*/
         questions.Add(tempQuestion);
     }
 
@@ -272,11 +288,10 @@
         try
         {
             foreach (var question in questions)
-            {
-                question.QuizRef = newQuiz;     
+            {                   
+                question.QuizRef = newQuiz;
                 newQuiz.Questions.Add(question);           
             }
-
         } catch (Exception ex)
         {
             throw;
@@ -294,9 +309,17 @@
 
     private void AddAnswer(Question question)
     {
+        using var dbContext = DbFactory.CreateDbContext();
         Answer tempAnswer = new Answer();
+        tempAnswer.Question = question;
         tempAnswer.Order = question.Answers.Count + 1;
+        
+        /*if (!dbContext.Odpovede.Local.Any(a => a.Id == tempAnswer.Id))
+        {
+            dbContext.Odpovede.Attach(tempAnswer);
+        }*/
         question.Answers.Add(tempAnswer);
+        
     }
 
     private void DeleteAnswer(Question question)
@@ -309,7 +332,6 @@
             question.Answers.RemoveAt(question.Answers.Count - 1);  
         }
     }
-
 
     #endregion AnswerMethods
 

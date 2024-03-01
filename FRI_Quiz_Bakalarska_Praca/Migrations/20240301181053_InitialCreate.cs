@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace FRI_Quiz_Bakalarska_Praca.Migrations
 {
     /// <inheritdoc />
-    public partial class init : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -55,6 +55,24 @@ namespace FRI_Quiz_Bakalarska_Praca.Migrations
                         principalTable: "AspNetRoles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "Answers",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Text = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Order = table.Column<int>(type: "int", nullable: false),
+                    Correct = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    QuestionId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Answers", x => x.Id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -174,7 +192,7 @@ namespace FRI_Quiz_Bakalarska_Praca.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "Kvizy",
+                name: "Quizzes",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -184,15 +202,13 @@ namespace FRI_Quiz_Bakalarska_Praca.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     DateFrom = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     DateTo = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    Description = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
                     UserId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Kvizy", x => x.Id);
+                    table.PrimaryKey("PK_Quizzes", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Kvizy_AspNetUsers_UserId",
+                        name: "FK_Quizzes_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
@@ -201,47 +217,32 @@ namespace FRI_Quiz_Bakalarska_Praca.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "Otazky",
+                name: "Questions",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     Text = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Order = table.Column<int>(type: "int", nullable: false)
+                    Order = table.Column<int>(type: "int", nullable: false),
+                    QuizRefId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Otazky", x => x.Id);
+                    table.PrimaryKey("PK_Questions", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Otazky_Kvizy_Id",
-                        column: x => x.Id,
-                        principalTable: "Kvizy",
+                        name: "FK_Questions_Quizzes_QuizRefId",
+                        column: x => x.QuizRefId,
+                        principalTable: "Quizzes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
-            migrationBuilder.CreateTable(
-                name: "Odpovede",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false),
-                    Text = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Order = table.Column<int>(type: "int", nullable: false),
-                    Correct = table.Column<bool>(type: "tinyint(1)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Odpovede", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Odpovede_Otazky_Id",
-                        column: x => x.Id,
-                        principalTable: "Otazky",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
+            migrationBuilder.CreateIndex(
+                name: "IX_Answers_QuestionId",
+                table: "Answers",
+                column: "QuestionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -286,9 +287,22 @@ namespace FRI_Quiz_Bakalarska_Praca.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Kvizy_UserId",
-                table: "Kvizy",
+                name: "IX_Questions_QuizRefId",
+                table: "Questions",
+                column: "QuizRefId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Quizzes_UserId",
+                table: "Quizzes",
                 column: "UserId");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Answers_Questions_QuestionId",
+                table: "Answers",
+                column: "QuestionId",
+                principalTable: "Questions",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_AspNetUserClaims_AspNetUsers_UserId",
@@ -315,10 +329,10 @@ namespace FRI_Quiz_Bakalarska_Praca.Migrations
                 onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.AddForeignKey(
-                name: "FK_AspNetUsers_Kvizy_QuizId",
+                name: "FK_AspNetUsers_Quizzes_QuizId",
                 table: "AspNetUsers",
                 column: "QuizId",
-                principalTable: "Kvizy",
+                principalTable: "Quizzes",
                 principalColumn: "Id");
         }
 
@@ -326,8 +340,11 @@ namespace FRI_Quiz_Bakalarska_Praca.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_Kvizy_AspNetUsers_UserId",
-                table: "Kvizy");
+                name: "FK_Quizzes_AspNetUsers_UserId",
+                table: "Quizzes");
+
+            migrationBuilder.DropTable(
+                name: "Answers");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
@@ -345,19 +362,16 @@ namespace FRI_Quiz_Bakalarska_Praca.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Odpovede");
+                name: "Questions");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "Otazky");
-
-            migrationBuilder.DropTable(
                 name: "AspNetUsers");
 
             migrationBuilder.DropTable(
-                name: "Kvizy");
+                name: "Quizzes");
         }
     }
 }

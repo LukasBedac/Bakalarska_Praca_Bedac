@@ -18,7 +18,7 @@ namespace FRI_Quiz_Bakalarska_Praca.Data.Model
 
         [Required]
         [MaxLength(50)]
-        public string? QuizName { get; set; }
+        public string QuizName { get; set; } = string.Empty;
 
         [Required]
         public virtual List<Question> Questions { get; set; } = new List<Question>();
@@ -29,9 +29,6 @@ namespace FRI_Quiz_Bakalarska_Praca.Data.Model
         [Required]
         public DateTime? DateTo { get; set; }
        
-        [Required]
-        public string? Description { get; set; } = " ";
-        
         [Required]
         public User User { get; set; }
 

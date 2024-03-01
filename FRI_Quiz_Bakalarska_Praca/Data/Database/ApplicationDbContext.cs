@@ -24,9 +24,9 @@ namespace FRI_Quiz_Bakalarska_Praca.Data.Database
             
         }
 
-        public DbSet<Answer> Odpovede { get; set; }
-        public DbSet<Question> Otazky { get; set; }
-        public DbSet<Quiz> Kvizy { get; set; }
+        public DbSet<Answer> Answers { get; set; }
+        public DbSet<Question> Questions { get; set; }
+        public DbSet<Quiz> Quizzes { get; set; }
         
         
         /*protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
