@@ -19,7 +19,6 @@ namespace FRI_Quiz_Bakalarska_Praca.Data.Model
         [Required]
         public int Order { get; set; }
 
-        //TODO 1.9 Skusit to zmenit na Quiz.Id
         [Required]
         public virtual Quiz QuizRef { get; set; }
     }

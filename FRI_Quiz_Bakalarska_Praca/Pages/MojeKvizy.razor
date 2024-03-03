@@ -4,29 +4,7 @@
 @using Microsoft.EntityFrameworkCore
 @inject IDbContextFactory<ApplicationDbContext> DbFactory
 <AuthorizeView>
-    <Authorized>
-        <!--<Table>
-            <TableHeader>
-                <TableHeaderCell>Quiz</TableHeaderCell>
-                <TableHeaderCell>Otazky</TableHeaderCell>
-            </TableHeader>
-            <TableBody>
-                @foreach (var quiz in quizzes)
-                {
-                    <TableRowCell>@quiz.QuizName</TableRowCell>
-                    @foreach (var question in quiz.Questions)
-                    {
-                        <TableRowCell>@question.Text</TableRowCell>
-                        @foreach (var answer in question.Answers)
-                        {
-                            <TableRowCell>@answer.Text</TableRowCell>
-                        }
-                    }
-                }
-                
-            </TableBody>
-        </Table>-->
-
+    <Authorized>     
         <Accordion>
             @foreach (var quiz in quizzes)
             {
@@ -34,14 +12,14 @@
                     <CollapseHeader>
                         <Heading Size="HeadingSize.Is5">
                             <AccordionToggle Width="Width.Is25">@quiz.QuizName</AccordionToggle>
-                            <AccordionToggle Class="disabled"> Pocet bodov: </AccordionToggle>
+                            <AccordionToggle Class="disabled"> Pocet bodov: 0/@GetNumberOfMaxPoints()</AccordionToggle>
                         </Heading>
                         </CollapseHeader>
                         <CollapseBody Height="Height.Is25" Background="Background.Default">
                             @foreach (var question in quiz.Questions)
                             {
                                 <div>
-                                    <header>Otazka - @question.Text</header>
+                                    <header>@question.Text</header>
                                 </div>
                                 <CollapseBody> 
                                     @foreach (var answer in question.Answers)
@@ -70,55 +48,18 @@
         <Heading>
             Na zobrazenie vám priradených kvízov sa prosím prihláste.
             <br />
-            <a href="/login">Prihlásiť sa</a>
+            <div>
+                <a class="oi oi-account-login" href="/login"> Prihlásiť sa</a>
+            </div>
         </Heading>
     </NotAuthorized>
 </AuthorizeView>
-    <!--
-    <Collapse Visible="@collapse2Visible">
-        <CollapseHeader>
-            <Heading Size="HeadingSize.Is5">
-                <AccordionToggle>Kviz 2</AccordionToggle>
-                <AccordionToggle Class="disabled"> Pocet bodov: 0/1</AccordionToggle>
-            </Heading>
-        </CollapseHeader>
-        <CollapseBody>
-            Otazka 1: What fictional place would you most like to go to?
-        </CollapseBody>
-    </Collapse>
-    <Collapse Visible="@collapse3Visible">
-        <CollapseHeader>
-            <Heading Size="HeadingSize.Is5">
-                <AccordionToggle>VAII kviz prednaska 4</AccordionToggle>
-                <AccordionToggle Class="disabled"> Pocet bodov: 2/3</AccordionToggle>
-            </Heading>
-        </CollapseHeader>
-        <CollapseBody>
-            1: Naco pouzivame HTML?
-            
-            
-        </CollapseBody>
-        
-        <CollapseBody>
-            
-            2: Naco pozuivame CSS?
-
-        </CollapseBody>
-        <CollapseBody>
-
-            3: kafanhfouqbfoqnbfiphqwevfouqbdno;qfb vjwkvdilqbk.
-
-        </CollapseBody>
-    </Collapse>
-    -->
 
 
 @code {
     //TODO 2.2 - Zobrazenie kvizov len nacitanych podla QR kodu - nutne dorobenie kvizov predtym   
     private bool collapseVisible = false;
-
     private List<Quiz> quizzes = new List<Quiz>();
-    private bool checkbox;
 
     protected override async Task OnInitializedAsync()
     {
@@ -128,15 +69,15 @@
         .Include(Quiz => Quiz.Questions)
         .ThenInclude(Question => Question.Answers)
         .ToListAsync();
-        /*foreach (var quiz in quizzes)
-        {
-            List<Question> questions = new List<Question>();
-            questions.Add(await dbContext.Otazky.FindAsync(quiz.Id));
-            foreach (var question in questions)
-            {
-                question.Answers.Add(dbContext.Odpovede.Find(question.Id));    
-            } 
-        }*/
         await base.OnInitializedAsync();
+    }
+    private int GetNumberOfMaxPoints()
+    {
+        int points = 0;
+        foreach (var quiz in quizzes)
+        {
+            points += quiz.QuestionCount;            
+        }
+        return points;
     }
 }

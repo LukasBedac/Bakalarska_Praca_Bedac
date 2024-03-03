@@ -2,35 +2,34 @@
 
 <PageTitle>Profil</PageTitle>
 
-@if (loginName != null)
-{
-    <div class="ms-3">
-        <label>Meno: @loginName</label>
+<AuthorizeView>
+    <Authorized>
+        <div class="ms-3">
+            <label>Meno:</label>
         
-    </div>
-    <div class="ms-3">
-        <label>Email: @loginName@@stud.uniza.sk</label>
-    </div>
-    <div class="ms-3">
-        <label id="password">Heslo</label>
-        <span data-hidden-value="54372.23">
-            <span class="display">********</span>
-        </span>
-        <!--<input for="password" type="password" />-->
-        <button type="submit" class="btn btn-primary" @onclick="PasswordChange" >Zmenit heslo</button>
-    </div>
-    
-}
-else
-{
+        </div>
+        <div class="ms-3">
+            <label>Email:</label>
+        </div>
+        <div class="ms-3">
+            <label id="password">Heslo</label>
+            <span data-hidden-value="54372.23">
+                <span class="display">********</span>
+            </span>
+            <!--<input for="password" type="password" />-->
+            <button type="submit" class="btn btn-primary" @onclick="PasswordChange" >Zmenit heslo</button>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+
+
     <div class="ms-1">Aktualne ste odhlaseny, ak chete sa prihlaste
         <a href="MicrosoftIdentity/Account/SignIn">tu</a>
     </div>
-}
-
+    </NotAuthorized>
+</AuthorizeView>
 @code {
     //TODO 1.4 Prerobit na jemne nastavenia, napr. zmena hesla a mena v kvizoch, vymazanie uctu
-    private string? loginName;
     private bool passwordChange;
     public void PasswordChange()
     {
