@@ -5,7 +5,10 @@
 @inject IDbContextFactory<ApplicationDbContext> DbFactory
 <AuthorizeView>
     <Authorized>     
-        <Accordion>
+        <Div Class="list-quiz-active">
+            <Heading>Vaše aktívne kvízy</Heading>
+        </Div>
+        <Accordion Height="Height.Is50">
             @foreach (var quiz in quizzes)
             {
                 <Collapse Visible="@collapseVisible">
@@ -14,42 +17,54 @@
                             <AccordionToggle Width="Width.Is25">@quiz.QuizName</AccordionToggle>
                             <AccordionToggle Class="disabled"> Pocet bodov: 0/@GetNumberOfMaxPoints()</AccordionToggle>
                         </Heading>
-                        </CollapseHeader>
-                        <CollapseBody Height="Height.Is25" Background="Background.Default">
-                            @foreach (var question in quiz.Questions)
-                            {
-                                <div>
-                                    <header>@question.Text</header>
-                                </div>
-                                <CollapseBody> 
-                                    @foreach (var answer in question.Answers)
-                                    {
-                                         <div class="question-box">
-                                            <div class="question-order">
-                                            <div class="paddng-between-answer"># @answer.Order</div>
-                                                <div>@answer.Text</div>
-                                            </div>
-                                            <div>
-                                                <input type="checkbox">
-                                            </div>
+                    </CollapseHeader>
+                    <CollapseBody Height="Height.Is25" Background="Background.Default">
+                        @foreach (var question in quiz.Questions)
+                        {
+                            <div>
+                                <header>@question.Text</header>
+                            </div>
+                            <CollapseBody> 
+                                @foreach (var answer in question.Answers)
+                                {
+                                        <div class="question-box">
+                                        <div class="question-order">
+                                        <div class="paddng-between-answer"># @answer.Order</div>
+                                            <div>@answer.Text</div>
                                         </div>
-                                        <br />
-                                    }
-                                    
-                                </CollapseBody>
-                            }
-                        </CollapseBody>             
+                                        <div>
+                                            <input type="checkbox">
+                                        </div>
+                                    </div>
+                                    <br />
+                                }
+                            </CollapseBody>
+                        }
+                    </CollapseBody>             
                 </Collapse>
             }
-    
+        </Accordion>
+        <Div Class="list-quiz-all">
+            <Heading>Zoznam kvízov</Heading>
+        </Div>
+        <Accordion >
+            @foreach (var quiz in quizzes)
+            {
+                <CollapseHeader>
+                    <Heading Size="HeadingSize.Is5">
+                        <AccordionToggle Width="Width.Is25">@quiz.QuizName</AccordionToggle>
+                    </Heading>
+                </CollapseHeader>
+            }
+ 
         </Accordion>
     </Authorized>
     <NotAuthorized>
-        <Heading>
+        <Heading TextAlignment="TextAlignment.Center">
             Na zobrazenie vám priradených kvízov sa prosím prihláste.
             <br />
             <div>
-                <a class="oi oi-account-login" href="/login"> Prihlásiť sa</a>
+                <a class="oi oi-account-login link-login" href="/login"> Prihlásiť sa</a>
             </div>
         </Heading>
     </NotAuthorized>

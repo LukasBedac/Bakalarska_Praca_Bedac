@@ -10,6 +10,8 @@ namespace FRI_Quiz_Bakalarska_Praca.Data.Model
         [Key]
         public int Id { get; set; }
 
+        //public Guid Hash { get; set; }
+
         [Required]
         public string? Text { get; set; } = " ";
 

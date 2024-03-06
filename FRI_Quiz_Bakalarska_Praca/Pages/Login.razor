@@ -128,8 +128,6 @@
     </Row>
    </Container>
 
-
-
 @code {
     //TODO 1.2 JWTokens prerobit, dotiahnut login cez FB a microsoft, treba doriesit viacero funkcii
     Validations? loginValidationsRef;
@@ -216,6 +214,7 @@
             await dbContext.SaveChangesAsync();
             await registerValidationsRef.ClearAll();
             password = "";
+            NavManager.NavigateTo("/");
 
         } else
         {

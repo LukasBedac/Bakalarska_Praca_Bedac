@@ -20,6 +20,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Components.Authorization;
 using FRI_Quiz_Bakalarska_Praca.Data;
 using Blazored.SessionStorage;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,6 +43,17 @@ builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
     .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
 builder.Services.AddControllersWithViews()
     .AddMicrosoftIdentityUI();
+//TODO 2.5 Login
+/*
+builder.Services.AddDefaultIdentity<User>(options => 
+    options.SignIn.RequireConfirmedAccount = false)
+    .AddRoles<IdentityRole<int>>()
+    .AddRoles<IdentityRole<int>>()
+    .AddUserManager<ApplicationDbContext>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddClaimsPrincipalFactory<Claim>()
+    .AddDefaultUI(); 
+*/
 /*builder.Services.AddAuthorization( 
 options => //Vypnutie autorizacie k microsoftu a ponechanie stareho kodu nizsie
 {

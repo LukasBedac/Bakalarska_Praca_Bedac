@@ -26,14 +26,15 @@
 }
 .rigt_side_quiz {
     display: inline-flex;
-    flex-direction: row;
-    flex-grow: 1;
+    flex-direction: column;
+    position: fixed;
     right: 0;
-    top: 0;
-    height: 100%;
+    flex-grow: 1;
     justify-content: right;
+    scroll-padding-top: 0.5rem;
+    padding-right: 0.5rem;
     min-width: 30%;
-    max-width: 35%;
+    max-width: 50%;
 }
 
 .nazov-label {
@@ -112,6 +113,11 @@
     width: 30%;
     justify-content:space-between;
 }
+.table-width {
+    min-width: 135%;
+    max-width: 40%;
+}
+
 @media (max-width: 640.98px) {
     .nastaveniaCasu {
         flex-direction: column;

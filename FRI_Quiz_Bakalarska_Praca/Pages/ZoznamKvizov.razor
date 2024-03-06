@@ -21,16 +21,19 @@
          <DataGridDateColumn Field="@nameof(Quiz.DateFrom)" Caption="Začiatok" />
          <DataGridDateColumn Field="@nameof(Quiz.DateTo)" Caption="Koniec" />
          <DataGridColumn Field="@nameof(Quiz.Type)" Caption="Typ" />
-         <DataGridNumericColumn Field="@nameof(Quiz.QuestionCount)" Caption="Počet otázok" />
+         <DataGridNumericColumn Field="@nameof(Quiz.QuestionCount)" Caption="Počet otázok" Filterable="false" />
+         <DataGridColumn Filterable="false">
+             
+         </DataGridColumn>
     </DataGridColumns>
     <ButtonRowTemplate>
-        <Button Color="Color.Primary" Disabled="(selectedQuiz is null)" Clicked="context.EditCommand.Clicked">Edit</Button>
+         <Button Color="Color.Primary" Disabled="(selectedQuiz is null)" Clicked="context.EditCommand.Clicked">Edit</Button>
          <Button Color="Color.Danger" Disabled="(selectedQuiz is null)" Clicked="context.DeleteCommand.Clicked">Delete</Button>
     </ButtonRowTemplate>
 </DataGrid>
  @code {
-     //TODO 2.3 - Dorobit edit, vymazanie - editcommand vlastny ktory presunie uzivatela na vytvor kviz stranku s potrebnymi parametrami daneho kvizu
-     //             Vymazanie - dorobit deletecommand na vymazanie aj z datavazy - nutne aj osetrenie pri zadavani (vyskakovacie okno/nejake druhe potvrdenie)
+    //TODO 2.3 - Dorobit edit, vymazanie - editcommand vlastny ktory presunie uzivatela na vytvor kviz stranku s potrebnymi parametrami daneho kvizu
+    //             Vymazanie - dorobit deletecommand na vymazanie aj z datavazy - nutne aj osetrenie pri zadavani (vyskakovacie okno/nejake druhe potvrdenie)
     public Quiz? Quiz { get; set; }
     private List<Quiz> quizzes = new List<Quiz>();
     private Quiz selectedQuiz = new Quiz();
@@ -44,5 +47,12 @@
         .ToListAsync();
         await base.OnInitializedAsync();
     }
+    //TODO 2.4 Podrstranka pre admina na edit livequizu na zobrazenie 
+    //Histogram na zobrazenie a update tlaciko na refresh
+
+    private void EditRow()
+    {
+        
+    } 
 }
 

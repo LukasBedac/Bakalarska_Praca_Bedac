@@ -16,3 +16,15 @@
 .paddng-between-answer {
     padding-right: 2rem;
 }
+.link-login {
+    text-decoration:none;
+}
+.list-quiz-all {
+    display: flex;
+    padding-top: 2rem;
+    margin-top: 2rem;
+}
+.list-quiz-active{
+    display: flex;
+    padding-bottom: 1rem;
+}

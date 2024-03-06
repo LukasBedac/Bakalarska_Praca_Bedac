@@ -1,5 +1,4 @@
 ﻿@page "/vytvorKviz"
-
 @using FRI_Quiz_Bakalarska_Praca.Data
 @using FRI_Quiz_Bakalarska_Praca.Data.Database
 @using FRI_Quiz_Bakalarska_Praca.Data.Model
@@ -79,6 +78,21 @@
         <Table Hoverable>
             <TableHeader>
                 <TableRow>
+                    <TableHeaderCell>Meno</TableHeaderCell>
+                </TableRow>
+            </TableHeader>
+            <TableBody>
+                @foreach (var user in newQuiz.Moderators)
+                {
+                    <TableRow>
+                        <TableRowCell>@user.UserName</TableRowCell>
+                    </TableRow>
+                }
+            </TableBody>
+        </Table>
+        <Table Hoverable FixedHeader>
+            <TableHeader>
+                <TableRow>
                     <TableHeaderCell>Otazka</TableHeaderCell>
                     <TableHeaderCell>Nazov</TableHeaderCell>
                     <TableHeaderCell></TableHeaderCell>
@@ -88,13 +102,14 @@
                 @foreach (var question in questions)
                 {
                 <TableRow>
-                    <TableRowHeader>@question.Order</TableRowHeader>
+                    <TableRowHeader>#@question.Order</TableRowHeader>
                     <TableRowCell>@(question.Text.Length > 20 ? question.Text.Substring(0, 20) + "..." : question.Text)</TableRowCell>
                     <TableRowCell><Button Class="btn-secondary">Edit</Button></TableRowCell>
                 </TableRow>
                 }        
             </TableBody>
         </Table>
+       
     </div>
     <div class="left-side-quiz">
         <EditForm id="QuestionForm" Model="@questions" OnInvalidSubmit="SubmitQuestion">
@@ -150,13 +165,14 @@
     private List<Question> questions = new List<Question>() { };
     private bool isLiveKviz = true;
     private IReadOnlyList<DateTime?> dates = new List<DateTime?>() { };
-    private TimeSpan? timeFrom;
-    private TimeSpan? timeTo;
+    private TimeSpan? timeFrom = TimeSpan.Zero;
+    private TimeSpan? timeTo = TimeSpan.Zero;
     private DatePicker<DateTime?>? datePicker;
     private TimeEdit<TimeSpan?>? timePicker;
     private Validations? quizValidation;
     private bool OnceSubmit = false;
-    private int correctAnswersNumbers;
+    //[Parameter]
+    //public Quiz ActualQuiz { get; set; }
     #endregion Fields
 
     #region HelpMethods
@@ -210,7 +226,6 @@
     }
     private void ResetForm()
     {
-
         newQuiz = new Quiz();
         questions = new List<Question>() { };
         AddQuestion();
@@ -220,7 +235,20 @@
         datePicker = null;
         timePicker = null;
         OnceSubmit = false;
-        correctAnswersNumbers = 0;
+        questions[0].Order = 1;
+        AddAnswer(questions[0]);
+    }
+    private void EditQuizFromAnotherPage()
+    {
+        //newQuiz = ActualQuiz;
+        questions = new List<Question>() { };
+        //questions.AddRange(ActualQuiz.Questions);
+        dates = new List<DateTime?>() { };
+        timeFrom = null;
+        timeTo = null;
+        datePicker = null;
+        timePicker = null;
+        OnceSubmit = false;
         questions[0].Order = 1;
         AddAnswer(questions[0]);
     }
@@ -245,12 +273,6 @@
         }
         if (!OnceSubmit)
         {
-            /*Insert kviz to DB
-            SubmitQuestion metoda - z otazkok vytiahnut odpovede cez foreach a insert into DB
-            Priradit odpovede k otazkam, nasledne insert into DB
-            Update question v DB
-            Update kviz v DB
-            */
 
             //TODO 1.7 Prerobit usera, ktory je prihlaseny aby bol owner kvizu
             await SubmitQuestion();
@@ -285,18 +307,13 @@
     private async Task SubmitQuestion()
     {
         using var dbContext = DbFactory.CreateDbContext();
-        try
         {
             foreach (var question in questions)
             {                   
                 question.QuizRef = newQuiz;
                 newQuiz.Questions.Add(question);           
             }
-        } catch (Exception ex)
-        {
-            throw;
-        }
-
+        } 
     }
     private void DeleteQuestion(Question question)
     {

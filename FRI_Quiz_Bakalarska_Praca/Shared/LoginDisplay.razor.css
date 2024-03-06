@@ -1,4 +1,6 @@
 ﻿body {
+    display: flex;
+    position: absolute;
 }
 .userName {
     color: cornflowerblue;

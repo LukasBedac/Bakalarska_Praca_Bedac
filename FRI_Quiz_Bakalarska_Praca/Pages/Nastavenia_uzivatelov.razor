@@ -1,0 +1,67 @@
+﻿@page "/nastaveniaUzivatelov"
+@using FRI_Quiz_Bakalarska_Praca.Data.Database
+@using FRI_Quiz_Bakalarska_Praca.Data.Model
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
+<h3>Nastavenia uživateľov</h3>
+<Table Hoverable>
+    <TableHeader>
+        <TableRow>
+            <TableHeaderCell>#</TableHeaderCell>
+            <TableHeaderCell>Meno</TableHeaderCell>
+            <TableHeaderCell>Email</TableHeaderCell>
+            <TableHeaderCell>Rola</TableHeaderCell>
+            <TableHeaderCell TextAlignment="TextAlignment.Center">Editácia</TableHeaderCell>
+            
+        </TableRow>
+    </TableHeader>
+    <TableBody>
+        @foreach (var user in users)
+        {
+            <TableRow>
+                <TableRowHeader>@user.Id</TableRowHeader>
+                <TableRowCell>@user.UserName</TableRowCell>
+                <TableRowCell>@user.Email</TableRowCell>
+                <TableRowCell>null</TableRowCell>
+                    <TableRowCell TextAlignment="TextAlignment.Center">
+                        <Button Type="ButtonType.Button" Color="Color.Success">Zmeň rolu</Button>
+                        <Button Type="ButtonType.Button" Color="Color.Danger" Clicked="() => DeleteUser(user)">Odstrániť uživateľa</Button>
+                    </TableRowCell>
+                <TableRowCell></TableRowCell>
+            </TableRow>
+        }
+    </TableBody>
+</Table>
+
+
+ 
+@code {
+    private List<User> users = new List<User>();
+    private List<IdentityUserRole<int>> roles = new List<IdentityUserRole<int>>();
+    private User selectedUser;
+
+    protected override Task OnInitializedAsync()
+    {
+        return LoadUsers();
+    }
+
+    private async Task LoadUsers()
+    {
+        using var DbContext = DbFactory.CreateDbContext();
+        users = await DbContext.Users.ToListAsync();
+
+    }
+
+    private async Task DeleteUser(User user)
+    {
+        /*using var DbContext = DbFactory.CreateDbContext();
+        DbContext.Users.Remove(user);
+        await DbContext.SaveChangesAsync(); */
+    }
+    //TODO 2.6 Vyvtorit filter na mena
+    private void Filter()
+    {
+        
+    }
+}
