@@ -1,0 +1,17 @@
+﻿@page "/QRCodeGen"
+@using FRI_Quiz_Bakalarska_Praca.Data.Model
+
+<h3>QRCode generator</h3>
+@foreach (var question in questions) {
+    <div>
+        <Blazorise.QRCode.QRCode Value="">#@question.Id</Blazorise.QRCode.QRCode>
+        <br />
+    </div>
+}
+
+
+
+@code {
+    private List<Question> questions = new List<Question>();
+
+}
