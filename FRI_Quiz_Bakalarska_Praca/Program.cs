@@ -36,24 +36,55 @@ builder.Services.AddDbContextFactory<ApplicationDbContext>(options => options.Us
         .EnableSensitiveDataLogging()
         .EnableDetailedErrors());
 //--------------End Db Context Dp Injection---------------//
-builder.Services.AddIdentity<User, IdentityRole<int>>()
+/*builder.Services.AddIdentity<User, IdentityRole<int>>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
     .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
-builder.Services.AddControllersWithViews()
-    .AddMicrosoftIdentityUI();
+*/
+//builder.Services.AddControllersWithViews()
+//    .AddMicrosoftIdentityUI();
 //TODO 2.5 Login
-/*
+
 builder.Services.AddDefaultIdentity<User>(options => 
     options.SignIn.RequireConfirmedAccount = false)
     .AddRoles<IdentityRole<int>>()
-    .AddRoles<IdentityRole<int>>()
-    .AddUserManager<ApplicationDbContext>()
+//    .AddUserManager<IdentityUser>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddClaimsPrincipalFactory<Claim>()
-    .AddDefaultUI(); 
-*/
+//    .AddClaimsPrincipalFactory<Claim>()
+    .AddDefaultUI();
+builder.Services.AddRazorPages();
+builder.Services.Configure<IdentityOptions>(options =>
+{
+    // Password settings.
+    options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireNonAlphanumeric = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequiredLength = 8;
+    options.Password.RequiredUniqueChars = 0;
+
+    // Lockout settings.
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+    options.Lockout.MaxFailedAccessAttempts = 5;
+    options.Lockout.AllowedForNewUsers = true;
+
+    // User settings.
+    options.User.AllowedUserNameCharacters =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+    options.User.RequireUniqueEmail = false;
+});
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    // Cookie settings
+    options.Cookie.HttpOnly = true;
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
+
+    options.LoginPath = "/Identity/Account/Login";
+    options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+    options.SlidingExpiration = true;
+});
 /*builder.Services.AddAuthorization( 
 options => //Vypnutie autorizacie k microsoftu a ponechanie stareho kodu nizsie
 {
@@ -69,13 +100,13 @@ builder.Services
     .AddBootstrapProviders()
     .AddFontAwesomeIcons();
 builder.Services.AddBlazoredSessionStorage();
-builder.Services.AddRazorPages();
+
 builder.Services.AddServerSideBlazor()
     .AddMicrosoftIdentityConsentHandler();
-Configure(builder.Services);
+//Configure(builder.Services);
 var app = builder.Build();
 
-void Configure(IServiceCollection services)
+/*void Configure(IServiceCollection services)
 {   
     services.AddScoped<UserManager<User>>();
     services.AddScoped<SignInManager<User>>();
@@ -94,7 +125,7 @@ void Configure(IServiceCollection services)
             roleManager.CreateAsync(new IdentityRole<int>("User")).Wait();
         }
     }
-}
+}*/
 
 
 // Configure the HTTP request pipeline.

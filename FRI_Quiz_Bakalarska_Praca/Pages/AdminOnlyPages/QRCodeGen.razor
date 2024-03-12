@@ -1,6 +1,6 @@
 ﻿@page "/QRCodeGen"
 @using FRI_Quiz_Bakalarska_Praca.Data.Model
-
+@inject NavigationManager NavManager
 <h3>QRCode generator</h3>
 @foreach (var question in questions) {
     <div>
@@ -10,8 +10,13 @@
 }
 
 
-
 @code {
     private List<Question> questions = new List<Question>();
+    private NavigationManager navigationManager;
+    private void NavigateTo()
+    {
+        //TODO 3.0 nenechat to tu
+        navigationManager.NavigateTo("/yourmum");
+    }
 
 }
