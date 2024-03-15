@@ -1,40 +1,39 @@
 ﻿@page "/profil"
+@using FRI_Quiz_Bakalarska_Praca.Data.Database
+@using Microsoft.EntityFrameworkCore
 @inject AuthenticationStateProvider AuthProvider
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
 
 <PageTitle>Profil</PageTitle>
 
 <AuthorizeView>
     <Authorized>
-        <div class="ms-3">
-            <label>Meno:</label>
-        
+
+        <div class="form-floating mb-3">
+            <label class="form-label">Email: @context.User.Identity.Name</label>
+            
         </div>
-        <div class="ms-3">
-            <label>Email:</label>
-        </div>
-        <div class="ms-3">
-            <label id="password">Heslo</label>
-            <span data-hidden-value="54372.23">
-                <span class="display">********</span>
-            </span>
-            <!--<input for="password" type="password" />-->
-            <button type="submit" class="btn btn-primary" @onclick="PasswordChange" >Zmenit heslo</button>
-        </div>
+        <div class="form-floating mb-3">
+            <label class="form-label">Meno: </label>
+            <input type="text" class="form-control" placeholder="Tu si môžete zmeniť meno" />
+        </div>        
+        <button type="submit" class="btn btn-primary" >Zmenit heslo</button>        
     </Authorized>
     <NotAuthorized>
-
-
     <div class="ms-1">Aktualne ste odhlaseny, ak chete sa prihlaste
-        <a href="MicrosoftIdentity/Account/SignIn">tu</a>
+        <a href="Areas/identity/Pages/Account/Login">tu</a>
     </div>
     </NotAuthorized>
 </AuthorizeView>
 @code {
-    //TODO 1.4 Prerobit na jemne nastavenia, napr. zmena hesla a mena v kvizoch, vymazanie uctu
+    //TODO 2.0 Dorobit nastavenia
     private bool passwordChange;
-    public void PasswordChange()
+    private string name = string.Empty;
+
+    private string getMeno()
     {
-        passwordChange = !passwordChange;
+        using var dbContext = DbFactory.CreateDbContext();
+        return " ";
     }
 
 }

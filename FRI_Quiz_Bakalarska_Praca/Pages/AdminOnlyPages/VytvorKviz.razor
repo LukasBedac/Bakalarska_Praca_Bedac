@@ -161,7 +161,7 @@
 
 @code {
     #region Fields 
-    private Quiz newQuiz = new Quiz();
+    private Quiz newQuiz;
     private List<Question> questions = new List<Question>() { };
     private bool isLiveKviz = true;
     private IReadOnlyList<DateTime?> dates = new List<DateTime?>() { };
@@ -171,13 +171,13 @@
     private TimeEdit<TimeSpan?>? timePicker;
     private Validations? quizValidation;
     private bool OnceSubmit = false;
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
     //[Parameter]
     //public Quiz ActualQuiz { get; set; }
     #endregion Fields
 
     #region HelpMethods
-    //TODO 2.0 - Vytvorenie zgrupovania otazok pri livekvize - moznost nastavenia si otazok do groupy
-    //              ktore budu spolu a budu sa otvarat jednym QR kodom
 
     //TODO 2.1 - Autocomplete na uzivatelov z uniza.sk domeny - doplnanie uzivatelov podla zadavaneho emailu 
     //              Pravdepodone autocomplete staci aby ukazal meno, nie email - dohoda
@@ -219,8 +219,24 @@
         isLiveKviz = !isLiveKviz;
     }
 
-    protected override void OnInitialized()
+    protected async override Task OnInitializedAsync()
     {
+        newQuiz = new Quiz();
+        if (authenticationState is not null)
+        {
+            using var dbContext = DbFactory.CreateDbContext();
+            var state = await authenticationState;
+            var user = state.User;
+            var users = await dbContext.Users.ToListAsync();
+            foreach (var userFromDb in users)
+            {
+                if (userFromDb.Email.Equals(user.Identity.Name))
+                {
+                    newQuiz.User = userFromDb;
+                }
+            }
+
+        }
         AddQuestion();
         AddAnswer(questions[0]);
     }
@@ -274,15 +290,13 @@
         if (!OnceSubmit)
         {
 
-            //TODO 1.7 Prerobit usera, ktory je prihlaseny aby bol owner kvizu
-            await SubmitQuestion();
-            newQuiz.User = await dbContext.Users.FindAsync(1);
+            SubmitQuestion();                       
             await dbContext.Quizzes.AddAsync(newQuiz);
             OnceSubmit = true;
             await dbContext.SaveChangesAsync();
         } else
         {
-            await SubmitQuestion();
+            SubmitQuestion();
             dbContext.Quizzes.Update(newQuiz);
             await dbContext.SaveChangesAsync();
         }
@@ -297,14 +311,10 @@
         Question tempQuestion = new Question();
 
         tempQuestion.Order = questions.Count + 1;
-        /*if (!dbContext.Otazky.Local.Any(a => a.Id == tempQuestion.Id))
-        {
-            dbContext.Otazky.Attach(tempQuestion);
-        }*/
         questions.Add(tempQuestion);
     }
 
-    private async Task SubmitQuestion()
+    private void SubmitQuestion()
     {
         using var dbContext = DbFactory.CreateDbContext();
         {
@@ -330,11 +340,6 @@
         Answer tempAnswer = new Answer();
         tempAnswer.Question = question;
         tempAnswer.Order = question.Answers.Count + 1;
-        
-        /*if (!dbContext.Odpovede.Local.Any(a => a.Id == tempAnswer.Id))
-        {
-            dbContext.Odpovede.Attach(tempAnswer);
-        }*/
         question.Answers.Add(tempAnswer);
         
     }

@@ -4,6 +4,7 @@
 @using FRI_Quiz_Bakalarska_Praca.Data.Model
 @using Microsoft.EntityFrameworkCore
 @inject IDbContextFactory<ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
 
 <DataGrid TItem="Quiz"
           Data="@quizzes"
@@ -27,7 +28,7 @@
          </DataGridColumn>
     </DataGridColumns>
     <ButtonRowTemplate>
-         <Button Color="Color.Primary" Disabled="(selectedQuiz is null)" Clicked="context.EditCommand.Clicked">Edit</Button>
+         <Button Color="Color.Primary" Disabled="(selectedQuiz is null)" Clicked="EditQuiz">Edit</Button>
          <Button Color="Color.Danger" Disabled="(selectedQuiz is null)" Clicked="context.DeleteCommand.Clicked">Delete</Button>
     </ButtonRowTemplate>
 </DataGrid>
@@ -52,7 +53,13 @@
 
     private void EditRow()
     {
-        
+
     } 
+    private async Task EditQuiz()
+    {
+        NavigationManager.NavigateTo("/vytvorKviz");
+    }
+
+    private async Task 
 }
 

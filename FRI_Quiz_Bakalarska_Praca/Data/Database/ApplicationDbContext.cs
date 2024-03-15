@@ -28,12 +28,6 @@ namespace FRI_Quiz_Bakalarska_Praca.Data.Database
         public DbSet<Question> Questions { get; set; }
         public DbSet<Quiz> Quizzes { get; set; }
         
-        
-        /*protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-
-            
-        }*/
     }
 }
 

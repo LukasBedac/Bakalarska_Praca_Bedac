@@ -24,7 +24,6 @@ using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//Treba urobit identity FB, microsoft, lokalny
 
 // Add services to the container.
 
@@ -42,10 +41,8 @@ builder.Services.AddDbContextFactory<ApplicationDbContext>(options => options.Us
 builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
     .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
 */
-//builder.Services.AddControllersWithViews()
-//    .AddMicrosoftIdentityUI();
-//TODO 2.5 Login
 
+//TODO 2.5 Login
 builder.Services.AddDefaultIdentity<User>(options => 
     options.SignIn.RequireConfirmedAccount = false)
     .AddRoles<IdentityRole<int>>()
@@ -99,8 +96,10 @@ builder.Services
     })
     .AddBootstrapProviders()
     .AddFontAwesomeIcons();
-builder.Services.AddBlazoredSessionStorage();
-
+//builder.Services.AddBlazoredSessionStorage();
+builder.Services.AddScoped<UserManager<User>>();
+builder.Services.AddScoped<SignInManager<User>>();
+//builder.Services.AddScoped<AuthenticationStateProvider, OwnAuthenticationProvider>();
 builder.Services.AddServerSideBlazor()
     .AddMicrosoftIdentityConsentHandler();
 //Configure(builder.Services);

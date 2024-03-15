@@ -2,18 +2,18 @@
 @inject AuthenticationStateProvider AuthProvider
 <AuthorizeView>
     <Authorized >
-        Hello, @context.User.Identity?.Name!
+        @context.User.Identity?.Name!
         <AuthorizeView Roles="Admin" Context="innerContext">
             ste admin
         </AuthorizeView>
-         <a href="/logout">Log out</a>
+         <a href="/logout">Odhlásiť sa</a>
          
     </Authorized>
     <NotAuthorized>
         <div>
             <span class="oi oi-account-login"></span>
         </div>
-        <a href="login">Log in</a>
+        <a href="login">Prihlásiť sa</a>
     </NotAuthorized>
 </AuthorizeView>
 

@@ -13,6 +13,10 @@ namespace FRI_Quiz_Bakalarska_Praca.Data.Model
         [Key]
         public int Id { get; set; }
 
+        //[Required]
+        //[DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+        //public Guid Hash { get; set; }
+
         [Required]
         public TypKvizu Type { get; set; }
 
