@@ -8,15 +8,16 @@
 
 <AuthorizeView>
     <Authorized>
-
         <div class="form-floating mb-3">
-            <label class="form-label">Email: @context.User.Identity.Name</label>
+            <div>
+                <label class="form-label">Email: @context.User.Identity.Name</label>
             
+            </div>
+            <div>
+                <label class="form-label">Meno: </label>
+                <input type="text" class="form-control" placeholder="Tu si môžete zmeniť meno" />
+            </div>        
         </div>
-        <div class="form-floating mb-3">
-            <label class="form-label">Meno: </label>
-            <input type="text" class="form-control" placeholder="Tu si môžete zmeniť meno" />
-        </div>        
         <button type="submit" class="btn btn-primary" >Zmenit heslo</button>        
     </Authorized>
     <NotAuthorized>
@@ -27,7 +28,6 @@
 </AuthorizeView>
 @code {
     //TODO 2.0 Dorobit nastavenia
-    private bool passwordChange;
     private string name = string.Empty;
 
     private string getMeno()

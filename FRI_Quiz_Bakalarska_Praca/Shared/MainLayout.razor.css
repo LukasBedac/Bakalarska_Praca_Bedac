@@ -2,7 +2,7 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    min-height:100vh;
+    min-height: 100vh;
 }
 
 main {
@@ -31,14 +31,15 @@ main {
 }
 
 .footer {
-    display: flex;
-    position: relative;
+    display: table-footer-group;
+    position: absolute;
     bottom: 0;
     height: 3.5rem;
-    padding-top: 0.5rem;
+    padding-top: 2rem;
     padding-bottom: 0.5rem;
     align-items: center;
     justify-content: space-between;
+    margin-top: 2rem;
 }
 
     .top-row ::deep a, .top-row .btn-link {

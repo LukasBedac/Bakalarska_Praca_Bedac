@@ -1,0 +1,7 @@
+﻿body {
+}
+.footer {
+    display: inline-flex;
+    flex-direction: row;
+    position:fixed;
+}

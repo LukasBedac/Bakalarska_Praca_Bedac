@@ -4,12 +4,23 @@
 @using Microsoft.EntityFrameworkCore
 @inject IDbContextFactory<ApplicationDbContext> DbFactory
 <AuthorizeView>
-    <Authorized>     
+    <Authorized>    
+        @if (liveQuizzes.Count() < 1)
+        {
         <Div Class="list-quiz-active">
             <Heading>Vaše aktívne kvízy</Heading>
+            <br />
         </Div>
-        <Accordion Height="Height.Is50">
-            @foreach (var quiz in quizzes)
+        
+            <Div>
+                <Heading>Aktúalne nie sú aktívne žiadne kvízy, pre aktivovanie kvízu prosím naskenujte QR kód</Heading>
+                <Button Class="btn btn-primary" Type="ButtonType.Link" To="/QRCode">QR kód sken</Button>
+            </Div>
+        } 
+        else
+        {
+            <Accordion Height="Height.Is50">
+            @foreach (var quiz in liveQuizzes)
             {
                 <Collapse Visible="@collapseVisible">
                     <CollapseHeader>
@@ -43,22 +54,27 @@
                     </CollapseBody>             
                 </Collapse>
             }
-        </Accordion>
+            </Accordion>
+           
+        }
         <Div Class="list-quiz-all">
-            <Heading>Zoznam kvízov</Heading>
+            <Heading>Zoznam ostatných kvízov</Heading>
         </Div>
-        <Accordion >
+        <Accordion>
             @foreach (var quiz in quizzes)
-            {
-                <CollapseHeader>
-                    <Heading Size="HeadingSize.Is5">
-                        <AccordionToggle Width="Width.Is25">@quiz.QuizName</AccordionToggle>
-                    </Heading>
-                </CollapseHeader>
+            {              
+                <Card Width="Width.Is50" Background="Background.Transparent" Shadow="Shadow.Small">
+                    <CardBody>
+                        <CardTitle>@quiz.QuizName</CardTitle>
+                            <CardText>Počet otázok: @quiz.Questions.Count()</CardText>
+                        </CardBody>
+                </Card>
             }
- 
+
         </Accordion>
-    </Authorized>
+        </Authorized>
+
+        
     <NotAuthorized>
         <Heading TextAlignment="TextAlignment.Center">
             Na zobrazenie vám priradených kvízov sa prosím prihláste.
@@ -75,6 +91,7 @@
     //TODO 2.2 - Zobrazenie kvizov len nacitanych podla QR kodu - nutne dorobenie kvizov predtym   
     private bool collapseVisible = false;
     private List<Quiz> quizzes = new List<Quiz>();
+    private List<Quiz> liveQuizzes = new List<Quiz>() { };
 
     protected override async Task OnInitializedAsync()
     {
@@ -84,6 +101,7 @@
         .Include(Quiz => Quiz.Questions)
         .ThenInclude(Question => Question.Answers)
         .ToListAsync();
+        quizzes = GetLiveQuizzes();
         await base.OnInitializedAsync();
     }
     private int GetNumberOfMaxPoints()
@@ -94,5 +112,21 @@
             points += quiz.QuestionCount;            
         }
         return points;
+    }
+
+    private List<Quiz> GetLiveQuizzes()
+    {
+        List<Quiz> tempQuizzes = new List<Quiz>() { };
+        foreach (var quiz in quizzes)
+        {
+            if (quiz.DateFrom > DateTime.Now && quiz.DateTo < DateTime.Now)
+            {
+                liveQuizzes.Add(quiz);
+            } else
+            {
+                tempQuizzes.Add(quiz);
+            }
+        }
+        return tempQuizzes;
     }
 }

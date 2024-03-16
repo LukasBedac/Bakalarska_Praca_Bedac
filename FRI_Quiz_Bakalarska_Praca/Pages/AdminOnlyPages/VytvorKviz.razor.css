@@ -110,6 +110,7 @@
 .buttons_group_quiz {
     display: flex;
     margin-top: 1rem;
+    padding-bottom:5rem;
     width: 30%;
     justify-content:space-between;
 }

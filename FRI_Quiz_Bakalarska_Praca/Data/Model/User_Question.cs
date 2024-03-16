@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 
 namespace FRI_Quiz_Bakalarska_Praca.Data.Model
 {
@@ -8,18 +9,18 @@ namespace FRI_Quiz_Bakalarska_Praca.Data.Model
         public int Id { get; set; }
 
         [Required]
-        public User ActualUser { get; set; }
+        [NotNull]
+        public User? UserId { get; set; }
 
         [Required]
-        public Question ActualQuestionId { get; set; }
-
-        public List<Answer> CheckedAnswers { get; set; } = new List<Answer>() { };
-
-        [Required]
-        public DateTime? DateOpen { get; set; }
+        [NotNull]
+        public Question? QuestionId { get; set; }
 
         [Required]
-        public DateTime? DateClose { get; set; }   
-        
+        public List<Answer>? CheckedAnswers { get; set; } = new List<Answer>() { };
+
+        [Required]
+        public DateTime? DateAnswered { get; set; } = DateTime.Today;
+
     }
 }
