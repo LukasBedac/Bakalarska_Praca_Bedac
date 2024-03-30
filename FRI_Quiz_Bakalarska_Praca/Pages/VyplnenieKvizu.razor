@@ -1,7 +1,9 @@
-﻿@page "/vyplnKviz"
+﻿@page "/vyplnKviz/{id:int?}"
 @using FRI_Quiz_Bakalarska_Praca.Data
 @using FRI_Quiz_Bakalarska_Praca.Data.Database
 @using FRI_Quiz_Bakalarska_Praca.Data.Model
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
 <div>
     <EditForm Model="@uQ">
     
@@ -11,5 +13,22 @@
 
 @code {
     //TODO 2.7 Dorobit editform, zobrazenie prave danej otazky
+    private Quiz quiz;
     private User_Question uQ;
+
+
+    [Parameter]
+    public int? Id { get; set; }
+    [CascadingParameter]
+    public Task<AuthenticationState>? authenticationState { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var dbContext = await DbFactory.CreateDbContextAsync();
+        if (Id != null)
+        {
+            quiz = await dbContext.Quizzes.Include(q => q.Questions).ThenInclude(a => a.Answers).FirstOrDefaultAsync(q => q.Id == Id);
+        }
+        uQ.Question = quiz.Questions.Find(q => q.Id == Id);
+    }
 }

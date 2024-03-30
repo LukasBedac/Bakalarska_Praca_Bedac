@@ -35,21 +35,33 @@ builder.Services.AddDbContextFactory<ApplicationDbContext>(options => options.Us
         .EnableSensitiveDataLogging()
         .EnableDetailedErrors());
 //--------------End Db Context Dp Injection---------------//
-/*builder.Services.AddIdentity<User, IdentityRole<int>>()
-    .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddDefaultTokenProviders();
-builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
-    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
-*/
-
+builder.Services.AddAuthentication()
+   .AddGoogle(options =>
+   {
+       IConfigurationSection googleAuthNSection =
+       builder.Configuration.GetSection("Authentication:Google");
+       options.ClientId = googleAuthNSection["ClientId"];
+       options.ClientSecret = googleAuthNSection["ClientSecret"];
+   })
+   /*.AddFacebook(options =>
+   {
+       IConfigurationSection FBAuthNSection =
+       builder.Configuration.GetSection("Authentication:FB");
+       options.ClientId = FBAuthNSection["ClientId"];
+       options.ClientSecret = FBAuthNSection["ClientSecret"];
+   })*/
+   .AddMicrosoftAccount(microsoftOptions =>
+   {
+       microsoftOptions.ClientId = builder.Configuration["Authentication:Microsoft:ClientId"];
+       microsoftOptions.ClientSecret = builder.Configuration["Authentication:Microsoft:ClientSecret"];
+   });
 //TODO 2.5 Login
 builder.Services.AddDefaultIdentity<User>(options => 
     options.SignIn.RequireConfirmedAccount = false)
     .AddRoles<IdentityRole<int>>()
-//    .AddUserManager<IdentityUser>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
-//    .AddClaimsPrincipalFactory<Claim>()
     .AddDefaultUI();
+
 builder.Services.AddRazorPages();
 builder.Services.Configure<IdentityOptions>(options =>
 {
@@ -76,7 +88,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 {
     // Cookie settings
     options.Cookie.HttpOnly = true;
-    options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
+    //options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
 
     options.LoginPath = "/Identity/Account/Login";
     options.AccessDeniedPath = "/Identity/Account/AccessDenied";
@@ -137,6 +149,8 @@ if (!app.Environment.IsDevelopment())
 
 
 app.UseHttpsRedirection();
+
+app.UseCookiePolicy();
 
 app.UseStaticFiles();
 

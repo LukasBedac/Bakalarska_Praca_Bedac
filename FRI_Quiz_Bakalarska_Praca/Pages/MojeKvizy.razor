@@ -3,15 +3,16 @@
 @using FRI_Quiz_Bakalarska_Praca.Data.Model
 @using Microsoft.EntityFrameworkCore
 @inject IDbContextFactory<ApplicationDbContext> DbFactory
+@inject NavigationManager NavManager
+
 <AuthorizeView>
     <Authorized>    
-        @if (liveQuizzes.Count() < 1)
-        {
         <Div Class="list-quiz-active">
             <Heading>Vaše aktívne kvízy</Heading>
             <br />
         </Div>
-        
+        @if (liveQuizzes.Count() < 1)
+        {          
             <Div>
                 <Heading>Aktúalne nie sú aktívne žiadne kvízy, pre aktivovanie kvízu prosím naskenujte QR kód</Heading>
                 <Button Class="btn btn-primary" Type="ButtonType.Link" To="/QRCode">QR kód sken</Button>
@@ -22,18 +23,18 @@
             <Accordion Height="Height.Is50">
             @foreach (var quiz in liveQuizzes)
             {
-                <Collapse Visible="@collapseVisible">
+                <Collapse>
                     <CollapseHeader>
                         <Heading Size="HeadingSize.Is5">
-                            <AccordionToggle Width="Width.Is25">@quiz.QuizName</AccordionToggle>
+                            <AccordionToggle Width="Width.Is25" Clicked="() => NavigateToQuiz(quiz.Id)">@quiz.QuizName</AccordionToggle>
                             <AccordionToggle Class="disabled"> Pocet bodov: 0/@GetNumberOfMaxPoints()</AccordionToggle>
                         </Heading>
                     </CollapseHeader>
-                    <CollapseBody Height="Height.Is25" Background="Background.Default">
+                    <!--<CollapseBody Height="Height.Is25" Background="Background.Default">
                         @foreach (var question in quiz.Questions)
                         {
                             <div>
-                                <header>@question.Text</header>
+                                <header>@((MarkupString)question.Text)</header>
                             </div>
                             <CollapseBody> 
                                 @foreach (var answer in question.Answers)
@@ -41,18 +42,15 @@
                                         <div class="question-box">
                                         <div class="question-order">
                                         <div class="paddng-between-answer"># @answer.Order</div>
-                                            <div>@answer.Text</div>
-                                        </div>
-                                        <div>
-                                            <input type="checkbox">
+                                            <div>@((MarkupString)answer.Text)</div>
                                         </div>
                                     </div>
                                     <br />
                                 }
                             </CollapseBody>
                         }
-                    </CollapseBody>             
-                </Collapse>
+                            </CollapseBody>-->
+                        </Collapse>
             }
             </Accordion>
            
@@ -92,6 +90,8 @@
     private bool collapseVisible = false;
     private List<Quiz> quizzes = new List<Quiz>();
     private List<Quiz> liveQuizzes = new List<Quiz>() { };
+    private DateTime date = new DateTime();
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -102,6 +102,7 @@
         .ThenInclude(Question => Question.Answers)
         .ToListAsync();
         quizzes = GetLiveQuizzes();
+        date = DateTime.Now;
         await base.OnInitializedAsync();
     }
     private int GetNumberOfMaxPoints()
@@ -119,7 +120,7 @@
         List<Quiz> tempQuizzes = new List<Quiz>() { };
         foreach (var quiz in quizzes)
         {
-            if (quiz.DateFrom > DateTime.Now && quiz.DateTo < DateTime.Now)
+            if (quiz.DateFrom <= DateTime.Now && DateTime.Now <= quiz.DateTo)
             {
                 liveQuizzes.Add(quiz);
             } else
@@ -128,5 +129,10 @@
             }
         }
         return tempQuizzes;
+    }
+    //TODO Zmenit ID presmerovanie na GUID-hash
+    private void NavigateToQuiz(int Id)
+    {
+        NavManager.NavigateTo($"/vyplnKviz");
     }
 }

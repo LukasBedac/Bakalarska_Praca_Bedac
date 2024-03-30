@@ -1,9 +1,10 @@
-﻿@page "/vytvorKviz"
+﻿@page "/vytvorKviz/{id:int?}"
 @using FRI_Quiz_Bakalarska_Praca.Data
 @using FRI_Quiz_Bakalarska_Praca.Data.Database
 @using FRI_Quiz_Bakalarska_Praca.Data.Model
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.EntityFrameworkCore
+@using System.Security.Claims
 @using TinyMCE.Blazor;
 @inject AuthenticationStateProvider AuthProvider
 @inject IDbContextFactory<ApplicationDbContext> DbFactory
@@ -26,10 +27,29 @@
                 </div>
                 <div class="users">
                     <label class="form-label users-label">Pridat uzivatela: </label>
-                    <Field class="users-input" >               
-                        <TextEdit></TextEdit>
-                        <FieldLabel TextSize="TextSize.Small">Tu môžete zadať používateľov, ktorý budú mať prístup na editáciu kvízu</FieldLabel>
-                    </Field>
+                    <Autocomplete TItem="User"
+                                  TValue="string"
+                                  Data="@users"
+                                  TextField="@(( item ) => item.Email)"
+                                  ValueField="@(( item ) => item.Email)"
+                                  @bind-SelectedValues="@SelectedSearchValue"
+                                  @bind-SelectedTexts="SelectedAutoCompleteText"
+                                  SelectionMode="AutocompleteSelectionMode.Multiple"
+                                  Placeholder="Hladaj..."
+                                  Filter="AutocompleteFilter.Contains"
+                                  FreeTyping
+                                  CustomFilter="@(( item, searchValue ) => item.Email.IndexOf( searchValue, 0, StringComparison.CurrentCultureIgnoreCase ) >= 0 )">
+                         <NotFoundContent Context="ATcontext"> Prepáčte... @ATcontext nebol nájdený! :( </NotFoundContent>
+                     </Autocomplete>
+                     <br/>
+                     <Field Horizontal>
+                        <FieldBody ColumnSize="ColumnSize.Is12">
+                            Hladané: @string.Join(',', SelectedSearchValue)
+                        </FieldBody>
+                        <FieldBody ColumnSize="ColumnSize.Is12">
+                            Označené: @(SelectedAutoCompleteText == null ? null : string.Join(',', SelectedAutoCompleteText))
+                    </FieldBody>
+                </Field>
                 </div>
                 <div class="nastaveniaCasu">
                     <div class="datum">
@@ -82,10 +102,10 @@
                 </TableRow>
             </TableHeader>
             <TableBody>
-                @foreach (var user in newQuiz.Moderators)
+                @foreach (var user in SelectedAutoCompleteText)
                 {
                     <TableRow>
-                        <TableRowCell>@user.UserName</TableRowCell>
+                        <TableRowCell>@user</TableRowCell>
                     </TableRow>
                 }
             </TableBody>
@@ -94,7 +114,7 @@
             <TableHeader>
                 <TableRow>
                     <TableHeaderCell>Otazka</TableHeaderCell>
-                    <TableHeaderCell>Nazov</TableHeaderCell>
+                    <TableHeaderCell>Text</TableHeaderCell>
                     <TableHeaderCell></TableHeaderCell>
                 </TableRow>
             </TableHeader>
@@ -103,7 +123,7 @@
                 {
                 <TableRow>
                     <TableRowHeader>#@question.Order</TableRowHeader>
-                    <TableRowCell>@(question.Text.Length > 20 ? question.Text.Substring(0, 20) + "..." : question.Text)</TableRowCell>
+                        <TableRowCell>@(question.Text.Length > 20 ? ((MarkupString)question.Text.Substring(0, 20) + "...") : ((MarkupString)question.Text))</TableRowCell>
                     <TableRowCell><Button Class="btn-secondary">Edit</Button></TableRowCell>
                 </TableRow>
                 }        
@@ -112,12 +132,12 @@
        
     </div>
     <div class="left-side-quiz">
-        <EditForm id="QuestionForm" Model="@questions" OnInvalidSubmit="SubmitQuestion">
+        <EditForm id="QuestionForm" Model="@questions" OnValidSubmit="SubmitQuestion">
             @foreach (var question in questions) 
                 {
                 <div class="mb-3">
                     <label class="form-label">Otázka</label>
-                <Editor @bind-Text="question.Text" Field="@(() => question.Text)" Conf="@textConf"></Editor>
+                    <Editor @bind-Value="question.Text" Field="@(() => question.Text)" Conf="@textConf"></Editor>
                 </div>
                 <div>
                     <button type="submit" class="btn btn-danger" @onclick="() => DeleteQuestion(question)">Odstrániť otázku</button>
@@ -128,7 +148,7 @@
                     {
                     <div class="odpoved">
                         <label class="form-check-label"></label>
-                        <Editor @bind-Text="answer.Text" Field="() => answer.Text" Conf="@odpovedeConf"></Editor>
+                            <Editor @bind-Value="answer.Text" Field="(() => answer.Text)" Conf="@odpovedeConf"></Editor>
                         <div>
                             <label class="odpoved-label">Spravna</label>
                             <input @bind="answer.Correct" type="checkbox" class="form-check odpoved-checkbox" />
@@ -155,26 +175,33 @@
     <div class="buttons_group_quiz">        
         <button type="submit" form="QuizId" class="btn btn-primary">@(!OnceSubmit ? "Pridať kvíz" : "Update kvízu")</button>
         <button type="submit" class="btn btn-success" @onclick="AddQuestion">Pridať otázku</button>
-        <button type="reset" class="btn btn-danger" @onclick="ResetForm">Nový kvíz</button>
+        <!--<button type="reset" class="btn btn-danger" @onclick="ResetForm">Nový kvíz</button>-->
     </div>
 </div>
 
 @code {
     #region Fields 
-    private Quiz newQuiz;
-    private List<Question> questions = new List<Question>() { };
+    private Quiz newQuiz = new Quiz();
+    private List<Question> questions = new List<Question>();
     private bool isLiveKviz = true;
     private IReadOnlyList<DateTime?> dates = new List<DateTime?>() { };
     private TimeSpan? timeFrom = TimeSpan.Zero;
-    private TimeSpan? timeTo = TimeSpan.Zero;
+    private TimeSpan? timeTo = new TimeSpan(23, 59, 0);
     private DatePicker<DateTime?>? datePicker;
     private TimeEdit<TimeSpan?>? timePicker;
     private Validations? quizValidation;
+    private User user;
+    public IEnumerable<User> users;
+    public List<string?> SelectedSearchValue { get; set; } = new List<string?>() { };
+    public List<string?> SelectedAutoCompleteText { get; set; } = new List<string?>() { };
     private bool OnceSubmit = false;
+    //Tento parameter sluzi na URL datove presmerovanie
+    [Parameter]
+    public int? Id { get; set; }
+
     [CascadingParameter]
-    private Task<AuthenticationState>? authenticationState { get; set; }
-    //[Parameter]
-    //public Quiz ActualQuiz { get; set; }
+    public Task<AuthenticationState>? authenticationState { get; set; }
+
     #endregion Fields
 
     #region HelpMethods
@@ -221,60 +248,73 @@
 
     protected async override Task OnInitializedAsync()
     {
-        newQuiz = new Quiz();
-        if (authenticationState is not null)
+        using var dbContext = DbFactory.CreateDbContext();
+        users = await dbContext.Users.ToListAsync();
+        if (Id != null)
         {
-            using var dbContext = DbFactory.CreateDbContext();
-            var state = await authenticationState;
-            var user = state.User;
-            var users = await dbContext.Users.ToListAsync();
-            foreach (var userFromDb in users)
+            Quiz quiz = await dbContext.Quizzes
+            .Include(q => q.Questions)
+            .ThenInclude(qu => qu.Answers)
+            .FirstOrDefaultAsync(q => q.Id == Id);
+            newQuiz = quiz;
+            questions = quiz.Questions;
+            dates = new List<DateTime?>() { quiz.DateFrom, quiz.DateTo };
+            timeFrom = quiz.DateFrom.Value.TimeOfDay;
+            timeTo = quiz.DateTo.Value.TimeOfDay;
+            OnceSubmit = true;
+        } else
+        {
+            if (authenticationState is not null)
             {
-                if (userFromDb.Email.Equals(user.Identity.Name))
-                {
-                    newQuiz.User = userFromDb;
+
+                /*newQuiz.User = owner;
+                * 
+                var state = await authenticationState;
+                var user = state.User;
+
+                //user.FindFirst(ClaimNames); - z tohto ID usera
+                var users = await dbContext.Users.ToListAsync();
+
+                foreach (var userFromDb in users)
+                    {
+                    if (userFromDb.Email.Equals(user.Identity.Name))
+                        {
+                        newQuiz.User = userFromDb;
                 }
+                }*/
+
             }
-
+            AddQuestion();
+            AddAnswer(questions[0]);
         }
-        AddQuestion();
-        AddAnswer(questions[0]);
     }
-    private void ResetForm()
+    /*private void ResetForm()
     {
-        newQuiz = new Quiz();
-        questions = new List<Question>() { };
-        AddQuestion();
-        dates = new List<DateTime?>();
-        timeFrom = null;
-        timeTo = null;
-        datePicker = null;
-        timePicker = null;
-        OnceSubmit = false;
-        questions[0].Order = 1;
-        AddAnswer(questions[0]);
+    newQuiz = new Quiz();
+    questions = new List<Question>() { };
+    AddQuestion();
+    dates = new List<DateTime?>();
+    timeFrom = null;
+    timeTo = null;
+    datePicker = null;
+    timePicker = null;
+    OnceSubmit = false;
+    questions[0].Order = 1;
+    AddAnswer(questions[0]);
     }
-    private void EditQuizFromAnotherPage()
-    {
-        //newQuiz = ActualQuiz;
-        questions = new List<Question>() { };
-        //questions.AddRange(ActualQuiz.Questions);
-        dates = new List<DateTime?>() { };
-        timeFrom = null;
-        timeTo = null;
-        datePicker = null;
-        timePicker = null;
-        OnceSubmit = false;
-        questions[0].Order = 1;
-        AddAnswer(questions[0]);
-    }
-
+    */
     #endregion HelpMethods
 
     #region QuizMethods
     private async Task SubmitQuiz()
     {
         using var dbContext = DbFactory.CreateDbContext();
+        if (Id != null)
+        {
+            dbContext.Quizzes.Update(newQuiz);
+            await dbContext.SaveChangesAsync();
+            return;
+        }
         if (!SetDates())
         {
             return;
@@ -289,9 +329,14 @@
         }
         if (!OnceSubmit)
         {
-
+            var state = await authenticationState;
+            var ownerId = int.Parse(state.User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            var owner = await dbContext.Users.FindAsync(ownerId);
+            dbContext.Users.Attach(owner);
+            AddModerators();
+            newQuiz.User = owner;
             SubmitQuestion();                       
-            await dbContext.Quizzes.AddAsync(newQuiz);
+            dbContext.Quizzes.Attach(newQuiz);
             OnceSubmit = true;
             await dbContext.SaveChangesAsync();
         } else
@@ -301,22 +346,27 @@
             await dbContext.SaveChangesAsync();
         }
     }
+    private void AddModerators()
+    {
+        for (int i = 0; i < SelectedAutoCompleteText.Count(); i++)
+        {
+            
+        }
+    }
 
     #endregion QuizMethods
 
     #region QuestionMethods
 
-    private void AddQuestion() {
-        using var dbContext = DbFactory.CreateDbContext();
-        Question tempQuestion = new Question();
+    private void AddQuestion() {        
 
+        Question tempQuestion = new Question();
         tempQuestion.Order = questions.Count + 1;
         questions.Add(tempQuestion);
     }
 
     private void SubmitQuestion()
     {
-        using var dbContext = DbFactory.CreateDbContext();
         {
             foreach (var question in questions)
             {                   
@@ -336,7 +386,6 @@
 
     private void AddAnswer(Question question)
     {
-        using var dbContext = DbFactory.CreateDbContext();
         Answer tempAnswer = new Answer();
         tempAnswer.Question = question;
         tempAnswer.Order = question.Answers.Count + 1;

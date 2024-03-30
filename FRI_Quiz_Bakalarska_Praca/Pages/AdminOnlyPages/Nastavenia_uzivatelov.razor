@@ -23,9 +23,9 @@
                 <TableRowHeader>@user.Id</TableRowHeader>
                 <TableRowCell>@user.UserName</TableRowCell>
                 <TableRowCell>@user.Email</TableRowCell>
-                <TableRowCell>null</TableRowCell>
+                <TableRowCell></TableRowCell>
                     <TableRowCell TextAlignment="TextAlignment.Center">
-                        <Button Type="ButtonType.Button" Color="Color.Success">Zmeň rolu</Button>
+                        <Button Type="ButtonType.Button" Color="Color.Success" Clicked="() => ChangeRole(user)">Zmeň rolu</Button>
                         <Button Type="ButtonType.Button" Color="Color.Danger" Clicked="() => DeleteUser(user)">Odstrániť uživateľa</Button>
                     </TableRowCell>
                 <TableRowCell></TableRowCell>
@@ -59,7 +59,14 @@
         DbContext.Users.Remove(user);
         await DbContext.SaveChangesAsync(); */
     }
+    private async Task ChangeRole(User user)
+    {
+        using var DbContext = DbFactory.CreateDbContext();
+
+    }
+
     //TODO 2.6 Vyvtorit filter na mena
+
     private void Filter()
     {
         

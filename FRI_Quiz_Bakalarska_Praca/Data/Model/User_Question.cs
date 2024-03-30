@@ -10,11 +10,11 @@ namespace FRI_Quiz_Bakalarska_Praca.Data.Model
 
         [Required]
         [NotNull]
-        public User? UserId { get; set; }
+        public User User { get; set; }
 
         [Required]
         [NotNull]
-        public Question? QuestionId { get; set; }
+        public Question Question { get; set; }
 
         [Required]
         public List<Answer>? CheckedAnswers { get; set; } = new List<Answer>() { };
