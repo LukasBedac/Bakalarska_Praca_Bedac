@@ -15,7 +15,7 @@
           Filterable
           FilterMethod="DataGridFilterMethod.Contains"
            CommandMode="DataGridCommandMode.ButtonRow">
-     <DataGridColumns>
+     <DataGridColumns >
          <DataGridColumn Field="@nameof(Quiz.Id)" Caption="#" Sortable="false" Filterable="false" />
          <DataGridColumn Field="@nameof(Quiz.QuizName)" Caption="Názov" Editable />
          <DataGridColumn Field="@nameof(Quiz.Moderators)" DisplayFormat="" Caption="Moderátori" />
@@ -23,21 +23,63 @@
          <DataGridDateColumn Field="@nameof(Quiz.DateTo)" Caption="Koniec" />
          <DataGridColumn Field="@nameof(Quiz.Type)" Caption="Typ" />
          <DataGridNumericColumn Field="@nameof(Quiz.QuestionCount)" Caption="Počet otázok" Filterable="false" />
-         <DataGridColumn Filterable="false">
-             
-         </DataGridColumn>
+         
     </DataGridColumns>
-    <ButtonRowTemplate>
+     <ButtonRowTemplate>
          <Button Color="Color.Primary" Disabled="(selectedQuiz is null)" Clicked="() => EditQuiz(selectedQuiz.Id)">Edit</Button>
-         <Button Color="Color.Danger" Disabled="(selectedQuiz is null)" Clicked="context.DeleteCommand.Clicked">Delete</Button>
-    </ButtonRowTemplate>
+         <Button Color="Color.Danger" Disabled="(selectedQuiz is null)" Clicked="() => ShowModal(selectedQuiz.Id)">Delete</Button>
+     </ButtonRowTemplate>
 </DataGrid>
+ <Modal @ref="@modalRef" Closing="@OnModalClosing">
+     <ModalContent Centered>
+        <ModalHeader>
+            <ModalTitle>Potvrdenie vymazania</ModalTitle>
+        </ModalHeader>
+        <ModalBody>
+            Naozaj chcete vymazat kvíz?
+        </ModalBody>
+        <ModalFooter>
+            <Button Color="Color.Primary" Clicked="@CloseModal">Áno, vymazať</Button>
+            <Button Color="Color.Secondary" Clicked="@TryCloseModal">Nie, ponechať</Button>
+        </ModalFooter>
+    </ModalContent>
+</Modal>
  @code {
-    //TODO 2.3 - Dorobit edit, vymazanie - editcommand vlastny ktory presunie uzivatela na vytvor kviz stranku s potrebnymi parametrami daneho kvizu
-    //             Vymazanie - dorobit deletecommand na vymazanie aj z datavazy - nutne aj osetrenie pri zadavani (vyskakovacie okno/nejake druhe potvrdenie)
     public Quiz? Quiz { get; set; }
     private List<Quiz> quizzes = new List<Quiz>();
     private Quiz selectedQuiz = new Quiz();
+    private Modal modalRef;
+    private bool cancelClose;
+
+    private Task ShowModal(int id)
+    {
+        if (id == 0)
+        {
+            return modalRef.Hide();
+        }
+        return modalRef.Show();
+    }
+
+    private async Task CloseModal()
+    {
+        cancelClose = false;
+        await DeleteQuiz(selectedQuiz.Id);
+        await modalRef.Hide();
+    }
+
+    private Task TryCloseModal()
+    {
+        cancelClose = false;
+
+        return modalRef.Hide();
+    }
+
+    private Task OnModalClosing(ModalClosingEventArgs e)
+    {
+
+        e.Cancel = cancelClose || e.CloseReason != CloseReason.UserClosing;
+        return Task.CompletedTask;
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -51,18 +93,48 @@
     //TODO 2.4 Podrstranka pre admina na edit livequizu na zobrazenie 
     //Histogram na zobrazenie a update tlaciko na refresh
 
-    private void EditRow()
+    private async Task Refresh()
     {
-
+        using var dbContext = DbFactory.CreateDbContext();
+        quizzes = await dbContext.Quizzes
+        .Include(Kvizy => Kvizy.Questions)
+        .ThenInclude(Otazky => Otazky.Answers)
+        .ToListAsync();
+        StateHasChanged();
     } 
-    private async Task EditQuiz(int Id)
+    private Task EditQuiz(int Id)
     {
-        NavigationManager.NavigateTo($"/vytvorKviz/{Id}");
+        if (Id == 0)
+        {
+            return Task.CompletedTask;
+        } else
+        {
+            NavigationManager.NavigateTo($"/vytvorKviz/{Id}");
+            return Task.CompletedTask;
+        }
     }
 
-    private async Task DeleteQuiz()
+    private async Task DeleteQuiz(int Id)
     {
-        
+        if (Id == 0)
+        {
+            return;
+        } else
+        {
+            using var dbContext = await DbFactory.CreateDbContextAsync();
+            Quiz quiz = dbContext.Quizzes.Include(q => q.Questions).ThenInclude(qu => qu.Answers).First(q => q.Id == Id);
+            foreach (Question question in quiz.Questions)
+            {
+                foreach (Answer answer in question.Answers)
+                {
+                    dbContext.Answers.Remove(answer);
+                }
+                dbContext.Questions.Remove(question);
+            }
+            dbContext.Quizzes.Remove(quiz);
+            await dbContext.SaveChangesAsync();
+            await Refresh();
+        }
     }
 }
 

@@ -3,5 +3,6 @@
 .footer {
     display: inline-flex;
     flex-direction: row;
+    padding-top: 2rem;
     position:fixed;
 }

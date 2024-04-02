@@ -25,22 +25,59 @@
                 <TableRowCell>@user.Email</TableRowCell>
                 <TableRowCell></TableRowCell>
                     <TableRowCell TextAlignment="TextAlignment.Center">
-                        <Button Type="ButtonType.Button" Color="Color.Success" Clicked="() => ChangeRole(user)">Zmeň rolu</Button>
-                        <Button Type="ButtonType.Button" Color="Color.Danger" Clicked="() => DeleteUser(user)">Odstrániť uživateľa</Button>
+                        <Button Type="ButtonType.Button" Color="Color.Success" Clicked="@ShowChangeModal">Zmeň rolu</Button>
+                        <Button Type="ButtonType.Button" Color="Color.Danger" Clicked="() => ShowDeleteModal(user)">Odstrániť uživateľa</Button>
                     </TableRowCell>
                 <TableRowCell></TableRowCell>
             </TableRow>
         }
     </TableBody>
 </Table>
+<Modal @ref="@changeModal" Closing="@OnModalClosing">
+    <ModalContent Centered>
+        <ModalHeader>
+            <ModalTitle>Zmena role uživateľa</ModalTitle>
+        </ModalHeader>
+        <ModalBody>
+            <Label>Tu môžete zmeniť rolu uživateľovi.</Label>
+            <Buttons Border="Border.Rounded">
+                <Button Type="ButtonType.Submit" Color="Color.Dark" Outline Clicked="() => SetRole(1)" >Admin</Button>
+                 <Button Type="ButtonType.Submit" Color="Color.Dark" Outline Clicked="() => SetRole(2)">Moderátor</Button>
+                 <Button Type="ButtonType.Submit" Color="Color.Dark" Outline Clicked="() => SetRole(0)">Zrušiť rolu</Button>
+            </Buttons>
+            <br />
+            <Label>Zvolená rola: @this.role</Label>
+        </ModalBody>
+        <ModalFooter>
+            <Button Color="Color.Danger" Clicked="() => CloseChangeModal()">Zavrieť</Button>
+        </ModalFooter>
+    </ModalContent>
+</Modal>
 
+<Modal @ref="@deleteModal" Closing="@OnModalClosing">
+    <ModalContent Centered>
+        <ModalHeader>
+            <ModalTitle>Potvrdenie vymazania</ModalTitle>
+        </ModalHeader>
+        <ModalBody>
+            Naozaj chcete vymazat kvíz?
+        </ModalBody>
+        <ModalFooter>
+            <Button Color="Color.Primary" Clicked="() => CloseDeleteModal(selectedUser)">Áno, vymazať</Button>
+            <Button Color="Color.Secondary" Clicked="@TryCloseDeleteModal">Ponechať uživateľa</Button>
+        </ModalFooter>
+    </ModalContent>
+</Modal>
 
  
 @code {
     private List<User> users = new List<User>();
     private List<IdentityUserRole<int>> roles = new List<IdentityUserRole<int>>();
     private User selectedUser;
-
+    private Modal deleteModal;
+    private Modal changeModal;
+    private string role;
+    private bool cancelClose;
     protected override Task OnInitializedAsync()
     {
         return LoadUsers();
@@ -50,16 +87,17 @@
     {
         using var DbContext = DbFactory.CreateDbContext();
         users = await DbContext.Users.ToListAsync();
-
+        StateHasChanged();
     }
 
     private async Task DeleteUser(User user)
     {
-        /*using var DbContext = DbFactory.CreateDbContext();
+        using var DbContext = DbFactory.CreateDbContext();
         DbContext.Users.Remove(user);
-        await DbContext.SaveChangesAsync(); */
+        await DbContext.SaveChangesAsync();
+        await LoadUsers();
     }
-    private async Task ChangeRole(User user)
+    private async Task ChangeRole()
     {
         using var DbContext = DbFactory.CreateDbContext();
 
@@ -69,6 +107,65 @@
 
     private void Filter()
     {
-        
+
+    }
+
+    private Task ShowDeleteModal(User user)
+    {
+        if (user == null)
+        {
+            return deleteModal.Hide();
+        }
+        selectedUser = user;
+        return deleteModal.Show();
+    }
+
+    private Task ShowChangeModal()
+    {
+        return changeModal.Show();
+    }
+
+    private async Task CloseDeleteModal(User user)
+    {
+        cancelClose = false;
+        await DeleteUser(user);
+        await deleteModal.Hide();
+    }
+
+    private async Task CloseChangeModal()
+    {
+        cancelClose = false;
+        await ChangeRole();
+        await changeModal.Hide();
+    }
+
+    private Task TryCloseDeleteModal()
+    {
+        cancelClose = false;
+        return deleteModal.Hide();
+    }
+
+
+    private Task OnModalClosing(ModalClosingEventArgs e)
+    {
+
+        e.Cancel = cancelClose || e.CloseReason != CloseReason.UserClosing;
+        return Task.CompletedTask;
+    }
+
+    private async Task SetRole(int elementId)
+    {
+        if (elementId == 0)
+        {
+            this.role = "";
+        }
+        else if (elementId == 1)
+        {
+            this.role = "admin";
+        } else
+        {
+            this.role = "moderator";
+        }
+        await Task.CompletedTask;
     }
 }

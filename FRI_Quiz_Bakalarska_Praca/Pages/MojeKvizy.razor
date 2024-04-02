@@ -23,7 +23,7 @@
             <Accordion Height="Height.Is50">
             @foreach (var quiz in liveQuizzes)
             {
-                <Collapse>
+                <Collapse Width="Width.Is50">
                     <CollapseHeader>
                         <Heading Size="HeadingSize.Is5">
                             <AccordionToggle Width="Width.Is25" Clicked="() => NavigateToQuiz(quiz.Id)">@quiz.QuizName</AccordionToggle>
@@ -58,9 +58,10 @@
         <Div Class="list-quiz-all">
             <Heading>Zoznam ostatných kvízov</Heading>
         </Div>
-        <Accordion>
+        <div class="footer-padding">
+            <Accordion >
             @foreach (var quiz in quizzes)
-            {              
+            {
                 <Card Width="Width.Is50" Background="Background.Transparent" Shadow="Shadow.Small">
                     <CardBody>
                         <CardTitle>@quiz.QuizName</CardTitle>
@@ -69,7 +70,8 @@
                 </Card>
             }
 
-        </Accordion>
+            </Accordion>
+        </div>
         </Authorized>
 
         

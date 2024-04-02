@@ -1,4 +1,4 @@
-﻿@page "/vyplnKviz/{id:int?}"
+﻿@page "/vyplnKviz/{hash:guid?}"
 @using FRI_Quiz_Bakalarska_Praca.Data
 @using FRI_Quiz_Bakalarska_Praca.Data.Database
 @using FRI_Quiz_Bakalarska_Praca.Data.Model
@@ -18,17 +18,18 @@
 
 
     [Parameter]
-    public int? Id { get; set; }
+    public string? Guid { get; set; }
     [CascadingParameter]
     public Task<AuthenticationState>? authenticationState { get; set; }
 
-    protected override async Task OnInitializedAsync()
+    /*protected override async Task OnInitializedAsync()
     {
         using var dbContext = await DbFactory.CreateDbContextAsync();
-        if (Id != null)
+        if (Guid != null)
         {
-            quiz = await dbContext.Quizzes.Include(q => q.Questions).ThenInclude(a => a.Answers).FirstOrDefaultAsync(q => q.Id == Id);
+            quiz = await dbContext.Quizzes.Include(q => q.Questions).ThenInclude(a => a.Answers).FirstOrDefaultAsync(q => q.Hash == Guid);
         }
-        uQ.Question = quiz.Questions.Find(q => q.Id == Id);
-    }
+        //TODO 4.0 Nefunguje - nullpointer error
+        uQ.Question = quiz.Questions.Find(q => q.Hash == Guid);
+    }*/
 }

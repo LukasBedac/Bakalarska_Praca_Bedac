@@ -9,6 +9,7 @@
 @inject AuthenticationStateProvider AuthProvider
 @inject IDbContextFactory<ApplicationDbContext> DbFactory
 @inject UserManager<User> Usermanager
+@inject NavigationManager NavManager
 <PageTitle>Vytvorenie Kvizu</PageTitle>
 
 <div>
@@ -175,6 +176,7 @@
     <div class="buttons_group_quiz">        
         <button type="submit" form="QuizId" class="btn btn-primary">@(!OnceSubmit ? "Pridať kvíz" : "Update kvízu")</button>
         <button type="submit" class="btn btn-success" @onclick="AddQuestion">Pridať otázku</button>
+        <button type="submit" class="btn btn-success" @onclick="GetQRCodes" disabled="@(!OnceSubmit)">QR kódy</button>
         <!--<button type="reset" class="btn btn-danger" @onclick="ResetForm">Nový kvíz</button>-->
     </div>
 </div>
@@ -206,8 +208,6 @@
 
     #region HelpMethods
 
-    //TODO 2.1 - Autocomplete na uzivatelov z uniza.sk domeny - doplnanie uzivatelov podla zadavaneho emailu 
-    //              Pravdepodone autocomplete staci aby ukazal meno, nie email - dohoda
     private bool SetDates()
     {
         if (dates.Count < 1 ||  dates[0] == null || timeFrom == null)
@@ -303,6 +303,14 @@
     AddAnswer(questions[0]);
     }
     */
+    private void GetQRCodes()
+    {
+        using var dbContext = DbFactory.CreateDbContext();
+        int quizId = newQuiz.Id;
+        NavManager.NavigateTo($"QRCodeGen/{quizId}");
+
+    }
+
     #endregion HelpMethods
 
     #region QuizMethods
