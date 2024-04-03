@@ -25,7 +25,7 @@
                 <TableRowCell>@user.Email</TableRowCell>
                 <TableRowCell></TableRowCell>
                     <TableRowCell TextAlignment="TextAlignment.Center">
-                        <Button Type="ButtonType.Button" Color="Color.Success" Clicked="@ShowChangeModal">Zmeň rolu</Button>
+                        <Button Type="ButtonType.Button" Color="Color.Success" Clicked="() => ShowChangeModal(user)">Zmeň rolu</Button>
                         <Button Type="ButtonType.Button" Color="Color.Danger" Clicked="() => ShowDeleteModal(user)">Odstrániť uživateľa</Button>
                     </TableRowCell>
                 <TableRowCell></TableRowCell>
@@ -49,7 +49,8 @@
             <Label>Zvolená rola: @this.role</Label>
         </ModalBody>
         <ModalFooter>
-            <Button Color="Color.Danger" Clicked="() => CloseChangeModal()">Zavrieť</Button>
+            <Button Color="Color.Danger" Clicked="() => CloseChangeModal()">Aplikovať rolu</Button>
+                <Button Color="Color.Secondary" Clicked="@TryCloseChangeModal">Zavrieť</Button>
         </ModalFooter>
     </ModalContent>
 </Modal>
@@ -99,8 +100,33 @@
     }
     private async Task ChangeRole()
     {
-        using var DbContext = DbFactory.CreateDbContext();
-
+        using var dbContext = DbFactory.CreateDbContext();
+        IdentityUserRole<int> dbUserRole = await dbContext.UserRoles.FirstOrDefaultAsync(ur => ur.UserId == selectedUser.Id);
+        IdentityRole<int> dbRole = new IdentityRole<int>();
+        if (dbUserRole == null)
+        {
+            if (role == "")
+            {
+                return;
+            }
+            dbUserRole = new IdentityUserRole<int>();
+            dbUserRole.UserId = selectedUser.Id;
+            dbUserRole.RoleId = (dbRole = await dbContext.Roles.FirstOrDefaultAsync(r => r.Name == role)).Id;
+            dbContext.UserRoles.Add(dbUserRole);
+            await dbContext.SaveChangesAsync();
+            return;
+        } else
+        {
+            if (role == "") 
+            {
+                dbContext.UserRoles.Remove(dbUserRole);
+                await dbContext.SaveChangesAsync();
+                return;
+            }
+            dbUserRole.RoleId = (dbRole = await dbContext.Roles.FirstOrDefaultAsync(r => r.Name == role)).Id ;
+            await dbContext.SaveChangesAsync();
+            dbContext.UserRoles.Update(dbUserRole);
+        }
     }
 
     //TODO 2.6 Vyvtorit filter na mena
@@ -120,8 +146,9 @@
         return deleteModal.Show();
     }
 
-    private Task ShowChangeModal()
+    private Task ShowChangeModal(User user)
     {
+        selectedUser = user;
         return changeModal.Show();
     }
 
@@ -143,6 +170,11 @@
     {
         cancelClose = false;
         return deleteModal.Hide();
+    }
+    private Task TryCloseChangeModal()
+    {
+        cancelClose = false;
+        return changeModal.Hide();
     }
 
 
