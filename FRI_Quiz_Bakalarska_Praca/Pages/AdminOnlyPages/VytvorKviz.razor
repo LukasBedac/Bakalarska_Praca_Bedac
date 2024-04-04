@@ -150,7 +150,7 @@
                     <div class="odpoved">
                         <label class="form-check-label"></label>
                             <Editor @bind-Value="answer.Text" Field="(() => answer.Text)" Conf="@odpovedeConf"></Editor>
-                        <div>
+                        <div class="">
                             <label class="odpoved-label">Spravna</label>
                             <input @bind="answer.Correct" type="checkbox" class="form-check odpoved-checkbox" />
                         </div>
@@ -170,6 +170,7 @@
                         }
                     </div>
                 </div>
+                <Divider Width="Width.Is50"/>
             }                   
         </EditForm>
     </div>

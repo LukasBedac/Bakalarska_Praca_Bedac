@@ -21,7 +21,8 @@ namespace FRI_Quiz_Bakalarska_Praca.Data.Database
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-            
+            builder.Entity<IdentityRole<int>>().HasData(new IdentityRole<int> { Id = 1, Name = "admin", NormalizedName = "ADMIN" });
+            builder.Entity<IdentityRole<int>>().HasData(new IdentityRole<int> { Id = 2, Name = "moderator", NormalizedName = "MODERATOR" });
         }
 
         public DbSet<Answer> Answers { get; set; }

@@ -1,7 +1,46 @@
-﻿@page "/liveKvizEdit"
+﻿@page "/liveKvizEdit/{string:guid}"
+@using FRI_Quiz_Bakalarska_Praca.Data.Database
+@using FRI_Quiz_Bakalarska_Praca.Data.Model
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
 
-<h3>Live-Kviz Edit</h3>
+
+<Card>
+    <CardBody>
+        <CardTitle Size="3">
+            @quiz.QuizName
+        </CardTitle>
+        @foreach (var question in quiz.Questions)
+        {
+        <CardTitle Size="2">
+            @question.Text   
+        </CardTitle>
+        @foreach (var answer in question.Answers)
+            {
+                <CardBody>
+                    <CardText>
+                        @answer.Text
+                    </CardText>
+                </CardBody>
+            }
+        }
+       
+    </CardBody>
+</Card>
+
 
 @code {
     //TODO 2.8 Dorobit zobrazenie kvizu a jeho zobrazovanie podla zmeny, vytvorit graf vysledkov ale mozno na samosatnej stranke 
+    private Quiz quiz;
+
+    [Parameter]
+    public string Guid { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var dbContext = DbFactory.CreateDbContext();
+        //TODO 5.0 zmenit na GUID
+        quiz = dbContext.Quizzes.Include(q => q.Questions).ThenInclude(qu => qu.Answers).FirstOrDefault(q => q.Id == 1);
+
+    }
 }

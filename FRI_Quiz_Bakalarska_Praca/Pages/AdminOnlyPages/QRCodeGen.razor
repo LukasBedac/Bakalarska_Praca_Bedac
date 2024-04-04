@@ -8,11 +8,9 @@
 <Label>QR kódy otázok</Label>
 <div class="border-1 d-flex">
     @foreach (var question in questions)
-    {
-    
+    {   
         <Label Class="d-flex flex-column">Otázka @question.Order</Label>
-        <Blazorise.QRCode.QRCode Value="@(nameof(question.Id))" Class="d-inline flex-column"></Blazorise.QRCode.QRCode>
-    
+        <Blazorise.QRCode.QRCode Value="@(nameof(question.Id))" Class="d-inline flex-column"></Blazorise.QRCode.QRCode>  
     }
 </div>
 
@@ -22,7 +20,7 @@
 </div>
 
 <div class=""> 
-    <button class="btn btn-primary" type="submit" onclick="() => ReturnToEditQuiz">Späť na editáciu kvízu</button>
+    <button class="btn btn-primary" type="submit" onclick="@ReturnToEditQuiz">Späť na editáciu kvízu</button>
 </div>
 
 
@@ -39,7 +37,7 @@
     {
         using var dbContext = await DbFactory.CreateDbContextAsync();
         quiz = await dbContext.Quizzes.Include(q => q.Questions).FirstAsync(q => q.Id == Id);
-        if (quiz.Type == TypKvizu.livekviz)
+        if (quiz.Type == TypKvizu.kviz)
         {
             questions = quiz.Questions.ToList();
         } else

@@ -26,8 +26,14 @@
          
     </DataGridColumns>
      <ButtonRowTemplate>
-         <Button Color="Color.Primary" Disabled="(selectedQuiz is null)" Clicked="() => EditQuiz(selectedQuiz.Id)">Edit</Button>
-         <Button Color="Color.Danger" Disabled="(selectedQuiz is null)" Clicked="() => ShowModal(selectedQuiz.Id)">Delete</Button>
+         <Button Color="Color.Primary" Disabled="(selectedQuiz.Id == 0)" Clicked="() => EditQuiz(selectedQuiz.Id)">Edit</Button>
+         <Button Color="Color.Danger" Disabled="(selectedQuiz.Id == 0)" Clicked="() => ShowModal(selectedQuiz.Id)">Delete</Button>
+         @if (selectedQuiz.Id != 0 && selectedQuiz.Type == TypKvizu.livekviz)
+        {
+            <Button Color="Color.Secondary" Clicked="() => EditLiveQuiz(selectedQuiz.Id)">Spravovať livekvíz</Button>
+        }
+         
+        
      </ButtonRowTemplate>
 </DataGrid>
  <Modal @ref="@modalRef" Closing="@OnModalClosing">
@@ -135,6 +141,12 @@
             await dbContext.SaveChangesAsync();
             await Refresh();
         }
+    }
+
+    private Task EditLiveQuiz(int Id)
+    {
+        NavigationManager.NavigateTo($"/liveKvizEdit/{Id}");
+        return Task.CompletedTask;
     }
 }
 

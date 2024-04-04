@@ -10,9 +10,13 @@ namespace FRI_Quiz_Bakalarska_Praca.Data.Model
         [Key]
         public int Id { get; set; }
 
-        //[Required]
-        //[DatabaseGenerated(DatabaseGeneratedOption.Computed)]
-        //public Guid Hash { get; set; }
+        /*[Required]
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+        public Guid Hash { get; set; }
+
+        public DateTime? StartTime { get; set; }
+
+        public DateTime? EndTime { get; set; }*/
 
         [Required]
         public string? Text { get; set; } = " ";

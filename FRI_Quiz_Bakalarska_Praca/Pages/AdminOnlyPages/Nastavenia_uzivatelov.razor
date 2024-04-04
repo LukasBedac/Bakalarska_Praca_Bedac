@@ -61,10 +61,10 @@
             <ModalTitle>Potvrdenie vymazania</ModalTitle>
         </ModalHeader>
         <ModalBody>
-            Naozaj chcete vymazat kvíz?
+            Naozaj chcete vymazat uživateľa?
         </ModalBody>
         <ModalFooter>
-            <Button Color="Color.Primary" Clicked="() => CloseDeleteModal(selectedUser)">Áno, vymazať</Button>
+            <Button Color="Color.Danger" Clicked="() => CloseDeleteModal(selectedUser)">Áno, vymazať</Button>
             <Button Color="Color.Secondary" Clicked="@TryCloseDeleteModal">Ponechať uživateľa</Button>
         </ModalFooter>
     </ModalContent>
