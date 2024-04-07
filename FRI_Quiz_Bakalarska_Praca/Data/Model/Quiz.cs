@@ -1,8 +1,11 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
+using System.Runtime.InteropServices;
 
 
 namespace FRI_Quiz_Bakalarska_Praca.Data.Model
@@ -13,9 +16,9 @@ namespace FRI_Quiz_Bakalarska_Praca.Data.Model
         [Key]
         public int Id { get; set; }
 
-        //[Required]
-        //[DatabaseGenerated(DatabaseGeneratedOption.Computed)]
-        //public Guid Hash { get; set; }
+        [NotNull]
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+        public Guid Hash { get; set; }
 
         [Required]
         public TypKvizu Type { get; set; }

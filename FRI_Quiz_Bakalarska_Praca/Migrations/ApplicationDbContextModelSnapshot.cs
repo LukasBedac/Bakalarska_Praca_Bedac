@@ -3,6 +3,7 @@ using System;
 using FRI_Quiz_Bakalarska_Praca.Data.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -16,14 +17,18 @@ namespace FRI_Quiz_Bakalarska_Praca.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.14")
+                .HasAnnotation("ProductVersion", "8.0.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
+
+            MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
             modelBuilder.Entity("FRI_Quiz_Bakalarska_Praca.Data.Model.Answer", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<bool>("Correct")
                         .HasColumnType("tinyint(1)");
@@ -36,12 +41,16 @@ namespace FRI_Quiz_Bakalarska_Praca.Migrations
 
                     b.Property<string>("Text")
                         .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("varchar(250)");
+                        .HasColumnType("longtext");
+
+                    b.Property<int?>("User_QuestionId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("QuestionId");
+
+                    b.HasIndex("User_QuestionId");
 
                     b.ToTable("Answers");
                 });
@@ -52,11 +61,23 @@ namespace FRI_Quiz_Bakalarska_Praca.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("EndTime")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<Guid>("Hash")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
                     b.Property<int>("Order")
                         .HasColumnType("int");
 
-                    b.Property<int>("QuizRefId")
+                    b.Property<int>("QuizId")
                         .HasColumnType("int");
+
+                    b.Property<DateTime?>("StartTime")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Text")
                         .IsRequired()
@@ -64,7 +85,7 @@ namespace FRI_Quiz_Bakalarska_Praca.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("QuizRefId");
+                    b.HasIndex("QuizId");
 
                     b.ToTable("Questions");
                 });
@@ -75,6 +96,8 @@ namespace FRI_Quiz_Bakalarska_Praca.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<DateTime?>("DateFrom")
                         .IsRequired()
                         .HasColumnType("datetime(6)");
@@ -82,6 +105,10 @@ namespace FRI_Quiz_Bakalarska_Praca.Migrations
                     b.Property<DateTime?>("DateTo")
                         .IsRequired()
                         .HasColumnType("datetime(6)");
+
+                    b.Property<Guid>("Hash")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
 
                     b.Property<string>("QuizName")
                         .IsRequired()
@@ -106,6 +133,8 @@ namespace FRI_Quiz_Bakalarska_Praca.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
@@ -171,11 +200,40 @@ namespace FRI_Quiz_Bakalarska_Praca.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("FRI_Quiz_Bakalarska_Praca.Data.Model.User_Question", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("DateAnswered")
+                        .IsRequired()
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("QuestionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuestionId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserQuestions");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<int>", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -196,6 +254,20 @@ namespace FRI_Quiz_Bakalarska_Praca.Migrations
                         .HasDatabaseName("RoleNameIndex");
 
                     b.ToTable("AspNetRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Admin",
+                            NormalizedName = "ADMIN"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Moderator",
+                            NormalizedName = "MODERATOR"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
@@ -203,6 +275,8 @@ namespace FRI_Quiz_Bakalarska_Praca.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
                         .HasColumnType("longtext");
@@ -226,6 +300,8 @@ namespace FRI_Quiz_Bakalarska_Praca.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<string>("ClaimType")
                         .HasColumnType("longtext");
 
@@ -245,10 +321,12 @@ namespace FRI_Quiz_Bakalarska_Praca.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
                 {
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("varchar(255)");
+                        .HasMaxLength(128)
+                        .HasColumnType("varchar(128)");
 
                     b.Property<string>("ProviderKey")
-                        .HasColumnType("varchar(255)");
+                        .HasMaxLength(128)
+                        .HasColumnType("varchar(128)");
 
                     b.Property<string>("ProviderDisplayName")
                         .HasColumnType("longtext");
@@ -284,10 +362,12 @@ namespace FRI_Quiz_Bakalarska_Praca.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("varchar(255)");
+                        .HasMaxLength(128)
+                        .HasColumnType("varchar(128)");
 
                     b.Property<string>("Name")
-                        .HasColumnType("varchar(255)");
+                        .HasMaxLength(128)
+                        .HasColumnType("varchar(128)");
 
                     b.Property<string>("Value")
                         .HasColumnType("longtext");
@@ -305,18 +385,22 @@ namespace FRI_Quiz_Bakalarska_Praca.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("FRI_Quiz_Bakalarska_Praca.Data.Model.User_Question", null)
+                        .WithMany("CheckedAnswers")
+                        .HasForeignKey("User_QuestionId");
+
                     b.Navigation("Question");
                 });
 
             modelBuilder.Entity("FRI_Quiz_Bakalarska_Praca.Data.Model.Question", b =>
                 {
-                    b.HasOne("FRI_Quiz_Bakalarska_Praca.Data.Model.Quiz", "QuizRef")
+                    b.HasOne("FRI_Quiz_Bakalarska_Praca.Data.Model.Quiz", "Quiz")
                         .WithMany("Questions")
-                        .HasForeignKey("QuizRefId")
+                        .HasForeignKey("QuizId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("QuizRef");
+                    b.Navigation("Quiz");
                 });
 
             modelBuilder.Entity("FRI_Quiz_Bakalarska_Praca.Data.Model.Quiz", b =>
@@ -335,6 +419,25 @@ namespace FRI_Quiz_Bakalarska_Praca.Migrations
                     b.HasOne("FRI_Quiz_Bakalarska_Praca.Data.Model.Quiz", null)
                         .WithMany("Moderators")
                         .HasForeignKey("QuizId");
+                });
+
+            modelBuilder.Entity("FRI_Quiz_Bakalarska_Praca.Data.Model.User_Question", b =>
+                {
+                    b.HasOne("FRI_Quiz_Bakalarska_Praca.Data.Model.Question", "Question")
+                        .WithMany()
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FRI_Quiz_Bakalarska_Praca.Data.Model.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Question");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
@@ -398,6 +501,11 @@ namespace FRI_Quiz_Bakalarska_Praca.Migrations
                     b.Navigation("Moderators");
 
                     b.Navigation("Questions");
+                });
+
+            modelBuilder.Entity("FRI_Quiz_Bakalarska_Praca.Data.Model.User_Question", b =>
+                {
+                    b.Navigation("CheckedAnswers");
                 });
 #pragma warning restore 612, 618
         }

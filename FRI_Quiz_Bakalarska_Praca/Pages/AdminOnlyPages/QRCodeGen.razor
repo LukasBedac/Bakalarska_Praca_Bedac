@@ -1,4 +1,4 @@
-﻿@page "/QRCodeGen/{id:int}"
+﻿@page "/QRCodeGen/{id:guid}"
 @using FRI_Quiz_Bakalarska_Praca.Data.Database
 @using FRI_Quiz_Bakalarska_Praca.Data.Model
 @using Microsoft.EntityFrameworkCore
@@ -31,12 +31,12 @@
     private Quiz quiz;
     private TypKvizu typ;
     [Parameter]
-    public int Id { get; set; }
+    public Guid QuizGuid { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         using var dbContext = await DbFactory.CreateDbContextAsync();
-        quiz = await dbContext.Quizzes.Include(q => q.Questions).FirstAsync(q => q.Id == Id);
+        quiz = await dbContext.Quizzes.Include(q => q.Questions).FirstAsync(q => q.Hash == QuizGuid);
         if (quiz.Type == TypKvizu.kviz)
         {
             questions = quiz.Questions.ToList();
@@ -48,6 +48,6 @@
 
     private void ReturnToEditQuiz()
     {
-        NavManager.NavigateTo($"/vytvorKviz/{quiz.Id}");
+        NavManager.NavigateTo($"/vytvorKviz/{quiz.Hash}");
     }
 }

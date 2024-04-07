@@ -26,11 +26,11 @@
          
     </DataGridColumns>
      <ButtonRowTemplate>
-         <Button Color="Color.Primary" Disabled="(selectedQuiz.Id == 0)" Clicked="() => EditQuiz(selectedQuiz.Id)">Edit</Button>
-         <Button Color="Color.Danger" Disabled="(selectedQuiz.Id == 0)" Clicked="() => ShowModal(selectedQuiz.Id)">Delete</Button>
+         <Button Color="Color.Primary" Disabled="(selectedQuiz.Id == 0)" Clicked="() => EditQuiz(selectedQuiz.Hash)">Edit</Button>
+         <Button Color="Color.Danger" Disabled="(selectedQuiz.Id == 0)" Clicked="() => ShowModal(selectedQuiz.Hash)">Delete</Button>
          @if (selectedQuiz.Id != 0 && selectedQuiz.Type == TypKvizu.livekviz)
         {
-            <Button Color="Color.Secondary" Clicked="() => EditLiveQuiz(selectedQuiz.Id)">Spravovať livekvíz</Button>
+            <Button Color="Color.Secondary" Clicked="() => EditLiveQuiz(selectedQuiz.Hash)">Spravovať livekvíz</Button>
         }
          
         
@@ -57,9 +57,9 @@
     private Modal modalRef;
     private bool cancelClose;
 
-    private Task ShowModal(int id)
+    private Task ShowModal(Guid guid)
     {
-        if (id == 0)
+        if (guid == Guid.Empty)
         {
             return modalRef.Hide();
         }
@@ -69,7 +69,7 @@
     private async Task CloseModal()
     {
         cancelClose = false;
-        await DeleteQuiz(selectedQuiz.Id);
+        await DeleteQuiz(selectedQuiz.Hash);
         await modalRef.Hide();
     }
 
@@ -108,27 +108,27 @@
         .ToListAsync();
         StateHasChanged();
     } 
-    private Task EditQuiz(int Id)
+    private Task EditQuiz(Guid guid)
     {
-        if (Id == 0)
+        if (guid == Guid.Empty)
         {
             return Task.CompletedTask;
         } else
         {
-            NavigationManager.NavigateTo($"/vytvorKviz/{Id}");
+            NavigationManager.NavigateTo($"/vytvorKviz/{guid}");
             return Task.CompletedTask;
         }
     }
 
-    private async Task DeleteQuiz(int Id)
+    private async Task DeleteQuiz(Guid guid)
     {
-        if (Id == 0)
+        if (guid == Guid.Empty)
         {
             return;
         } else
         {
             using var dbContext = await DbFactory.CreateDbContextAsync();
-            Quiz quiz = dbContext.Quizzes.Include(q => q.Questions).ThenInclude(qu => qu.Answers).First(q => q.Id == Id);
+            Quiz quiz = dbContext.Quizzes.Include(q => q.Questions).ThenInclude(qu => qu.Answers).First(q => q.Hash == guid);
             foreach (Question question in quiz.Questions)
             {
                 foreach (Answer answer in question.Answers)
@@ -143,9 +143,9 @@
         }
     }
 
-    private Task EditLiveQuiz(int Id)
+    private Task EditLiveQuiz(Guid guid)
     {
-        NavigationManager.NavigateTo($"/liveKvizEdit/{Id}");
+        NavigationManager.NavigateTo($"/liveKvizEdit/{guid}");
         return Task.CompletedTask;
     }
 }

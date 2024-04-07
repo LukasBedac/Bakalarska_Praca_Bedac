@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 
 namespace FRI_Quiz_Bakalarska_Praca.Data.Model
 {
@@ -10,13 +11,13 @@ namespace FRI_Quiz_Bakalarska_Praca.Data.Model
         [Key]
         public int Id { get; set; }
 
-        /*[Required]
+        [NotNull]
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public Guid Hash { get; set; }
 
         public DateTime? StartTime { get; set; }
 
-        public DateTime? EndTime { get; set; }*/
+        public DateTime? EndTime { get; set; }
 
         [Required]
         public string? Text { get; set; } = " ";
@@ -28,6 +29,6 @@ namespace FRI_Quiz_Bakalarska_Praca.Data.Model
         public int Order { get; set; }
 
         [Required]
-        public virtual Quiz QuizRef { get; set; }
+        public virtual Quiz Quiz { get; set; }
     }
 }

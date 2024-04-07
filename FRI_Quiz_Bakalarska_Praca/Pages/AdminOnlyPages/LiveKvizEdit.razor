@@ -1,4 +1,4 @@
-﻿@page "/liveKvizEdit/{string:guid}"
+﻿@page "/liveKvizEdit/{Guid:guid}"
 @using FRI_Quiz_Bakalarska_Praca.Data.Database
 @using FRI_Quiz_Bakalarska_Praca.Data.Model
 @using Microsoft.EntityFrameworkCore
@@ -8,18 +8,18 @@
 <Card>
     <CardBody>
         <CardTitle Size="3">
-            @quiz.QuizName
+            Kvíz - @quiz.QuizName
         </CardTitle>
         @foreach (var question in quiz.Questions)
         {
-        <CardTitle Size="2">
-            @question.Text   
+        <CardTitle Size="2" Class="d-inline-flex">
+            #@question.Order @((MarkupString)question.Text)   
         </CardTitle>
         @foreach (var answer in question.Answers)
             {
                 <CardBody>
                     <CardText>
-                        @answer.Text
+                        @((MarkupString)answer.Text)
                     </CardText>
                 </CardBody>
             }
@@ -34,7 +34,7 @@
     private Quiz quiz;
 
     [Parameter]
-    public string Guid { get; set; }
+    public Guid Guid { get; set; }
 
     protected override async Task OnInitializedAsync()
     {

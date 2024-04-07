@@ -1,4 +1,4 @@
-﻿@page "/vytvorKviz/{id:int?}"
+﻿@page "/vytvorKviz/{GuidQuiz:guid?}"
 @using FRI_Quiz_Bakalarska_Praca.Data
 @using FRI_Quiz_Bakalarska_Praca.Data.Database
 @using FRI_Quiz_Bakalarska_Praca.Data.Model
@@ -31,22 +31,19 @@
                     <Autocomplete TItem="User"
                                   TValue="string"
                                   Data="@users"
-                                  TextField="@(( item ) => item.Email)"
-                                  ValueField="@(( item ) => item.Email)"
+                                  TextField="@(( user ) => user.Email)"
+                                  ValueField="@(( user ) => user.Email)"
                                   @bind-SelectedValues="@SelectedSearchValue"
                                   @bind-SelectedTexts="SelectedAutoCompleteText"
                                   SelectionMode="AutocompleteSelectionMode.Multiple"
                                   Placeholder="Hladaj..."
                                   Filter="AutocompleteFilter.Contains"
                                   FreeTyping
-                                  CustomFilter="@(( item, searchValue ) => item.Email.IndexOf( searchValue, 0, StringComparison.CurrentCultureIgnoreCase ) >= 0 )">
+                                  CustomFilter="@(( user, searchValue ) => user.Email.IndexOf( searchValue, 0, StringComparison.CurrentCultureIgnoreCase ) >= 0 )">
                          <NotFoundContent Context="ATcontext"> Prepáčte... @ATcontext nebol nájdený! :( </NotFoundContent>
                      </Autocomplete>
                      <br/>
                      <Field Horizontal>
-                        <FieldBody ColumnSize="ColumnSize.Is12">
-                            Hladané: @string.Join(',', SelectedSearchValue)
-                        </FieldBody>
                         <FieldBody ColumnSize="ColumnSize.Is12">
                             Označené: @(SelectedAutoCompleteText == null ? null : string.Join(',', SelectedAutoCompleteText))
                     </FieldBody>
@@ -133,7 +130,7 @@
        
     </div>
     <div class="left-side-quiz">
-        <EditForm id="QuestionForm" Model="@questions" OnValidSubmit="SubmitQuestion">
+        <EditForm id="QuestionForm" Model="@questions" >
             @foreach (var question in questions) 
                 {
                 <div class="mb-3">
@@ -200,7 +197,7 @@
     private bool OnceSubmit = false;
     //Tento parameter sluzi na URL datove presmerovanie
     [Parameter]
-    public int? Id { get; set; }
+    public Guid? GuidQuiz { get; set; }
 
     [CascadingParameter]
     public Task<AuthenticationState>? authenticationState { get; set; }
@@ -251,64 +248,31 @@
     {
         using var dbContext = DbFactory.CreateDbContext();
         users = await dbContext.Users.ToListAsync();
-        if (Id != null)
+        if (GuidQuiz != null)
         {
             Quiz quiz = await dbContext.Quizzes
+            .Include(q => q.Moderators)
             .Include(q => q.Questions)
-            .ThenInclude(qu => qu.Answers)
-            .FirstOrDefaultAsync(q => q.Id == Id);
+            .ThenInclude(qu => qu.Answers)            
+            .FirstOrDefaultAsync(q => q.Hash == GuidQuiz);
             newQuiz = quiz;
             questions = quiz.Questions;
             dates = new List<DateTime?>() { quiz.DateFrom, quiz.DateTo };
             timeFrom = quiz.DateFrom.Value.TimeOfDay;
             timeTo = quiz.DateTo.Value.TimeOfDay;
+            newQuiz.Moderators = quiz.Moderators;
             OnceSubmit = true;
         } else
         {
-            if (authenticationState is not null)
-            {
-
-                /*newQuiz.User = owner;
-                * 
-                var state = await authenticationState;
-                var user = state.User;
-
-                //user.FindFirst(ClaimNames); - z tohto ID usera
-                var users = await dbContext.Users.ToListAsync();
-
-                foreach (var userFromDb in users)
-                    {
-                    if (userFromDb.Email.Equals(user.Identity.Name))
-                        {
-                        newQuiz.User = userFromDb;
-                }
-                }*/
-
-            }
             AddQuestion();
             AddAnswer(questions[0]);
         }
     }
-    /*private void ResetForm()
-    {
-    newQuiz = new Quiz();
-    questions = new List<Question>() { };
-    AddQuestion();
-    dates = new List<DateTime?>();
-    timeFrom = null;
-    timeTo = null;
-    datePicker = null;
-    timePicker = null;
-    OnceSubmit = false;
-    questions[0].Order = 1;
-    AddAnswer(questions[0]);
-    }
-    */
     private void GetQRCodes()
     {
         using var dbContext = DbFactory.CreateDbContext();
-        int quizId = newQuiz.Id;
-        NavManager.NavigateTo($"QRCodeGen/{quizId}");
+        Guid quizGuid = newQuiz.Hash;
+        NavManager.NavigateTo($"QRCodeGen/{quizGuid}");
 
     }
 
@@ -318,7 +282,7 @@
     private async Task SubmitQuiz()
     {
         using var dbContext = DbFactory.CreateDbContext();
-        if (Id != null)
+        if (GuidQuiz != null)
         {
             dbContext.Quizzes.Update(newQuiz);
             await dbContext.SaveChangesAsync();
@@ -342,8 +306,9 @@
             var ownerId = int.Parse(state.User.FindFirst(ClaimTypes.NameIdentifier).Value);
             var owner = await dbContext.Users.FindAsync(ownerId);
             dbContext.Users.Attach(owner);
-            AddModerators();
+            newQuiz.Hash = Guid.NewGuid();
             newQuiz.User = owner;
+            AddModerators();
             SubmitQuestion();                       
             dbContext.Quizzes.Attach(newQuiz);
             OnceSubmit = true;
@@ -355,11 +320,12 @@
             await dbContext.SaveChangesAsync();
         }
     }
-    private void AddModerators()
+    private async void AddModerators()
     {
+        using var dbContext = DbFactory.CreateDbContext();
         for (int i = 0; i < SelectedAutoCompleteText.Count(); i++)
         {
-            
+            newQuiz.Moderators.Add(await dbContext.Users.FirstOrDefaultAsync(u => u.Email == SelectedAutoCompleteText[i]));
         }
     }
 
@@ -371,6 +337,7 @@
 
         Question tempQuestion = new Question();
         tempQuestion.Order = questions.Count + 1;
+        tempQuestion.Hash = Guid.NewGuid();
         questions.Add(tempQuestion);
     }
 
@@ -379,7 +346,7 @@
         {
             foreach (var question in questions)
             {                   
-                question.QuizRef = newQuiz;
+                question.Quiz = newQuiz;
                 newQuiz.Questions.Add(question);           
             }
         } 

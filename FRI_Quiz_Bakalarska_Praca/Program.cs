@@ -80,7 +80,6 @@ builder.Services.Configure<IdentityOptions>(options =>
     // User settings.
     options.User.AllowedUserNameCharacters =
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
-    options.User.RequireUniqueEmail = true;
 });
 
 builder.Services.ConfigureApplicationCookie(options =>
@@ -94,6 +93,7 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = "/Identity/Account/AccessDenied";
     options.SlidingExpiration = true;
 });
+builder.Services.AddCascadingAuthenticationState();
 /*builder.Services.AddAuthorization( 
 options => //Vypnutie autorizacie k microsoftu a ponechanie stareho kodu nizsie
 {
@@ -111,6 +111,7 @@ builder.Services
 //builder.Services.AddBlazoredSessionStorage();
 builder.Services.AddScoped<UserManager<User>>();
 builder.Services.AddScoped<SignInManager<User>>();
+builder.Services.AddScoped<RoleManager<IdentityRole<int>>>();
 //builder.Services.AddScoped<AuthenticationStateProvider, OwnAuthenticationProvider>();
 builder.Services.AddServerSideBlazor()
     .AddMicrosoftIdentityConsentHandler();
