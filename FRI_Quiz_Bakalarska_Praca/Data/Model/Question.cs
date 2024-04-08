@@ -28,6 +28,9 @@ namespace FRI_Quiz_Bakalarska_Praca.Data.Model
         [Required]
         public int Order { get; set; }
 
+        [DefaultValue(false)]
+        public bool Shown { get; set; }
+
         [Required]
         public virtual Quiz Quiz { get; set; }
     }

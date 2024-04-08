@@ -26,8 +26,8 @@
                 <Collapse Width="Width.Is50">
                     <CollapseHeader>
                         <Heading Size="HeadingSize.Is5">
-                            <AccordionToggle Width="Width.Is25" Clicked="() => NavigateToQuiz(quiz.Id)">@quiz.QuizName</AccordionToggle>
-                            <AccordionToggle Class="disabled"> Pocet bodov: 0/@GetNumberOfMaxPoints()</AccordionToggle>
+                            <AccordionToggle Width="Width.Is25" Clicked="() => NavigateToQuiz(quiz.Hash)">@quiz.QuizName</AccordionToggle>
+                            <AccordionToggle Class="disabled"> Pocet bodov: 0/@GetNumberOfMaxPoints(quiz.Hash)</AccordionToggle>
                         </Heading>
                     </CollapseHeader>
                     <!--<CollapseBody Height="Height.Is25" Background="Background.Default">
@@ -106,12 +106,15 @@
         date = DateTime.Now;
         await base.OnInitializedAsync();
     }
-    private int GetNumberOfMaxPoints()
+    private int GetNumberOfMaxPoints(Guid guid)
     {
         int points = 0;
         foreach (var quiz in quizzes)
         {
-            points += quiz.QuestionCount;            
+            if (quiz.Hash == guid)
+            {
+                points += quiz.QuestionCount;
+            }
         }
         return points;
     }
@@ -132,8 +135,8 @@
         return tempQuizzes;
     }
     //TODO Zmenit ID presmerovanie na GUID-hash
-    private void NavigateToQuiz(int Id)
+    private void NavigateToQuiz(Guid guid)
     {
-        NavManager.NavigateTo($"/vyplnKviz/{Id}");
+        NavManager.NavigateTo($"/vyplnKviz/{guid}");
     }
 }

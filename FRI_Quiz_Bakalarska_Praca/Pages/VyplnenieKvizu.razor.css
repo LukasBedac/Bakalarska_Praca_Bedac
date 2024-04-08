@@ -1,0 +1,42 @@
+﻿body {
+}
+
+.display-center {
+    display:flex;
+    position:center;
+    flex-direction:column;
+    align-items:start;
+    align-self:center;
+    width:50%;
+    margin-left: auto;
+    margin-right: auto;
+}
+.question-box {
+    display:flex;
+    flex-direction:column;
+    border: 2px solid blue;
+    width: 100%;
+}
+.question-settings {
+    display: flex;
+    background-color: lightgray;
+    border: 1px solid blue;
+}
+.asnwer-box {
+    display:inline-flex;
+    flex-direction: row;
+    padding-right: 2rem;
+    padding-top:2em;
+    left: 0;
+    width: 60%;
+}
+.checkbox-box {
+    display: inline-flex;
+    flex-direction: row;
+    position: center;
+    right: 0;
+    padding-left: 3rem;
+    justify-content:right;
+    padding-bottom: 1rem;
+    margin-right: auto;
+}

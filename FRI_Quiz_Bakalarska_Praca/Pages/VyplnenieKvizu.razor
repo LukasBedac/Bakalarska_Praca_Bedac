@@ -1,35 +1,71 @@
-﻿@page "/vyplnKviz/{hash:guid?}"
+﻿@page "/vyplnKviz/{QuizGuid:guid}"
 @using FRI_Quiz_Bakalarska_Praca.Data
 @using FRI_Quiz_Bakalarska_Praca.Data.Database
 @using FRI_Quiz_Bakalarska_Praca.Data.Model
 @using Microsoft.EntityFrameworkCore
+@using System.Security.Claims
 @inject IDbContextFactory<ApplicationDbContext> DbFactory
-<div>
-    <EditForm Model="@uQ">
-    
 
-    </EditForm>
+
+<div class="display-center">
+    <Heading>@quiz.QuizName</Heading>
+    <Divider />
+        @foreach (var userQuestion in userQuestions)
+        {
+            <Table Background="Background.Light">
+                 <TableHeader Flex="Flex.InlineFlex" TextColor="TextColor.Dark">
+                #@(userQuestion.Question.Order) &nbsp; @((MarkupString)userQuestion.Question.Text)
+                </TableHeader>
+                 <TableHeader></TableHeader>
+                 <Divider Width="Width.Is100"></Divider>
+                    <TableBody Border="Border.Primary" >
+                    @foreach (var answer in userQuestion.Question.Answers)
+                    {
+                    <TableRow Border="Border.Is2.Primary">
+                        @((MarkupString)answer.Text)
+                        <TableRowCell Class="align-content-center">
+                            <input type="checkbox" />
+
+                        </TableRowCell>
+                    </TableRow>
+                   
+                    }
+                 </TableBody>
+                <Divider></Divider>
+            </Table>
+        }
+        <Button Color="Color.Success">Potvrdiť odpovede</Button>
 </div>
 
 @code {
-    //TODO 2.7 Dorobit editform, zobrazenie prave danej otazky
-    private Quiz quiz;
-    private User_Question uQ;
-
-
+    private Quiz quiz = new Quiz();
+    private User_Question userQuestion = new User_Question();
+    private List<User_Question> userQuestions = new List<User_Question>() { };
+    private bool tmp;
     [Parameter]
-    public string? Guid { get; set; }
+    public Guid QuizGuid { get; set; }
+
     [CascadingParameter]
     public Task<AuthenticationState>? authenticationState { get; set; }
 
-    /*protected override async Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
     {
         using var dbContext = await DbFactory.CreateDbContextAsync();
-        if (Guid != null)
+        if (QuizGuid != Guid.Empty)
         {
-            quiz = await dbContext.Quizzes.Include(q => q.Questions).ThenInclude(a => a.Answers).FirstOrDefaultAsync(q => q.Hash == Guid);
+            quiz = await dbContext.Quizzes.Include(q => q.Questions).ThenInclude(a => a.Answers).FirstOrDefaultAsync(q => q.Hash == QuizGuid);
         }
-        //TODO 4.0 Nefunguje - nullpointer error
-        uQ.Question = quiz.Questions.Find(q => q.Hash == Guid);
-    }*/
+        var state = await authenticationState;
+        int userId = int.Parse(state.User.FindFirst(ClaimTypes.NameIdentifier).Value);
+        foreach (var question in quiz.Questions)
+        {
+            if (question.Shown == false) //TODO 5.3 Prerobit na true podmienku
+            {
+                User_Question tmpUq = new User_Question();
+                tmpUq.Question = question;
+                tmpUq.User = await dbContext.Users.FindAsync(userId);
+                userQuestions.Add(tmpUq);
+            }
+        }
+    }
 }

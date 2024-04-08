@@ -1,35 +1,43 @@
-﻿@page "/QRCodeGen/{id:guid}"
+﻿@page "/QRCodeGen/{QuizGuid:guid}"
 @using FRI_Quiz_Bakalarska_Praca.Data.Database
 @using FRI_Quiz_Bakalarska_Praca.Data.Model
 @using Microsoft.EntityFrameworkCore
 @inject NavigationManager NavManager
 @inject IDbContextFactory<ApplicationDbContext> DbFactory
 <h3>QRCode generator</h3>
-<Label>QR kódy otázok</Label>
-<div class="border-1 d-flex">
-    @foreach (var question in questions)
-    {   
-        <Label Class="d-flex flex-column">Otázka @question.Order</Label>
-        <Blazorise.QRCode.QRCode Value="@(nameof(question.Id))" Class="d-inline flex-column"></Blazorise.QRCode.QRCode>  
-    }
-</div>
 
-<div>
-    <Label>QR kód kvízu</Label>
-    <Blazorise.QRCode.QRCode Value="@(nameof(quiz.Id))"></Blazorise.QRCode.QRCode>
-</div>
+@if (liveQuiz)
+{
+    
+    <div>
+        <Label>QR kód kvízu</Label>
+        <Blazorise.QRCode.QRCode Value="@($"/vyplnenieKvizu/{quiz.Hash}")"></Blazorise.QRCode.QRCode>
+    </div>
+} else
+{
+    <Label>QR kódy otázok</Label>
+    <div class="border-1 d-flex">
+        @foreach (var question in questions)
+        {
+            <Label Class="d-flex flex-column">Otázka @question.Order</Label>
+            <Blazorise.QRCode.QRCode Value="@($"/vyplnenieKvizu/{question.Hash}")" Class="d-inline flex-column"></Blazorise.QRCode.QRCode>
+        }
+    </div>
+}
+
+
+
 
 <div class=""> 
     <button class="btn btn-primary" type="submit" onclick="@ReturnToEditQuiz">Späť na editáciu kvízu</button>
 </div>
 
 
-
-
 @code {
     private List<Question> questions = new List<Question>();
     private Quiz quiz;
     private TypKvizu typ;
+    private bool liveQuiz;
     [Parameter]
     public Guid QuizGuid { get; set; }
 
@@ -39,9 +47,11 @@
         quiz = await dbContext.Quizzes.Include(q => q.Questions).FirstAsync(q => q.Hash == QuizGuid);
         if (quiz.Type == TypKvizu.kviz)
         {
+            liveQuiz = false;
             questions = quiz.Questions.ToList();
         } else
         {
+            liveQuiz = true;
             return;
         }
     }
