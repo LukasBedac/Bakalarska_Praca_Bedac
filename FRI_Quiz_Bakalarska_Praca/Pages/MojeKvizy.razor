@@ -2,6 +2,7 @@
 @using FRI_Quiz_Bakalarska_Praca.Data.Database
 @using FRI_Quiz_Bakalarska_Praca.Data.Model
 @using Microsoft.EntityFrameworkCore
+@using System.Security.Claims
 @inject IDbContextFactory<ApplicationDbContext> DbFactory
 @inject NavigationManager NavManager
 
@@ -27,7 +28,7 @@
                     <CollapseHeader>
                         <Heading Size="HeadingSize.Is5">
                             <AccordionToggle Width="Width.Is25" Clicked="() => NavigateToQuiz(quiz.Hash)">@quiz.QuizName</AccordionToggle>
-                            <AccordionToggle Class="disabled"> Pocet bodov: 0/@GetNumberOfMaxPoints(quiz.Hash)</AccordionToggle>
+                            <AccordionToggle Class="disabled"> Pocet bodov: @GetNumberOfCorrectAnswers(quiz.Hash)/@GetNumberOfMaxPoints(quiz.Hash)</AccordionToggle>
                         </Heading>
                     </CollapseHeader>
                     <!--<CollapseBody Height="Height.Is25" Background="Background.Default">
@@ -87,17 +88,20 @@
 </AuthorizeView>
 
 
-@code {   
+@code {
     private bool collapseVisible = false;
     private List<Quiz> quizzes = new List<Quiz>();
     private List<Quiz> liveQuizzes = new List<Quiz>() { };
     private DateTime date = new DateTime();
-
+    private int userId;
+    [CascadingParameter]
+    public Task<AuthenticationState>? authenticationState { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         using var dbContext = DbFactory.CreateDbContext();
-
+        var state = await authenticationState;
+        userId = int.Parse(state.User.FindFirst(ClaimTypes.NameIdentifier).Value);
         quizzes = await dbContext.Quizzes
         .Include(Quiz => Quiz.Questions)
         .ThenInclude(Question => Question.Answers)
@@ -109,13 +113,52 @@
     private int GetNumberOfMaxPoints(Guid guid)
     {
         int points = 0;
-        foreach (var quiz in quizzes)
+        foreach (var quiz in liveQuizzes)
         {
             if (quiz.Hash == guid)
             {
                 points += quiz.QuestionCount;
             }
         }
+        return points;
+    }
+
+    private int GetNumberOfCorrectAnswers(Guid guid)
+    {
+        using var dbContext = DbFactory.CreateDbContext();
+
+        List<User_Question> user_questions = new List<User_Question>() { };
+        user_questions = dbContext.UserQuestions.Include(u => u.User).Include(u => u.Question).Include(u => u.CheckedAnswers).
+            Where(q => q.User.Id == userId).ToList();
+        Quiz selectedQuiz = null;
+        int points = 0;
+        foreach (var quiz in liveQuizzes)
+        {
+            if (quiz.Hash == guid)
+            {
+                selectedQuiz = quiz;
+            }
+        }
+        foreach (var question in selectedQuiz.Questions)
+        {
+            foreach (var questionUser in user_questions)
+            {
+                if (questionUser.Question.Hash == question.Hash)
+                {
+                    foreach (var answer in questionUser.CheckedAnswers)
+                    {
+                        if (answer.Correct)
+                        {
+                            ++points;
+                        } else
+                        {
+                            --points;
+                        }
+                    }
+                }
+            }
+        }
+
         return points;
     }
 

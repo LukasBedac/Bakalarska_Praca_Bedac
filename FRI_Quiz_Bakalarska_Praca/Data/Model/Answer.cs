@@ -19,5 +19,8 @@ namespace FRI_Quiz_Bakalarska_Praca.Data.Model
         
         [Required]
         public Question Question { get; set; }
+
+        [NotMapped]
+        public bool isChecked { get; set; }
     }
 }

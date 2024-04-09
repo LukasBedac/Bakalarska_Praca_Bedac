@@ -21,33 +21,46 @@
                     <TableBody Border="Border.Primary" >
                     @foreach (var answer in userQuestion.Question.Answers)
                     {
-                    <TableRow Border="Border.Is2.Primary">
-                        @((MarkupString)answer.Text)
-                        <TableRowCell Class="align-content-center">
-                            <input type="checkbox" />
-
-                        </TableRowCell>
-                    </TableRow>
-                   
+                        @if (user_uQ.Contains(userQuestion))
+                        {
+                        <TableRow Border="Border.Is2.Primary">
+                            @((MarkupString)answer.Text)
+                            <TableRowCell Class="align-content-center">
+                                <input type="checkbox" @bind="answer.isChecked" disabled />
+                            </TableRowCell>
+                        </TableRow>
+                        } else
+                        {
+                        <TableRow Border="Border.Is2.Primary">
+                            @((MarkupString)answer.Text)
+                            <TableRowCell Class="align-content-center">
+                                <input type="checkbox" @bind="answer.isChecked"/>
+                            </TableRowCell>
+                        </TableRow>
+                        }
                     }
                  </TableBody>
                 <Divider></Divider>
             </Table>
         }
-        <Button Color="Color.Success">Potvrdiť odpovede</Button>
+        <Button Color="Color.Success" Clicked="SubmitUserQuestion">Potvrdiť odpovede</Button>
 </div>
+<div class="footer"></div>
 
 @code {
     private Quiz quiz = new Quiz();
     private User_Question userQuestion = new User_Question();
+    private List<User_Question> user_uQ = new List<User_Question>() { };
     private List<User_Question> userQuestions = new List<User_Question>() { };
-    private bool tmp;
+    private bool checkBool;
+
     [Parameter]
     public Guid QuizGuid { get; set; }
 
     [CascadingParameter]
     public Task<AuthenticationState>? authenticationState { get; set; }
 
+    //TODO 5.4 Dorobit bodovanie quizov
     protected override async Task OnInitializedAsync()
     {
         using var dbContext = await DbFactory.CreateDbContextAsync();
@@ -55,12 +68,38 @@
         {
             quiz = await dbContext.Quizzes.Include(q => q.Questions).ThenInclude(a => a.Answers).FirstOrDefaultAsync(q => q.Hash == QuizGuid);
         }
+
         var state = await authenticationState;
         int userId = int.Parse(state.User.FindFirst(ClaimTypes.NameIdentifier).Value);
+        List<User_Question> tmpUQ = new List<User_Question>();
+        tmpUQ = await dbContext.UserQuestions.Where(q => q.User.Id == userId).ToListAsync();
+        foreach (var uq in tmpUQ)
+        {
+            if (uq.Question != null)
+            {
+                user_uQ.Add(uq);
+            }
+        }
+        if (user_uQ.Count() > 0)
+        {
+            userQuestions.AddRange(user_uQ);
+            foreach (var uQ in userQuestions)
+            {
+                if (quiz.Questions.Contains(uQ.Question))
+                {
+                    quiz.Questions.Remove(uQ.Question);
+                }
+                foreach (var answer in uQ.CheckedAnswers)
+                {
+                    answer.isChecked = true;
+                }
+            }
+        }
         foreach (var question in quiz.Questions)
         {
             if (question.Shown == false) //TODO 5.3 Prerobit na true podmienku
             {
+
                 User_Question tmpUq = new User_Question();
                 tmpUq.Question = question;
                 tmpUq.User = await dbContext.Users.FindAsync(userId);
@@ -68,4 +107,49 @@
             }
         }
     }
+    private async Task SubmitUserQuestion()
+    {
+        using var dbContext = await DbFactory.CreateDbContextAsync();
+        foreach (var userQuestion in userQuestions)
+        {
+            List<Answer> tmpAnswers = new List<Answer>();
+            foreach (var item in userQuestion.Question.Answers)
+            {
+                if (item.isChecked)
+                {
+                    tmpAnswers.Add(item);
+                }
+            }
+            userQuestion.CheckedAnswers = tmpAnswers;
+            userQuestion.DateAnswered = DateTime.Now;
+            dbContext.UserQuestions.Attach(userQuestion);
+        }
+        await dbContext.SaveChangesAsync();
+    }
+
+    /*private async Task AddCheckedAnswer(int uqId ,Answer answer, bool check)
+    {
+        if (check)
+        {
+            foreach (var item in userQuestions)
+            {
+                if (item.Id == uqId)
+                {
+                    item.CheckedAnswers.Add(answer);
+                }
+            }
+        } else
+        {
+            foreach (var item in userQuestions)
+            {
+                if (item.Id == uqId)
+                {
+                    if (item.CheckedAnswers.Contains(answer))
+                    {
+                        item.CheckedAnswers.Remove(answer);
+                    };
+                }
+            }
+        }
+    }*/
 }
