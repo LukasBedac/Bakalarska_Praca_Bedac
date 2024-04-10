@@ -28,7 +28,7 @@
                     <CollapseHeader>
                         <Heading Size="HeadingSize.Is5">
                             <AccordionToggle Width="Width.Is25" Clicked="() => NavigateToQuiz(quiz.Hash)">@quiz.QuizName</AccordionToggle>
-                            <AccordionToggle Class="disabled"> Pocet bodov: @GetNumberOfCorrectAnswers(quiz.Hash)/@GetNumberOfMaxPoints(quiz.Hash)</AccordionToggle>
+                            <AccordionToggle Class="disabled"> Pocet bodov: @GetNumberOfCorrectAnswers(quiz.Hash).ToString("F2") / @GetNumberOfMaxPoints(quiz.Hash)</AccordionToggle>
                         </Heading>
                     </CollapseHeader>
                     <!--<CollapseBody Height="Height.Is25" Background="Background.Default">
@@ -50,7 +50,7 @@
                                 }
                             </CollapseBody>
                         }
-                            </CollapseBody>-->
+                    </CollapseBody>-->
                         </Collapse>
             }
             </Accordion>
@@ -101,7 +101,10 @@
     {
         using var dbContext = DbFactory.CreateDbContext();
         var state = await authenticationState;
-        userId = int.Parse(state.User.FindFirst(ClaimTypes.NameIdentifier).Value);
+        if (state.User.Identity.IsAuthenticated)
+        {
+            userId = int.Parse(state.User.FindFirst(ClaimTypes.NameIdentifier).Value);
+        }
         quizzes = await dbContext.Quizzes
         .Include(Quiz => Quiz.Questions)
         .ThenInclude(Question => Question.Answers)
@@ -123,36 +126,78 @@
         return points;
     }
 
-    private int GetNumberOfCorrectAnswers(Guid guid)
+    private double GetNumberOfCorrectAnswers(Guid guid)
     {
         using var dbContext = DbFactory.CreateDbContext();
 
         List<User_Question> user_questions = new List<User_Question>() { };
-        user_questions = dbContext.UserQuestions.Include(u => u.User).Include(u => u.Question).Include(u => u.CheckedAnswers).
+        user_questions = dbContext.UserQuestions.Include(u => u.User).Include(u => u.Question).ThenInclude(q => q.Answers).Include(u => u.CheckedAnswers).
             Where(q => q.User.Id == userId).ToList();
         Quiz selectedQuiz = null;
-        int points = 0;
+        double points = 0;
         foreach (var quiz in liveQuizzes)
         {
             if (quiz.Hash == guid)
             {
                 selectedQuiz = quiz;
+                break;
             }
         }
-        foreach (var question in selectedQuiz.Questions)
+        User_Question selectedQuestion = null;
+        foreach (var question in selectedQuiz.Questions) 
         {
             foreach (var questionUser in user_questions)
             {
                 if (questionUser.Question.Hash == question.Hash)
                 {
-                    foreach (var answer in questionUser.CheckedAnswers)
+                    selectedQuestion = questionUser;
+                    if (selectedQuestion == null)
+                    {
+                        return 0;
+                    }
+                    double correctAnswers = 0;
+                    foreach (var answer in question.Answers)
                     {
                         if (answer.Correct)
                         {
-                            ++points;
-                        } else
+                            correctAnswers += 1;
+                        }
+                    }
+                    foreach (var answer in selectedQuestion.CheckedAnswers)
+                    {
+                        if (correctAnswers > 1)
                         {
-                            --points;
+                            if (answer.Correct)
+                            {
+                                points += 1 / correctAnswers;
+                            } else
+                            {
+                                if (points == 0)
+                                {
+                                    points = 0;
+                                } else
+                                {
+                                    points -= 1 / correctAnswers;
+                                }
+                            }                                                                                        
+                        }
+                        else
+                        {
+                            if (answer.Correct)
+                            {
+                                points += 1;
+                            }
+                            else
+                            {
+                                if (points == 1)
+                                {
+                                    points = 0;
+                                }
+                                else
+                                {
+                                    points -= 1;
+                                }
+                            }
                         }
                     }
                 }
@@ -160,6 +205,7 @@
         }
 
         return points;
+
     }
 
     private List<Quiz> GetLiveQuizzes()

@@ -21,12 +21,14 @@
 }
 .list-quiz-all {
     display: flex;
-    padding-top: 2rem;
+    padding-top: 3rem;
+    padding-bottom: 5rem;
     margin-top: 2rem;
 }
 .list-quiz-active{
     display: flex;
-    padding-bottom: 1rem;
+    padding-bottom: 2rem;
+    padding-top: 3rem;
 }
 
 .footer-padding {

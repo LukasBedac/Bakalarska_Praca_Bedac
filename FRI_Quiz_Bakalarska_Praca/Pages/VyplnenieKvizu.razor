@@ -49,7 +49,7 @@
 
 @code {
     private Quiz quiz = new Quiz();
-    private User_Question userQuestion = new User_Question();
+    //private User_Question userQuestion = new User_Question();
     private List<User_Question> user_uQ = new List<User_Question>() { };
     private List<User_Question> userQuestions = new List<User_Question>() { };
     private bool checkBool;
@@ -60,7 +60,6 @@
     [CascadingParameter]
     public Task<AuthenticationState>? authenticationState { get; set; }
 
-    //TODO 5.4 Dorobit bodovanie quizov
     protected override async Task OnInitializedAsync()
     {
         using var dbContext = await DbFactory.CreateDbContextAsync();
@@ -71,9 +70,9 @@
 
         var state = await authenticationState;
         int userId = int.Parse(state.User.FindFirst(ClaimTypes.NameIdentifier).Value);
-        List<User_Question> tmpUQ = new List<User_Question>();
-        tmpUQ = await dbContext.UserQuestions.Where(q => q.User.Id == userId).ToListAsync();
-        foreach (var uq in tmpUQ)
+        List<User_Question> tmpUQs = new List<User_Question>();
+        tmpUQs = await dbContext.UserQuestions.Include(q => q.Question).ThenInclude(q => q.Answers).Include(q => q.CheckedAnswers).Where(q => q.User.Id == userId).ToListAsync();
+        foreach (var uq in tmpUQs)
         {
             if (uq.Question != null)
             {
@@ -82,30 +81,52 @@
         }
         if (user_uQ.Count() > 0)
         {
-            userQuestions.AddRange(user_uQ);
+            foreach (var question in quiz.Questions)
+            {
+                foreach (var uq_question in user_uQ)
+                {
+                    if (uq_question.Question.Hash == question.Hash)
+                    {
+                        userQuestions.Add(uq_question);
+                    }
+                }
+
+            }
             foreach (var uQ in userQuestions)
             {
-                if (quiz.Questions.Contains(uQ.Question))
-                {
-                    quiz.Questions.Remove(uQ.Question);
-                }
                 foreach (var answer in uQ.CheckedAnswers)
                 {
                     answer.isChecked = true;
                 }
             }
         }
-        foreach (var question in quiz.Questions)
+        if (userQuestions.Count < 1)
         {
-            if (question.Shown == false) //TODO 5.3 Prerobit na true podmienku
+            foreach (var question in quiz.Questions)
             {
-
-                User_Question tmpUq = new User_Question();
-                tmpUq.Question = question;
-                tmpUq.User = await dbContext.Users.FindAsync(userId);
-                userQuestions.Add(tmpUq);
+                if (question.Shown)
+                {
+                    User_Question tmpUq = new User_Question();
+                    tmpUq.Question = question;
+                    tmpUq.User = await dbContext.Users.FindAsync(userId);
+                    userQuestions.Add(tmpUq);
+                }
+                
             }
         }
+        List<User_Question> notAnswered = new List<User_Question>();
+        foreach (var question in userQuestions)
+        {
+            if (!quiz.Questions.Contains(question.Question))
+            {
+                User_Question tmpUq = new User_Question();
+                tmpUq.Question = question.Question;
+                tmpUq.User = await dbContext.Users.FindAsync(userId);
+                notAnswered.Add(question);
+            }
+        }
+        userQuestions.AddRange(notAnswered);
+
     }
     private async Task SubmitUserQuestion()
     {
@@ -125,6 +146,7 @@
             dbContext.UserQuestions.Attach(userQuestion);
         }
         await dbContext.SaveChangesAsync();
+        StateHasChanged();
     }
 
     /*private async Task AddCheckedAnswer(int uqId ,Answer answer, bool check)

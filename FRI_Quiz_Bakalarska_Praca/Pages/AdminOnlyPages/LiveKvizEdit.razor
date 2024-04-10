@@ -1,4 +1,4 @@
-﻿@page "/liveKvizEdit/{Guid:guid}"
+﻿@page "/liveKvizEdit/{QuizGuid:guid}"
 @using FRI_Quiz_Bakalarska_Praca.Data.Database
 @using FRI_Quiz_Bakalarska_Praca.Data.Model
 @using Microsoft.EntityFrameworkCore
@@ -34,13 +34,13 @@
     private Quiz quiz;
 
     [Parameter]
-    public Guid Guid { get; set; }
+    public Guid QuizGuid { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         using var dbContext = DbFactory.CreateDbContext();
         //TODO 5.0 zmenit na GUID
-        quiz = dbContext.Quizzes.Include(q => q.Questions).ThenInclude(qu => qu.Answers).FirstOrDefault(q => q.Id == 1);
+        quiz = dbContext.Quizzes.Include(q => q.Questions).ThenInclude(qu => qu.Answers).FirstOrDefault(q => q.Hash == QuizGuid);
 
     }
 }
