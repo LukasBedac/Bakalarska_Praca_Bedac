@@ -4,5 +4,6 @@
     display: inline-flex;
     flex-direction: row;
     padding-top: 2rem;
-    position:fixed;
+    padding-bottom: 2rem;
+    position: fixed;
 }

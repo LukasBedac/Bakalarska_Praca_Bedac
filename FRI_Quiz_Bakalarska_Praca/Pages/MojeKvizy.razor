@@ -24,37 +24,16 @@
             <Accordion Height="Height.Is50">
             @foreach (var quiz in liveQuizzes)
             {
-                <Collapse Width="Width.Is50">
+                <Collapse Class="mobile-width-change">
                     <CollapseHeader>
                         <Heading Size="HeadingSize.Is5">
-                            <AccordionToggle Width="Width.Is25" Clicked="() => NavigateToQuiz(quiz.Hash)">@quiz.QuizName</AccordionToggle>
-                            <AccordionToggle Class="disabled"> Pocet bodov: @GetNumberOfCorrectAnswers(quiz.Hash).ToString("F2") / @GetNumberOfMaxPoints(quiz.Hash)</AccordionToggle>
+                                <AccordionToggle Clicked="() => NavigateToQuiz(quiz.Hash)">@quiz.QuizName </AccordionToggle>
+                                <AccordionToggle Class="disabled">Pocet bodov: @GetNumberOfCorrectAnswers(quiz.Hash).ToString("F2") / @GetNumberOfMaxPoints(quiz.Hash) </AccordionToggle>
                         </Heading>
-                    </CollapseHeader>
-                    <!--<CollapseBody Height="Height.Is25" Background="Background.Default">
-                        @foreach (var question in quiz.Questions)
-                        {
-                            <div>
-                                <header>@((MarkupString)question.Text)</header>
-                            </div>
-                            <CollapseBody> 
-                                @foreach (var answer in question.Answers)
-                                {
-                                        <div class="question-box">
-                                        <div class="question-order">
-                                        <div class="paddng-between-answer"># @answer.Order</div>
-                                            <div>@((MarkupString)answer.Text)</div>
-                                        </div>
-                                    </div>
-                                    <br />
-                                }
-                            </CollapseBody>
-                        }
-                    </CollapseBody>-->
-                        </Collapse>
+                    </CollapseHeader>                      
+                 </Collapse>
             }
-            </Accordion>
-           
+            </Accordion>           
         }
         <Div Class="list-quiz-all">
             <Heading>Zoznam ostatných kvízov</Heading>
@@ -70,7 +49,6 @@
                         </CardBody>
                 </Card>
             }
-
             </Accordion>
         </div>
         </Authorized>
@@ -223,7 +201,6 @@
         }
         return tempQuizzes;
     }
-    //TODO Zmenit ID presmerovanie na GUID-hash
     private void NavigateToQuiz(Guid guid)
     {
         NavManager.NavigateTo($"/vyplnKviz/{guid}");

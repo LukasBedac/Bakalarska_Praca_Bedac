@@ -1,0 +1,7 @@
+﻿body {
+
+}
+.bottom-padding {
+    display: flex;
+    padding-bottom: 5rem;
+}

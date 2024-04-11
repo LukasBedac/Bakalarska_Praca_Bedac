@@ -4,33 +4,43 @@
 @using Microsoft.EntityFrameworkCore
 @inject IDbContextFactory<ApplicationDbContext> DbFactory
 
+<Heading>@quiz.QuizName</Heading>
+<Table Border="Border.Is3">
+    <TableHeader>
+        <TableHeaderCell>Číslo</TableHeaderCell>
+        <TableHeaderCell>Otázka</TableHeaderCell>
+        <TableHeaderCell>Odpoveď | Správnosť</TableHeaderCell>
+        <TableHeaderCell>Viditeľnosť</TableHeaderCell>       
+        <TableHeaderCell></TableHeaderCell>
+    </TableHeader>
+    @foreach (var question in quiz.Questions)
+    {
+    <TableBody>
+        <TableRow>
+            <TableRowCell>@question.Order</TableRowCell>
+            <TableRowCell>@((MarkupString)question.Text)</TableRowCell>
+                @foreach (var answer in question.Answers)
+                {
+                    <TableRow>
+                        <TableRowCell>@((MarkupString)answer.Text)</TableRowCell>
+                        <TableRowCell TextColor="@(answer.Correct ? TextColor.Success : TextColor.Danger)">@(answer.Correct ? "Správna" : "Nesprávna")</TableRowCell>
+                    </TableRow>
+                }
+            <TableRowCell>@((MarkupString)(question.Shown ? "Viditelný" : "Skrytý"))</TableRowCell>
+            <TableRowCell>
+                    <Button Color="@(question.Shown ? Color.Danger : Color.Success)" Clicked="() => ChangeVisibility(question)">@((MarkupString)(question.Shown ? "Skryť" : "Zobraziť")) </Button>
+            </TableRowCell>
+        </TableRow>
+    </TableBody>   
+    }
+</Table>
+<div class="footer-padding bottom-padding">
+    <Button Color="Color.Primary" Clicked="@SaveChanges">Uložiť zmeny</Button>
+</div>
 
-<Card>
-    <CardBody>
-        <CardTitle Size="3">
-            Kvíz - @quiz.QuizName
-        </CardTitle>
-        @foreach (var question in quiz.Questions)
-        {
-        <CardTitle Size="2" Class="d-inline-flex">
-            #@question.Order @((MarkupString)question.Text)   
-        </CardTitle>
-        @foreach (var answer in question.Answers)
-            {
-                <CardBody>
-                    <CardText>
-                        @((MarkupString)answer.Text)
-                    </CardText>
-                </CardBody>
-            }
-        }
-       
-    </CardBody>
-</Card>
 
 
 @code {
-    //TODO 2.8 Dorobit zobrazenie kvizu a jeho zobrazovanie podla zmeny, vytvorit graf vysledkov ale mozno na samosatnej stranke 
     private Quiz quiz;
 
     [Parameter]
@@ -39,8 +49,28 @@
     protected override async Task OnInitializedAsync()
     {
         using var dbContext = DbFactory.CreateDbContext();
-        //TODO 5.0 zmenit na GUID
         quiz = dbContext.Quizzes.Include(q => q.Questions).ThenInclude(qu => qu.Answers).FirstOrDefault(q => q.Hash == QuizGuid);
 
+    }
+
+    private Task ChangeVisibility(Question question)
+    {
+        if (question == null)
+        {
+            return Task.CompletedTask;
+        } else
+        {
+            question.Shown = !question.Shown;
+        }
+
+        return Task.CompletedTask;
+        
+    }
+    private async Task SaveChanges()
+    {
+        using var dbContext = DbFactory.CreateDbContext();
+        dbContext.Quizzes.Update(quiz);
+        await dbContext.SaveChangesAsync();
+        await Task.CompletedTask;
     }
 }
