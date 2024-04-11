@@ -67,7 +67,6 @@
         {
             quiz = await dbContext.Quizzes.Include(q => q.Questions).ThenInclude(a => a.Answers).FirstOrDefaultAsync(q => q.Hash == QuizGuid);
         }
-        //TODO 5.0 Nefunguje zobrazenie otazok po vyplneni jednej
         var state = await authenticationState;
         int userId = int.Parse(state.User.FindFirst(ClaimTypes.NameIdentifier).Value);
         List<User_Question> tmpUQs = new List<User_Question>();
@@ -88,10 +87,10 @@
                     if (uq_question.Question.Hash == question.Hash)
                     {
                         userQuestions.Add(uq_question);
-                    }
+                    } 
                 }
-
             }
+
             foreach (var uQ in userQuestions)
             {
                 foreach (var answer in uQ.CheckedAnswers)
@@ -100,12 +99,22 @@
                 }
             }
         }
-        if (userQuestions.Count < 1)
+        if (userQuestions.Count < quiz.Questions.Count())
         {
+            List<Question> tmpQuestions = new List<Question>();
+            foreach (var userQuestion in userQuestions)
+            {
+                tmpQuestions.Add(userQuestion.Question);
+            }
             foreach (var question in quiz.Questions)
             {
+                if (tmpQuestions.Contains(question))
+                {
+                    break;
+                } 
                 if (question.Shown)
                 {
+
                     User_Question tmpUq = new User_Question();
                     tmpUq.Question = question;
                     tmpUq.User = await dbContext.Users.FindAsync(userId);
