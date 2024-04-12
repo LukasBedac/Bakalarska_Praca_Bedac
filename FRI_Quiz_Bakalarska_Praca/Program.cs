@@ -19,7 +19,6 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Components.Authorization;
 using FRI_Quiz_Bakalarska_Praca.Data;
-using Blazored.SessionStorage;
 using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);

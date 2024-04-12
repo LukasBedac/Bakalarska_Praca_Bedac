@@ -23,7 +23,7 @@
                     {
                         @if (user_uQ.Contains(userQuestion))
                         {
-                        <TableRow Border="Border.Is2.Primary">
+                        <TableRow Color="@(answer.Correct ? Color.Success : Color.Danger)" Border="Border.Is2.Primary">
                             @((MarkupString)answer.Text)
                             <TableRowCell Class="align-content-center">
                                 <input type="checkbox" @bind="answer.isChecked" disabled />
@@ -43,11 +43,21 @@
                 <Divider></Divider>
             </Table>
         }
-        <Button Color="Color.Success" Clicked="SubmitUserQuestion">Potvrdiť odpovede</Button>
+        <Buttons>
+            <Button Color="Color.Success" Clicked="SubmitUserQuestion">Potvrdiť odpovede</Button>
+            <Button Color="Color.Primary" Clicked="HandleRedraw">Zobraziť výsledky</Button>
+        </Buttons>
+   
+        <div>
+        <BarChart @ref="barChart" Type="ChartType.Bar" TItem="int" Clicked="@OnClicked" />
+        </div>
+    
+    
 </div>
 <div class="footer"></div>
 
 @code {
+    //TODO 5.6 Graf
     private Quiz quiz = new Quiz();
     //private User_Question userQuestion = new User_Question();
     private List<User_Question> user_uQ = new List<User_Question>() { };
@@ -70,7 +80,10 @@
         var state = await authenticationState;
         int userId = int.Parse(state.User.FindFirst(ClaimTypes.NameIdentifier).Value);
         List<User_Question> tmpUQs = new List<User_Question>();
-        tmpUQs = await dbContext.UserQuestions.Include(q => q.Question).ThenInclude(q => q.Answers).Include(q => q.CheckedAnswers).Where(q => q.User.Id == userId).ToListAsync();
+        tmpUQs = await dbContext.UserQuestions.Include(q => q.Question).ThenInclude(q => q.Answers)
+            .Include(q => q.CheckedAnswers).Where(q => q.User.Id == userId).ToListAsync();
+
+        //Pridanie vsetkych zodpovedanych entit do listu
         foreach (var uq in tmpUQs)
         {
             if (uq.Question != null)
@@ -78,6 +91,7 @@
                 user_uQ.Add(uq);
             }
         }
+        //Odflitrovanie vyplnenych otazok k danemu kvizu
         if (user_uQ.Count() > 0)
         {
             foreach (var question in quiz.Questions)
@@ -90,7 +104,7 @@
                     } 
                 }
             }
-
+            //Oznacenie doposial pridanych kvizov, ktore maju oznacene otazky - zatial su pridane len vypnene v liste
             foreach (var uQ in userQuestions)
             {
                 foreach (var answer in uQ.CheckedAnswers)
@@ -99,30 +113,30 @@
                 }
             }
         }
-        if (userQuestions.Count < quiz.Questions.Count())
+        //Nacitanie otazok z vyplnenych entit do listu
+        List<Question> tmpQuestions = new List<Question>();
+        foreach (var userQuestion in userQuestions)
         {
-            List<Question> tmpQuestions = new List<Question>();
-            foreach (var userQuestion in userQuestions)
+            tmpQuestions.Add(userQuestion.Question);
+        }
+        //kontrola ukazanych otazok - ak je zobrazena a nie je uz vyplnena, nech sa vyplni nova prazdna enntita a ukaze sa
+        // otazka na vyplnenie
+        foreach (var question in quiz.Questions)
+        {
+            if (tmpQuestions.Contains(question))
             {
-                tmpQuestions.Add(userQuestion.Question);
-            }
-            foreach (var question in quiz.Questions)
+                continue;
+            } 
+            if (question.Shown)
             {
-                if (tmpQuestions.Contains(question))
-                {
-                    break;
-                } 
-                if (question.Shown)
-                {
 
-                    User_Question tmpUq = new User_Question();
-                    tmpUq.Question = question;
-                    tmpUq.User = await dbContext.Users.FindAsync(userId);
-                    userQuestions.Add(tmpUq);
-                }
-
+                User_Question tmpUq = new User_Question();
+                tmpUq.Question = question;
+                tmpUq.User = await dbContext.Users.FindAsync(userId);
+                userQuestions.Add(tmpUq);
             }
         }
+
         List<User_Question> notAnswered = new List<User_Question>();
         foreach (var question in userQuestions)
         {
@@ -143,47 +157,133 @@
     private async Task SubmitUserQuestion()
     {
         using var dbContext = await DbFactory.CreateDbContextAsync();
+        List<User_Question> notAnswered = new List<User_Question>();
         foreach (var userQuestion in userQuestions)
         {
             List<Answer> tmpAnswers = new List<Answer>();
             foreach (var item in userQuestion.Question.Answers)
             {
+
                 if (item.isChecked)
                 {
                     tmpAnswers.Add(item);
                 }
+            }
+            if (userQuestion.CheckedAnswers.Count < 1)
+            {
+                continue;
             }
             userQuestion.CheckedAnswers = tmpAnswers;
             userQuestion.DateAnswered = DateTime.Now;
             dbContext.UserQuestions.Attach(userQuestion);
         }
         await dbContext.SaveChangesAsync();
-        StateHasChanged();
+    }
+    #region Chart
+    BarChart<int> barChart;
+    private List<BarChartDataset<int>> ChartData { get; set; }
+    List<string> backgroundColors = new List<string> { ChartColor.FromRgba(255, 99, 132, 0.2f), 
+        ChartColor.FromRgba(54, 162, 235, 0.2f), ChartColor.FromRgba(255, 206, 86, 0.2f), 
+        ChartColor.FromRgba(75, 192, 192, 0.2f), ChartColor.FromRgba(153, 102, 255, 0.2f), 
+        ChartColor.FromRgba(255, 159, 64, 0.2f) };
+    List<string> borderColors = new List<string> { ChartColor.FromRgba(255, 99, 132, 1f),
+        ChartColor.FromRgba(54, 162, 235, 1f), ChartColor.FromRgba(255, 206, 86, 1f), 
+        ChartColor.FromRgba(75, 192, 192, 1f), ChartColor.FromRgba(153, 102, 255, 1f), 
+        ChartColor.FromRgba(255, 159, 64, 1f) };
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await HandleRedraw();
+        }
     }
 
-    /*private async Task AddCheckedAnswer(int uqId ,Answer answer, bool check)
+    private async Task HandleRedraw()
     {
-        if (check)
+        await barChart.Clear();
+        List<BarChartDataset<int>> data = new List<BarChartDataset<int>>();
+        data = GetBarChartDataset();
+        foreach (var dataset in data)
         {
-            foreach (var item in userQuestions)
+            await barChart.AddDataSet(dataset);
+        }
+        
+        await barChart.AddLabels(SetLabels());
+        await barChart.Update();
+    }
+
+    private List<BarChartDataset<int>> GetBarChartDataset()
+    {
+        ChartData = new List<BarChartDataset<int>>() {
+        new BarChartDataset<int>()
             {
-                if (item.Id == uqId)
-                {
-                    item.CheckedAnswers.Add(answer);
-                }
+                Label = "Spravne",
+                Data = SetData(1),
+                BackgroundColor = backgroundColors,
+                BorderColor = borderColors,
+                BorderWidth = 1
+            },
+        new BarChartDataset<int>()
+            {
+                Label = "Nespravne",
+                Data = SetData(0),
+                BackgroundColor = backgroundColors,
+                BorderColor = borderColors,
+                BorderWidth = 1
             }
-        } else
+        };
+        return ChartData;
+    }
+
+    private string[] SetLabels()
+    {
+        string[] labels = new string[quiz.Questions.Count()];
+        for (int i = 0; i < quiz.Questions.Count(); i++)
         {
-            foreach (var item in userQuestions)
+            labels[i] = "Otazka" + quiz.Questions[i].Order;
+        }
+        return labels;
+    }
+
+
+    private List<int> SetData(int type)
+    {
+        return LoadData(type).Result;
+    }
+
+    private async Task<List<int>> LoadData(int type)
+    {
+        using var dbContext = await DbFactory.CreateDbContextAsync();
+        List<int> data = new List<int>();
+        List<User_Question> userDatas = new List<User_Question>();
+        userDatas = userQuestions;
+        foreach (var userUq in userDatas)
+        {
+            if (userUq.CheckedAnswers.Count() > 0 && userUq.Question.Quiz.Id == quiz.Id)
             {
-                if (item.Id == uqId)
+                foreach (var answer in userUq.CheckedAnswers)
                 {
-                    if (item.CheckedAnswers.Contains(answer))
+                    if (answer.isChecked && type == 1)
                     {
-                        item.CheckedAnswers.Remove(answer);
-                    };
+                        data.Add(1);
+                    } else
+                    {
+                        data.Add(0);
+                    }
                 }
             }
         }
-    }*/
+
+        return data;
+    }
+
+    Task OnClicked(ChartMouseEventArgs e)
+    {
+        var model = e.Model as BarChartModel;
+
+        Console.WriteLine($"Handling event for {nameof(BarChartModel)}: x:{model.X} y:{model.Y}");
+        return Task.CompletedTask;
+    }
+    #endregion Chart
 }
