@@ -57,13 +57,11 @@
 <div class="footer"></div>
 
 @code {
-    //TODO 5.6 Graf
     private Quiz quiz = new Quiz();
-    //private User_Question userQuestion = new User_Question();
     private List<User_Question> user_uQ = new List<User_Question>() { };
     private List<User_Question> userQuestions = new List<User_Question>() { };
     private bool checkBool;
-
+    List<User_Question> allDatas = new List<User_Question>();
     [Parameter]
     public Guid QuizGuid { get; set; }
 
@@ -75,14 +73,22 @@
         using var dbContext = await DbFactory.CreateDbContextAsync();
         if (QuizGuid != Guid.Empty)
         {
-            quiz = await dbContext.Quizzes.Include(q => q.Questions).ThenInclude(a => a.Answers).FirstOrDefaultAsync(q => q.Hash == QuizGuid);
+            quiz = await dbContext.Quizzes.Include(q => q.User).Include(q => q.Questions).ThenInclude(a => a.Answers).FirstOrDefaultAsync(q => q.Hash == QuizGuid);
         }
         var state = await authenticationState;
+        if (state.User.Identity.IsAuthenticated == false)
+        {
+            StateHasChanged();
+            return;
+        }
         int userId = int.Parse(state.User.FindFirst(ClaimTypes.NameIdentifier).Value);
+
         List<User_Question> tmpUQs = new List<User_Question>();
         tmpUQs = await dbContext.UserQuestions.Include(q => q.Question).ThenInclude(q => q.Answers)
-            .Include(q => q.CheckedAnswers).Where(q => q.User.Id == userId).ToListAsync();
+            .Include(q => q.CheckedAnswers).Include(q => q.Question.Quiz).Include(q => q.User).Where(q => q.User.Id == userId).ToListAsync();
 
+        allDatas = await dbContext.UserQuestions.Include(q => q.Question).ThenInclude(q => q.Answers)
+            .Include(q => q.CheckedAnswers).Include(q => q.Question.Quiz).Include(q => q.User).ToListAsync();
         //Pridanie vsetkych zodpovedanych entit do listu
         foreach (var uq in tmpUQs)
         {
@@ -169,7 +175,7 @@
                     tmpAnswers.Add(item);
                 }
             }
-            if (userQuestion.CheckedAnswers.Count < 1)
+            if (tmpAnswers.Count < 1)
             {
                 continue;
             }
@@ -182,14 +188,11 @@
     #region Chart
     BarChart<int> barChart;
     private List<BarChartDataset<int>> ChartData { get; set; }
-    List<string> backgroundColors = new List<string> { ChartColor.FromRgba(255, 99, 132, 0.2f), 
-        ChartColor.FromRgba(54, 162, 235, 0.2f), ChartColor.FromRgba(255, 206, 86, 0.2f), 
-        ChartColor.FromRgba(75, 192, 192, 0.2f), ChartColor.FromRgba(153, 102, 255, 0.2f), 
-        ChartColor.FromRgba(255, 159, 64, 0.2f) };
+    List<string> backgroundColors = new List<string> { ChartColor.FromRgba(54, 162, 235, 0.2f),
+        ChartColor.FromRgba(255, 99, 132, 0.2f) };
     List<string> borderColors = new List<string> { ChartColor.FromRgba(255, 99, 132, 1f),
-        ChartColor.FromRgba(54, 162, 235, 1f), ChartColor.FromRgba(255, 206, 86, 1f), 
-        ChartColor.FromRgba(75, 192, 192, 1f), ChartColor.FromRgba(153, 102, 255, 1f), 
-        ChartColor.FromRgba(255, 159, 64, 1f) };
+        ChartColor.FromRgba(54, 162, 235, 1f) };
+
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -208,29 +211,31 @@
         {
             await barChart.AddDataSet(dataset);
         }
-        
+
         await barChart.AddLabels(SetLabels());
         await barChart.Update();
     }
 
     private List<BarChartDataset<int>> GetBarChartDataset()
     {
+        var correctAnswers = SetData(1);
+        var inccorectAnswers = SetData(0);
         ChartData = new List<BarChartDataset<int>>() {
         new BarChartDataset<int>()
             {
                 Label = "Spravne",
-                Data = SetData(1),
-                BackgroundColor = backgroundColors,
-                BorderColor = borderColors,
+                Data = correctAnswers,
+                BackgroundColor = backgroundColors[0],
+                BorderColor = borderColors[0],
                 BorderWidth = 1
             },
         new BarChartDataset<int>()
             {
                 Label = "Nespravne",
-                Data = SetData(0),
-                BackgroundColor = backgroundColors,
-                BorderColor = borderColors,
-                BorderWidth = 1
+                Data = inccorectAnswers,
+                BackgroundColor = backgroundColors[1],
+                BorderColor = borderColors[1],
+                BorderWidth = 1 
             }
         };
         return ChartData;
@@ -241,7 +246,7 @@
         string[] labels = new string[quiz.Questions.Count()];
         for (int i = 0; i < quiz.Questions.Count(); i++)
         {
-            labels[i] = "Otazka" + quiz.Questions[i].Order;
+            labels[i] = "Otazka " + quiz.Questions[i].Order;
         }
         return labels;
     }
@@ -256,22 +261,28 @@
     {
         using var dbContext = await DbFactory.CreateDbContextAsync();
         List<int> data = new List<int>();
-        List<User_Question> userDatas = new List<User_Question>();
-        userDatas = userQuestions;
-        foreach (var userUq in userDatas)
+        foreach (var userUq in allDatas)
         {
             if (userUq.CheckedAnswers.Count() > 0 && userUq.Question.Quiz.Id == quiz.Id)
             {
+                int i = 0;              
                 foreach (var answer in userUq.CheckedAnswers)
                 {
-                    if (answer.isChecked && type == 1)
+                    if (answer.isChecked)
                     {
-                        data.Add(1);
-                    } else
-                    {
-                        data.Add(0);
-                    }
+                        if (answer.Correct && type == 1)
+                        {
+                            ++i;
+                        } else if (!(answer.Correct) && type == 0)
+                        {
+                            ++i;
+                        } else
+                        {
+
+                        }              
+                    } 
                 }
+                 data.Add(i);               
             }
         }
 
