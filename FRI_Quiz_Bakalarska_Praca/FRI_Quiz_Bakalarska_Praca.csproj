@@ -38,7 +38,7 @@
     <PackageReference Include="Microsoft.Identity.Web.UI" Version="2.17.1" />
     <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="7.4.0" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.6" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.1" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.2" />
     <PackageReference Include="NuGet.Packaging" Version="6.9.1" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.1" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.4.0" />
@@ -57,6 +57,10 @@
   <ItemGroup>
     <Folder Include="Image\" />
     <Folder Include="Migrations\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\qr-scanner-worker.min.js" />
   </ItemGroup>
 
 </Project>

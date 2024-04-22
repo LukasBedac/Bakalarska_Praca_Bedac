@@ -8,30 +8,7 @@
 <h1>Na tejto stránke si môžete naskenovať QR kód pre otvorenie kvízu</h1>
 <video id="qr-scanner" style="width: 100%"></video>
 
-<script>
-    import QrScanner from "Data/qr-scanner.min.js"
 
-</script>
-<script>
-    window.onvote.startQRScanner = (() => {
-        QrScanner.WORKER_PATH = "/Data/qr-scanner-worker.min.js";
-        if (window.onvote.qrScanner !== undefined) {
-            window.onvote.qrScanner.stop();
-        }
-        window.onvote.qrScanner = new QrScanner(document.getElementById("qr-scanner"), result => {
-            if (result.includes("/-/")) {
-                document.location = result;
-            }
-        });
-        window.onvote.qrScanner.start();
-    });
-
-    window.onvote.stopQRScanner = (() => {
-        if (window.onvote.qrScanner !== undefined) {
-            window.onvote.qrScanner.stop();
-        }
-    });
-</script>
 
 @code {
     
@@ -39,7 +16,7 @@
     {
         if (firstRender)
         {
-            await JsRuntime.InvokeVoidAsync("onvote.startQRScanner");
+            await JsRuntime.InvokeVoidAsync("frivia.startQRScanner");
         }
     }
 
@@ -47,7 +24,7 @@
     {
         try
         {
-            await JsRuntime.InvokeVoidAsync("onvote.stopQRScanner");
+            await JsRuntime.InvokeVoidAsync("frivia.stopQRScanner");
         }
         catch
         {

@@ -21,19 +21,21 @@
         } 
         else
         {
-            <Accordion Height="Height.Is50">
-            @foreach (var quiz in liveQuizzes)
-            {
-                <Collapse Class="mobile-width-change">
-                    <CollapseHeader>
-                        <Heading Size="HeadingSize.Is5">
-                                <AccordionToggle Clicked="() => NavigateToQuiz(quiz.Hash)">@quiz.QuizName </AccordionToggle>
-                                <AccordionToggle Class="disabled">Pocet bodov: @GetNumberOfCorrectAnswers(quiz.Hash).ToString("F2") / @GetNumberOfMaxPoints(quiz.Hash) </AccordionToggle>
-                        </Heading>
-                    </CollapseHeader>                      
-                 </Collapse>
-            }
-            </Accordion>           
+            <div class="list-padding">
+                <Accordion Height="Height.Is50">
+                @foreach (var quiz in liveQuizzes)
+                {
+                    <Collapse Class="mobile-width-change">
+                        <CollapseHeader>
+                            <Heading Size="HeadingSize.Is5">
+                                    <AccordionToggle Clicked="() => NavigateToQuiz(quiz.Hash)">@quiz.QuizName </AccordionToggle>
+                                    <AccordionToggle Class="disabled">Pocet bodov: @GetNumberOfCorrectAnswers(quiz.Hash).ToString("F2") / @GetNumberOfMaxPoints(quiz.Hash) </AccordionToggle>
+                            </Heading>
+                        </CollapseHeader>                      
+                     </Collapse>
+                }
+                </Accordion>
+            </div>
         }
         <Div Class="list-quiz-all">
             <Heading>Zoznam ostatných kvízov</Heading>

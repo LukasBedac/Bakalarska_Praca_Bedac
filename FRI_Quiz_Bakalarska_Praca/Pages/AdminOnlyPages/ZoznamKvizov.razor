@@ -5,6 +5,7 @@
 @using Microsoft.EntityFrameworkCore
 @inject IDbContextFactory<ApplicationDbContext> DbFactory
 @inject NavigationManager NavigationManager
+@attribute [Authorize(Roles = "Admin, Moderator")]
 
 <DataGrid TItem="Quiz"
           Data="@quizzes"
@@ -17,7 +18,7 @@
            CommandMode="DataGridCommandMode.ButtonRow">
      <DataGridColumns >
          <DataGridColumn Field="@nameof(Quiz.Id)" Caption="#" Sortable="false" Filterable="false" />
-         <DataGridColumn Field="@nameof(Quiz.QuizName)" Caption="Názov" Editable />
+         <DataGridColumn Field="@nameof(Quiz.QuizName)" Caption="Názov" />
          <DataGridColumn Field="@nameof(Quiz.Moderators)" DisplayFormat="" Caption="Moderátori" />
          <DataGridDateColumn Field="@nameof(Quiz.DateFrom)" Caption="Začiatok" />
          <DataGridDateColumn Field="@nameof(Quiz.DateTo)" Caption="Koniec" />
@@ -31,11 +32,12 @@
          @if (selectedQuiz.Id != 0 && selectedQuiz.Type == TypKvizu.livekviz)
         {
             <Button Color="Color.Secondary" Clicked="() => EditLiveQuiz(selectedQuiz.Hash)">Spravovať livekvíz</Button>
-        }
-         
-        
+        }    
      </ButtonRowTemplate>
 </DataGrid>
+<div class="down-padding">
+
+</div>
  <Modal @ref="@modalRef" Closing="@OnModalClosing">
      <ModalContent Centered>
         <ModalHeader>

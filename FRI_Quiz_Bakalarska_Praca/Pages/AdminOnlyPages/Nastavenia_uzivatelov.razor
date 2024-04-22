@@ -9,7 +9,6 @@
     <TableHeader>
         <TableRow>
             <TableHeaderCell>#</TableHeaderCell>
-            <TableHeaderCell>Meno</TableHeaderCell>
             <TableHeaderCell>Email</TableHeaderCell>
             <TableHeaderCell>Rola</TableHeaderCell>
             <TableHeaderCell TextAlignment="TextAlignment.Center">Editácia</TableHeaderCell>
@@ -21,9 +20,8 @@
         {
             <TableRow>
                 <TableRowHeader>@user.Id</TableRowHeader>
-                <TableRowCell>@user.UserName</TableRowCell>
                 <TableRowCell>@user.Email</TableRowCell>
-                <TableRowCell></TableRowCell>
+                <TableRowCell>@GetRole(user).Result</TableRowCell>
                     <TableRowCell TextAlignment="TextAlignment.Center">
                         <Button Type="ButtonType.Button" Color="Color.Success" Clicked="() => ShowChangeModal(user)">Zmeň rolu</Button>
                         <Button Type="ButtonType.Button" Color="Color.Danger" Clicked="() => ShowDeleteModal(user)">Odstrániť uživateľa</Button>
@@ -177,7 +175,6 @@
         return changeModal.Hide();
     }
 
-
     private Task OnModalClosing(ModalClosingEventArgs e)
     {
 
@@ -193,11 +190,28 @@
         }
         else if (elementId == 1)
         {
-            this.role = "admin";
+            this.role = "Admin";
         } else
         {
-            this.role = "moderator";
+            this.role = "Moderator";
         }
         await Task.CompletedTask;
+    }
+
+    private async Task<string> GetRole(User user)
+    {
+        using var dbContext = DbFactory.CreateDbContext();
+
+        IdentityRole<int> role = dbContext.UserRoles
+                            .Where(ur => ur.UserId == user.Id)
+                            .Join(dbContext.Roles, ur => ur.RoleId, r => r.Id, (ur, r) => r)
+                            .FirstOrDefault();
+        if (role == null)
+        {
+            return "";
+        } else
+        {
+            return role.Name;
+        }
     }
 }

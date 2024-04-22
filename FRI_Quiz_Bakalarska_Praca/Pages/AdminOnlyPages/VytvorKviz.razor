@@ -42,21 +42,16 @@
                                   CustomFilter="@(( user, searchValue ) => user.Email.IndexOf( searchValue, 0, StringComparison.CurrentCultureIgnoreCase ) >= 0 )">
                          <NotFoundContent Context="ATcontext"> Prepáčte... @ATcontext nebol nájdený! :( </NotFoundContent>
                      </Autocomplete>
-                     <br/>
-                     <Field Horizontal>
-                        <FieldBody ColumnSize="ColumnSize.Is12">
-                            Označené: @(SelectedAutoCompleteText == null ? null : string.Join(',', SelectedAutoCompleteText))
-                    </FieldBody>
-                </Field>
+                     <br/>   
                 </div>
                 <div class="nastaveniaCasu">
                     <div class="datum">
                         <label class="nastaveniaCasuText">Dátum pre kvíz:</label>
-                        <Addons>         
+                        <Addons>
                             <Addon AddonType="AddonType.Body">
-                                <DatePicker @bind-Dates="@dates" @ref="@datePicker" Date="null" Min="DateTime.Now"
+                                <DatePicker @bind-Dates="@dates" @ref="@datePicker" Min="DateTime.Now" TValue="DateTime?"
                                 SelectionMode="DateInputSelectionMode.Range" DisplayFormat="j/n/Y" Placeholder="DD/MM/YYYY" />
-                            </Addon>                                                                                 
+                            </Addon>
                         </Addons>
                     </div>
                 </div>
@@ -186,7 +181,7 @@
     private bool isLiveKviz = true;
     private IReadOnlyList<DateTime?> dates = new List<DateTime?>() { };
     private TimeSpan? timeFrom = TimeSpan.Zero;
-    private TimeSpan? timeTo = new TimeSpan(23, 59, 0);
+    private TimeSpan? timeTo = new TimeSpan(23, 59, 59);
     private DatePicker<DateTime?>? datePicker;
     private TimeEdit<TimeSpan?>? timePicker;
     private Validations? quizValidation;
@@ -248,6 +243,12 @@
     {
         using var dbContext = DbFactory.CreateDbContext();
         users = await dbContext.Users.ToListAsync();
+        var state = await authenticationState;
+        if (!state.User.Identity.IsAuthenticated)
+        {
+            NavManager.NavigateTo("/");
+            return;
+        }
         if (GuidQuiz != null)
         {
             Quiz quiz = await dbContext.Quizzes
@@ -262,6 +263,7 @@
             timeTo = quiz.DateTo.Value.TimeOfDay;
             newQuiz.Moderators = quiz.Moderators;
             OnceSubmit = true;
+            //TODO 5 Osetrit datum od ak je mensi ako aktualny ze sa zobrazi nejako
         } else
         {
             AddQuestion();
