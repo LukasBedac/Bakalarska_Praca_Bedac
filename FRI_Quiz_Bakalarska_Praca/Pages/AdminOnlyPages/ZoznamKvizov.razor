@@ -17,14 +17,13 @@
           FilterMethod="DataGridFilterMethod.Contains"
            CommandMode="DataGridCommandMode.ButtonRow">
      <DataGridColumns >
-         <DataGridColumn Field="@nameof(Quiz.Id)" Caption="#" Sortable="false" Filterable="false" />
          <DataGridColumn Field="@nameof(Quiz.QuizName)" Caption="Názov" />
          <DataGridColumn Field="@nameof(Quiz.Moderators)" DisplayFormat="" Caption="Moderátori" />
          <DataGridDateColumn Field="@nameof(Quiz.DateFrom)" Caption="Začiatok" />
          <DataGridDateColumn Field="@nameof(Quiz.DateTo)" Caption="Koniec" />
          <DataGridColumn Field="@nameof(Quiz.Type)" Caption="Typ" />
+         <DataGridNumericColumn Field="@nameof(Quiz.NumberOfUsers)" Caption="Počet účástníkov" Filterable="false" />
          <DataGridNumericColumn Field="@nameof(Quiz.QuestionCount)" Caption="Počet otázok" Filterable="false" />
-         
     </DataGridColumns>
      <ButtonRowTemplate>
          <Button Color="Color.Primary" Disabled="(selectedQuiz.Id == 0)" Clicked="() => EditQuiz(selectedQuiz.Hash)">Edit</Button>
@@ -55,6 +54,7 @@
  @code {
     public Quiz? Quiz { get; set; }
     private List<Quiz> quizzes = new List<Quiz>();
+    List<User_Question> user_Questions = new List<User_Question>();
     private Quiz selectedQuiz = new Quiz();
     private Modal modalRef;
     private bool cancelClose;
@@ -95,7 +95,12 @@
         quizzes = await dbContext.Quizzes
         .Include(Kvizy => Kvizy.Questions)
         .ThenInclude(Otazky => Otazky.Answers)
-        .ToListAsync();
+        .ToListAsync();       
+        user_Questions = await dbContext.UserQuestions.Include(q => q.Question.Quiz).Include(q => q.User).ToListAsync();
+        foreach (var quiz in quizzes)
+        {
+            quiz.NumberOfUsers = UsersCount(quiz.Hash);
+        }
         await base.OnInitializedAsync();
     }
 
@@ -147,6 +152,23 @@
     {
         NavigationManager.NavigateTo($"/liveKvizEdit/{guid}");
         return Task.CompletedTask;
+    }
+
+    private int UsersCount(Guid guid)
+    {
+        int count = 0;
+        List<string> users = new List<string>();
+        foreach (var uQ in user_Questions)
+        {
+            if (uQ.Question.Quiz.Hash == guid)
+            {
+                if (users.Count() == 0 || !users.Contains(uQ.User.UserName))
+                {
+                    users.Add(uQ.User.UserName);
+                }
+            }           
+        }      
+        return users.Count();
     }
 }
 

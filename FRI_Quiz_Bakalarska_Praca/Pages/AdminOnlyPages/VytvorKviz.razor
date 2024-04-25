@@ -3,15 +3,18 @@
 @using FRI_Quiz_Bakalarska_Praca.Data.Database
 @using FRI_Quiz_Bakalarska_Praca.Data.Model
 @using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Mvc
 @using Microsoft.EntityFrameworkCore
 @using System.Security.Claims
+@using Microsoft.Extensions.Hosting.Internal
 @using TinyMCE.Blazor;
 @inject AuthenticationStateProvider AuthProvider
 @inject IDbContextFactory<ApplicationDbContext> DbFactory
 @inject UserManager<User> Usermanager
 @inject NavigationManager NavManager
+@attribute [Authorize(Roles = "Admin, Moderator")]
 <PageTitle>Vytvorenie Kvizu</PageTitle>
-
+<script src="~/tinyMCE.js"></script>
 <div>
     <div class="left_side_quiz">
         <Validations @ref="quizValidation" Mode="ValidationMode.Auto" ValidateOnLoad="true">
@@ -48,9 +51,13 @@
                     <div class="datum">
                         <label class="nastaveniaCasuText">Dátum pre kvíz:</label>
                         <Addons>
-                            <Addon AddonType="AddonType.Body">
-                                <DatePicker @bind-Dates="@dates" @ref="@datePicker" Min="DateTime.Now" TValue="DateTime?"
+                            <Addon AddonType="AddonType.Body">                              
+                                <DatePicker @bind-Dates="@dates" @ref="@datePicker" Min="@(dates.Count() == 0 ? DateTime.Today : dates[0])" Date="null" TValue="DateTime?"
                                 SelectionMode="DateInputSelectionMode.Range" DisplayFormat="j/n/Y" Placeholder="DD/MM/YYYY" />
+                                @if (GuidQuiz != Guid.Empty && editDates.Count() > 0)
+                                {
+                                    <FieldLabel>Dátum kvízu je od @editDates[0] do @(editDates.Count() < 2 ? editDates[0] : editDates[1])</FieldLabel>
+                                }
                             </Addon>
                         </Addons>
                     </div>
@@ -180,6 +187,7 @@
     private List<Question> questions = new List<Question>();
     private bool isLiveKviz = true;
     private IReadOnlyList<DateTime?> dates = new List<DateTime?>() { };
+    private IReadOnlyList<DateTime?> editDates = new List<DateTime?>() { };
     private TimeSpan? timeFrom = TimeSpan.Zero;
     private TimeSpan? timeTo = new TimeSpan(23, 59, 59);
     private DatePicker<DateTime?>? datePicker;
@@ -191,8 +199,9 @@
     public List<string?> SelectedAutoCompleteText { get; set; } = new List<string?>() { };
     private bool OnceSubmit = false;
     //Tento parameter sluzi na URL datove presmerovanie
+    //TODO 5 If v html hadze chybu ze nemoze byt null
     [Parameter]
-    public Guid? GuidQuiz { get; set; }
+    public Guid? GuidQuiz { get; set; } = Guid.Empty;
 
     [CascadingParameter]
     public Task<AuthenticationState>? authenticationState { get; set; }
@@ -258,12 +267,18 @@
             .FirstOrDefaultAsync(q => q.Hash == GuidQuiz);
             newQuiz = quiz;
             questions = quiz.Questions;
-            dates = new List<DateTime?>() { quiz.DateFrom, quiz.DateTo };
+            editDates = new List<DateTime?>() { quiz.DateFrom, quiz.DateTo };
             timeFrom = quiz.DateFrom.Value.TimeOfDay;
             timeTo = quiz.DateTo.Value.TimeOfDay;
             newQuiz.Moderators = quiz.Moderators;
+            if (quiz.Type == TypKvizu.livekviz)
+            {
+                isLiveKviz = true;
+            } else
+            {
+                isLiveKviz = false;
+            }
             OnceSubmit = true;
-            //TODO 5 Osetrit datum od ak je mensi ako aktualny ze sa zobrazi nejako
         } else
         {
             AddQuestion();
@@ -284,16 +299,6 @@
     private async Task SubmitQuiz()
     {
         using var dbContext = DbFactory.CreateDbContext();
-        if (GuidQuiz != null)
-        {
-            dbContext.Quizzes.Update(newQuiz);
-            await dbContext.SaveChangesAsync();
-            return;
-        }
-        if (!SetDates())
-        {
-            return;
-        } 
         if (isLiveKviz)
         {
             newQuiz.Type = TypKvizu.livekviz;
@@ -302,6 +307,21 @@
         {
             newQuiz.Type = TypKvizu.kviz;
         }
+        if (!SetDates())
+        {
+            if (GuidQuiz == null)
+            {
+                return;
+            }
+            
+        }      
+        if (GuidQuiz != null)
+        {
+            dbContext.Quizzes.Update(newQuiz);
+            await dbContext.SaveChangesAsync();
+            return;
+        }
+        
         if (!OnceSubmit)
         {
             var state = await authenticationState;
@@ -368,7 +388,7 @@
         tempAnswer.Question = question;
         tempAnswer.Order = question.Answers.Count + 1;
         question.Answers.Add(tempAnswer);
-        
+
     }
 
     private void DeleteAnswer(Question question)
@@ -392,19 +412,27 @@
         {"paste_data_images", "true"},
         {"height", "250px"},
         {"automatic_uploads", true },
-        {"images_upload_url", "/Image"}
+        {"file_picker_types", "file image media"},
+        {"relative_urls", false },
+        {"remove_script_host", false },
+        {"images_upload_url", "/Images"}
     };
 
     private Dictionary<string, object> textConf = new Dictionary<string, object>{
         {"menubar", false },
         {"plugins", "autolink media link image emoticons table"},
         {"toolbar", "undo redo | styles | bold italic underline | table link image "},
-        {"paste_data_images", "true"},     
+        {"paste_data_images", "true"},
         {"width", "60%"},
         {"height", "200px"},
         {"automatic_uploads", true },
-        {"images_upload_url", "/Image"}
+        {"file_picker_types", "file image media"},
+        {"relative_urls", false },
+        {"remove_script_host", false },
+        {"images_upload_url", "/wwwroot/tinyMCE.js"},
+        {"location", "images/" }
     };
-    #endregion TinyMCE
 
+    
+        #endregion TinyMCE
 }

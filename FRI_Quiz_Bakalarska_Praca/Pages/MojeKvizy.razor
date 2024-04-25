@@ -52,6 +52,7 @@
                 </Card>
             }
             </Accordion>
+            <br />
         </div>
         </Authorized>
 
@@ -79,6 +80,10 @@
 
     protected override async Task OnInitializedAsync()
     {
+        if (!authenticationState.Result.User.Identity.IsAuthenticated)
+        {
+            return;
+        }
         using var dbContext = DbFactory.CreateDbContext();
         var state = await authenticationState;
         if (state.User.Identity.IsAuthenticated)

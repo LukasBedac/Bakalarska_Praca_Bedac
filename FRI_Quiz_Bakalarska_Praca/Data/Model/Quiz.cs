@@ -44,6 +44,9 @@ namespace FRI_Quiz_Bakalarska_Praca.Data.Model
         [NotMapped]
         public virtual int QuestionCount => Questions?.Count ?? 0;
 
+        [NotMapped]
+        public int NumberOfUsers { get; set; }
+
     }
 
     

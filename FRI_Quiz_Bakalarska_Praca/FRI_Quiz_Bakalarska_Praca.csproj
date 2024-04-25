@@ -55,7 +55,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Image\" />
+    <Folder Include="Images\" />
     <Folder Include="Migrations\" />
   </ItemGroup>
 
