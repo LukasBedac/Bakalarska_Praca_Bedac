@@ -12,6 +12,7 @@
 @inject IDbContextFactory<ApplicationDbContext> DbFactory
 @inject UserManager<User> Usermanager
 @inject NavigationManager NavManager
+@inject IJSRuntime JSRuntime
 @attribute [Authorize(Roles = "Admin, Moderator")]
 <PageTitle>Vytvorenie Kvizu</PageTitle>
 <script src="~/tinyMCE.js"></script>
@@ -310,11 +311,11 @@
             AddAnswer(questions[0]);           
         }
     }
-    private void GetQRCodes()
+    private async void GetQRCodes()
     {
         using var dbContext = DbFactory.CreateDbContext();
         Guid quizGuid = newQuiz.Hash;
-        NavManager.NavigateTo($"QRCodeGen/{quizGuid}");
+        await JSRuntime.InvokeVoidAsync("open", $"QRCodeGen/{GuidQuiz}", "_blank");
 
     }
 

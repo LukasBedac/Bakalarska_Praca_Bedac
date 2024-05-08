@@ -117,27 +117,6 @@ builder.Services.AddServerSideBlazor()
 //Configure(builder.Services);
 var app = builder.Build();
 
-/*void Configure(IServiceCollection services)
-{   
-    services.AddScoped<UserManager<User>>();
-    services.AddScoped<SignInManager<User>>();
-    services.AddScoped<AuthenticationStateProvider, OwnAuthenticationProvider>();
-    var serviceProvider = services.BuildServiceProvider();
-    using (var serviceScope = serviceProvider.CreateScope())
-    {
-        var userManager = serviceScope.ServiceProvider.GetRequiredService<UserManager<User>>();
-        var roleManager = serviceScope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<int>>>();
-        if (!roleManager.RoleExistsAsync("Admin").Result)
-        {
-            roleManager.CreateAsync(new IdentityRole<int>("Admin")).Wait();
-        }
-        if (!roleManager.RoleExistsAsync("User").Result)
-        {
-            roleManager.CreateAsync(new IdentityRole<int>("User")).Wait();
-        }
-    }
-}*/
-
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

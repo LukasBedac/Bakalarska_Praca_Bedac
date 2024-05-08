@@ -7,14 +7,17 @@
 @inject IDbContextFactory<ApplicationDbContext> DbFactory
 <h3>QRCode generator</h3>
 
+
 @if (liveQuiz)
 {
     <div>
+       
         <Label>QR kód kvízu</Label>
         <Blazorise.QRCode.QRCode Value="@($"/vyplnenieKvizu/{quiz.Hash}")"></Blazorise.QRCode.QRCode>
+        
     </div>
 } else
-{
+{   
     <Label>QR kódy otázok</Label>
     <div class="border-1 d-flex">
         @foreach (var question in questions)
@@ -24,6 +27,7 @@
         }
     </div>
 }
+
 
 <div class=""> 
     <Buttons>
