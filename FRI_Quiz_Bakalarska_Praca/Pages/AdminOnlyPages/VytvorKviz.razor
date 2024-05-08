@@ -52,21 +52,23 @@
                         <label class="nastaveniaCasuText">Dátum pre kvíz:</label>
                         <Addons>
                             <Addon AddonType="AddonType.Body">                              
-                                <DatePicker @bind-Dates="@dates" @ref="@datePicker" Min="@(dates.Count() == 0 ? DateTime.Today : dates[0])" Date="null" TValue="DateTime?"
-                                SelectionMode="DateInputSelectionMode.Range" DisplayFormat="j/n/Y" Placeholder="DD/MM/YYYY" />
-                                @if (GuidQuiz != Guid.Empty && editDates.Count() > 0)
-                                {
-                                    <FieldLabel>Dátum kvízu je od @editDates[0] do @(editDates.Count() < 2 ? editDates[0] : editDates[1])</FieldLabel>
-                                }
-                            </Addon>
-                        </Addons>
+                                <DatePicker @bind-Dates="@dates" @ref="@datePicker" Min="@(dates == null || dates.Count() < 1 ? DateTime.Today : dates[0])" Date="DateTime.Today" 
+                                SelectionMode="DateInputSelectionMode.Range" DisplayFormat="j/n/Y" Placeholder="DD/MM/YYYY" />   
+                                
+                            </Addon>   
+                            @if (GuidQuiz != null && editDates.Count() > 0)
+                            {
+                                <FieldLabel>Dátum začiatku je:@editDates[0] a dátum konca je:@(editDates.Count() < 2 ? editDates[0] : editDates[1]) </FieldLabel>
+                            }
+                        </Addons>                       
                     </div>
+                    
                 </div>
                 <div class="nastaveniaCasu">
                     <div class="casOd">
                         <label class="nastaveniaCasuText">Zaciatok: </label>
                         <Addons>
-                            <Validation Validator="ValidationRule.IsSelected">
+                            <Validation Validator="ValidationRule.IsSelected" >
                                 <Addon AddonType="AddonType.Body">
                                     <TimeEdit @bind-Time="@timeFrom" @ref="@timePicker" Min="DateTime.Now.TimeOfDay" TValue="TimeSpan?" />     
                                 </Addon>
@@ -133,43 +135,54 @@
     </div>
     <div class="left-side-quiz">
         <EditForm id="QuestionForm" Model="@questions" >
-            @foreach (var question in questions) 
+            <div class="question-label">
+                <h3 class="text-decoration-underline">Otázky</h3>
+            </div>
+                @foreach (var question in questions) 
                 {
-                <div class="mb-3">
-                    <label class="form-label">Otázka</label>
-                    <Editor @bind-Value="question.Text" Field="@(() => question.Text)" Conf="@textConf"></Editor>
-                </div>
                 <div>
-                    <button type="submit" class="btn btn-danger" @onclick="() => DeleteQuestion(question)">Odstrániť otázku</button>
-                </div>
-                <div class="odpovede-container">
-                    <label>Zadajte odpovede</label>
-                    @foreach (var answer in question.Answers)
-                    {
-                    <div class="odpoved">
-                        <label class="form-check-label"></label>
-                            <Editor @bind-Value="answer.Text" Field="(() => answer.Text)" Conf="@odpovedeConf"></Editor>
-                        <div class="">
-                            <label class="odpoved-label">Spravna</label>
-                            <input @bind="answer.Correct" type="checkbox" class="form-check odpoved-checkbox" />
-                        </div>
-                    </div>                    
-                    }
-                    <div>
-                        <br />
-                        <button type="submit" class="btn btn-success" @onclick="() => AddAnswer(question)" disabled="@AnswersMaxCount(question)">Pridať odpoveď</button>
-                        @if (question.Answers.Count < 2)
-                        { } else
-                        {
-                            <button type="submit" class="btn btn-danger" @onclick="() => DeleteAnswer(question)">Odstrániť odpoveď</button>
-                        }
-                        @if (@AnswersMaxCount(question))
-                        {
-                            <label class="max-answers-color">Nie je možné pridať viac odpovedí</label>
-                        }
+                    <div class="mb-3">
+                        <label class="form-label">Otázka @question.Order</label>
+                        <Editor @bind-Value="question.Text" Field="@(() => question.Text)" Conf="@textConf"></Editor>
                     </div>
-                </div>
-                <Divider Width="Width.Is50"/>
+                    <div>
+                        <button type="submit" class="btn btn-danger" @onclick="() => DeleteQuestion(question)">Odstrániť otázku</button>
+                    </div>
+                    <div class="odpovede-container">
+                        <div class="answer-label">
+                            <h3 class="text-decoration-underline">Odpovede</h3>
+                        </div>
+                        @foreach (var answer in question.Answers)
+                        {
+                        <div>
+                            <label class="form-check-label">Odpoved @answer.Order</label
+                        </div>                        
+                        <div class="odpoved">                       
+                            <Editor @bind-Value="answer.Text" Field="(() => answer.Text)" Conf="@odpovedeConf"></Editor>
+                            <div class="odpoved-checkbox">
+                                <label >Správna odpoveď</label>
+                                <div class="odpoved-padding">
+                                    <input @bind="answer.Correct" type="checkbox" class="form-check" />
+                                </div>
+                            </div>
+                        </div>                    
+                        }
+                        <div>
+                            <br />
+                            <button type="submit" class="btn btn-success" @onclick="() => AddAnswer(question)" disabled="@AnswersMaxCount(question)">Pridať odpoveď</button>
+                            @if (question.Answers.Count < 2)
+                            { } else
+                            {
+                                <button type="submit" class="btn btn-danger" @onclick="() => DeleteAnswer(question)">Odstrániť odpoveď</button>
+                            }
+                            @if (@AnswersMaxCount(question))
+                            {
+                                <label class="max-answers-color">Nie je možné pridať viac odpovedí</label>
+                            }
+                        </div>
+                    </div>
+                </div>   
+            <Divider Width="Width.Is50"/>
             }                   
         </EditForm>
     </div>
@@ -186,7 +199,7 @@
     private Quiz newQuiz = new Quiz();
     private List<Question> questions = new List<Question>();
     private bool isLiveKviz = true;
-    private IReadOnlyList<DateTime?> dates = new List<DateTime?>() { };
+    private IReadOnlyList<DateTime?> dates = new List<DateTime?>();
     private IReadOnlyList<DateTime?> editDates = new List<DateTime?>() { };
     private TimeSpan? timeFrom = TimeSpan.Zero;
     private TimeSpan? timeTo = new TimeSpan(23, 59, 59);
@@ -194,14 +207,13 @@
     private TimeEdit<TimeSpan?>? timePicker;
     private Validations? quizValidation;
     private User user;
+    private User owner;
     public IEnumerable<User> users;
     public List<string?> SelectedSearchValue { get; set; } = new List<string?>() { };
     public List<string?> SelectedAutoCompleteText { get; set; } = new List<string?>() { };
     private bool OnceSubmit = false;
-    //Tento parameter sluzi na URL datove presmerovanie
-    //TODO 5 If v html hadze chybu ze nemoze byt null
     [Parameter]
-    public Guid? GuidQuiz { get; set; } = Guid.Empty;
+    public Guid? GuidQuiz { get; set; }
 
     [CascadingParameter]
     public Task<AuthenticationState>? authenticationState { get; set; }
@@ -212,6 +224,13 @@
 
     private bool SetDates()
     {
+        if (GuidQuiz != null)
+        {
+            if (dates == null)
+            {
+                dates = editDates;
+            }
+        }
         if (dates.Count < 1 ||  dates[0] == null || timeFrom == null)
         {
             return false;
@@ -253,6 +272,8 @@
         using var dbContext = DbFactory.CreateDbContext();
         users = await dbContext.Users.ToListAsync();
         var state = await authenticationState;
+        var ownerId = int.Parse(state.User.FindFirst(ClaimTypes.NameIdentifier).Value);
+        owner = await dbContext.Users.FindAsync(ownerId);
         if (!state.User.Identity.IsAuthenticated)
         {
             NavManager.NavigateTo("/");
@@ -271,6 +292,10 @@
             timeFrom = quiz.DateFrom.Value.TimeOfDay;
             timeTo = quiz.DateTo.Value.TimeOfDay;
             newQuiz.Moderators = quiz.Moderators;
+            foreach (var moderator in quiz.Moderators)
+            {
+                SelectedSearchValue.Add(moderator.Email);
+            }
             if (quiz.Type == TypKvizu.livekviz)
             {
                 isLiveKviz = true;
@@ -282,7 +307,7 @@
         } else
         {
             AddQuestion();
-            AddAnswer(questions[0]);
+            AddAnswer(questions[0]);           
         }
     }
     private void GetQRCodes()
@@ -294,7 +319,7 @@
     }
 
     #endregion HelpMethods
-
+    //TODO 6 - Anchors
     #region QuizMethods
     private async Task SubmitQuiz()
     {
@@ -313,20 +338,19 @@
             {
                 return;
             }
-            
+
         }      
         if (GuidQuiz != null)
         {
+            AddModerators();
             dbContext.Quizzes.Update(newQuiz);
             await dbContext.SaveChangesAsync();
             return;
         }
-        
         if (!OnceSubmit)
         {
             var state = await authenticationState;
-            var ownerId = int.Parse(state.User.FindFirst(ClaimTypes.NameIdentifier).Value);
-            var owner = await dbContext.Users.FindAsync(ownerId);
+
             dbContext.Users.Attach(owner);
             newQuiz.Hash = Guid.NewGuid();
             newQuiz.User = owner;
@@ -347,7 +371,16 @@
         using var dbContext = DbFactory.CreateDbContext();
         for (int i = 0; i < SelectedAutoCompleteText.Count(); i++)
         {
-            newQuiz.Moderators.Add(await dbContext.Users.FirstOrDefaultAsync(u => u.Email == SelectedAutoCompleteText[i]));
+            if (dbContext.Users.Local.Contains(await dbContext.Users.FirstOrDefaultAsync(u => u.Email == SelectedAutoCompleteText[i])))
+            {
+                continue;
+            }
+            var user = await dbContext.Users.FirstOrDefaultAsync(u => u.Email == SelectedAutoCompleteText[i]);
+            if (user != null && user.Id != owner.Id)
+            {
+                newQuiz.Moderators.Add(user);
+            }
+
         }
     }
 
@@ -387,6 +420,10 @@
         Answer tempAnswer = new Answer();
         tempAnswer.Question = question;
         tempAnswer.Order = question.Answers.Count + 1;
+        if (tempAnswer.Order == 1)
+        {
+            tempAnswer.Correct = true;
+        }
         question.Answers.Add(tempAnswer);
 
     }
@@ -409,12 +446,14 @@
         {"plugins", "autolink media link image emoticons table"},
         {"menubar", false },
         {"toolbar", "undo redo | styles | bold italic underline | table | link image paste "},
-        {"paste_data_images", "true"},
+        {"paste_data_images", true},
         {"height", "250px"},
         {"automatic_uploads", true },
         {"file_picker_types", "file image media"},
         {"relative_urls", false },
         {"remove_script_host", false },
+        {"image_dimensions", true },
+        {"image_advtab", true},
         {"images_upload_url", "/Images"}
     };
 
@@ -422,17 +461,19 @@
         {"menubar", false },
         {"plugins", "autolink media link image emoticons table"},
         {"toolbar", "undo redo | styles | bold italic underline | table link image "},
-        {"paste_data_images", "true"},
-        {"width", "60%"},
+        {"paste_data_images", true},
+        {"width", "50%"},
         {"height", "200px"},
         {"automatic_uploads", true },
         {"file_picker_types", "file image media"},
         {"relative_urls", false },
         {"remove_script_host", false },
-        {"images_upload_url", "/wwwroot/tinyMCE.js"},
-        {"location", "images/" }
+        {"image_dimensions", true },
+        {"image_advtab", true},
+        {"location", "/Images" }
     };
 
     
         #endregion TinyMCE
 }
+        

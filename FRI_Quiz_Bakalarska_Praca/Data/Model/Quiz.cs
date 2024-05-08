@@ -47,6 +47,19 @@ namespace FRI_Quiz_Bakalarska_Praca.Data.Model
         [NotMapped]
         public int NumberOfUsers { get; set; }
 
+        [NotMapped]
+        public string? ModeratorsString { get; set; }
+
+        public string ModeratorsToString()
+        {
+            string moderators = "";
+            foreach (var moderator in Moderators)
+            {
+                moderators += moderator.Email + ", ";
+            }
+            return moderators;
+        }
+
     }
 
     

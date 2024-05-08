@@ -9,6 +9,17 @@
 .max-answers-color {
     color: red;
 }
+.question-label {
+    display:flex;
+    position:center;
+    justify-content:center;
+    width:50%;
+}
+.answer-label {
+    display: flex;
+    position: center;
+    justify-content: center;
+}
 
 .nastaveniaCasuText {
     align-items: center;
@@ -73,15 +84,18 @@
 }
 .odpovede-container {
     display: flex;
+    width: 50%;
     flex-direction: column;
+    padding-top: 2rem;
 }
-
-.odpoved-label {
+.odpoved-padding {
     display: flex;
+    padding-left: 3.4rem;
 }
-
 .odpoved {
     display:flex;
+    padding-bottom: 0.5rem;
+    padding-top: 0.5rem;
 }
 
 .form-text {
@@ -92,12 +106,6 @@
 
 .livekviz-button {
     margin: 0.2rem 0.5rem 0.2rem 0.5rem;
-}
-
-.odpoved-checkbox {
-    display: inline-flex;
-    margin-left: 1.5rem;
-    justify-content: space-between;
 }
 
 .kviz {
@@ -117,6 +125,12 @@
 .table-width {
     min-width: 135%;
     max-width: 40%;
+}
+
+.odpoved-checkbox {
+    padding-left: 3rem;
+    padding-top: 4.5rem;
+    align-items:center;
 }
 
 @media (max-width: 640.98px) {

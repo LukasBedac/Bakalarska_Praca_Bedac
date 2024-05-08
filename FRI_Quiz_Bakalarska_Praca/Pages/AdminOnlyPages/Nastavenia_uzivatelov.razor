@@ -7,6 +7,14 @@
 @attribute [Authorize(Roles = "Admin, Moderator")]
 <h3>Nastavenia uživateľov</h3>
 
+<div class="d-inline-flex">
+    <!--KeyDown="() => Filter(filter)" => funguje po stlaceni tlacitka ako filter -->
+    <TextEdit Border="Border.Secondary" @bind-Text="@filter" Placeholder="meno..."></TextEdit>
+</div>
+<div class="d-inline-flex">
+    <Button Color="Color.Primary" Type="ButtonType.Submit" Clicked="() => Filter(filter)">Vyhľadajte používateľa</Button>
+<Button Color="Color.Secondary" Clicked="ClearFilter">Vymazať filter</Button>
+</div>
 <Table Hoverable>
     <TableHeader>
         <TableRow>
@@ -16,19 +24,37 @@
         </TableRow>
     </TableHeader>
     <TableBody>
-        @{          
-            for (var i = 0; i < users.Count() / pageItems; i++)
+        @{         
+            if (filteredUsers.Count() < 1)
             {
-                var user = users[i];
-                <TableRow>
-                    <TableRowCell>@user.Email</TableRowCell>
+                for (var i = 0; i < users.Count() / pageItems; i++)
+                {
+                    var user = users[i];
+                    <TableRow>
+                        <TableRowCell>@user.Email</TableRowCell>
                         <TableRowCell>@GetRole(user).Result</TableRowCell>
                         <TableRowCell TextAlignment="TextAlignment.Center">
                             <Button Type="ButtonType.Button" Color="Color.Success" Clicked="() => ShowChangeModal(user)">Zmeň rolu</Button>
                             <Button Type="ButtonType.Button" Color="Color.Danger" Clicked="() => ShowDeleteModal(user)">Odstrániť uživateľa</Button>
                         </TableRowCell>
                     </TableRow>
+                }
+            } else
+            {
+                for (var i = 0; i < filteredUsers.Count() / pageItems; i++)
+                {
+                    var user = filteredUsers[i];
+                    <TableRow>
+                        <TableRowCell>@user.Email</TableRowCell>
+                        <TableRowCell>@GetRole(user).Result</TableRowCell>
+                        <TableRowCell TextAlignment="TextAlignment.Center">
+                            <Button Type="ButtonType.Button" Color="Color.Success" Clicked="() => ShowChangeModal(user)">Zmeň rolu</Button>
+                            <Button Type="ButtonType.Button" Color="Color.Danger" Clicked="() => ShowDeleteModal(user)">Odstrániť uživateľa</Button>
+                        </TableRowCell>
+                    </TableRow>
+                }
             }
+
         }
     </TableBody>
 </Table>
@@ -92,6 +118,9 @@
         </ModalFooter>
     </ModalContent>
 </Modal>
+<div class="footer-padding">
+
+</div>
 
  
 @code {
@@ -102,6 +131,8 @@
     private Modal changeModal;
     private string role;
     private bool cancelClose;
+    private string filter;
+    private List<User> filteredUsers = new List<User>();
     protected override Task OnInitializedAsync()
     {
         return LoadUsers();
@@ -158,11 +189,28 @@
         }
     }
 
-    //TODO 2.6 Vyvtorit filter na mena
-
-    private void Filter()
+    private void Filter(string filter)
     {
-
+        filteredUsers.Clear();
+        if (filter == null || filter == "")
+        {
+            return;
+        } else
+        {
+            foreach (User user in users)
+            {
+                if (user.Email.Contains(filter))
+                {
+                    filteredUsers.Add(user);
+                }
+            }
+            StateHasChanged();
+        }
+    }
+    private void ClearFilter()
+    {
+        filteredUsers.Clear();
+        filter = "";        
     }
 
     private Task ShowDeleteModal(User user)

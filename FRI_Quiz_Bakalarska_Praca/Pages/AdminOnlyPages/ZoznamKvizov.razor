@@ -18,7 +18,7 @@
            CommandMode="DataGridCommandMode.ButtonRow">
      <DataGridColumns >
          <DataGridColumn Field="@nameof(Quiz.QuizName)" Caption="Názov" />
-         <DataGridColumn Field="@nameof(Quiz.Moderators)" DisplayFormat="" Caption="Moderátori" />
+         <DataGridColumn Field="@nameof(Quiz.ModeratorsString)" Caption="Moderátori" />
          <DataGridDateColumn Field="@nameof(Quiz.DateFrom)" Caption="Začiatok" />
          <DataGridDateColumn Field="@nameof(Quiz.DateTo)" Caption="Koniec" />
          <DataGridColumn Field="@nameof(Quiz.Type)" Caption="Typ" />
@@ -95,10 +95,13 @@
         quizzes = await dbContext.Quizzes
         .Include(Kvizy => Kvizy.Questions)
         .ThenInclude(Otazky => Otazky.Answers)
+        .Include(Kvizy => Kvizy.Moderators)
         .ToListAsync();       
         user_Questions = await dbContext.UserQuestions.Include(q => q.Question.Quiz).Include(q => q.User).ToListAsync();
+
         foreach (var quiz in quizzes)
         {
+            quiz.ModeratorsString = quiz.ModeratorsToString();
             quiz.NumberOfUsers = UsersCount(quiz.Hash);
         }
         await base.OnInitializedAsync();

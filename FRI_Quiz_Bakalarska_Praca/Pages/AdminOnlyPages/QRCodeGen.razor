@@ -1,4 +1,5 @@
 ﻿@page "/QRCodeGen/{QuizGuid:guid}"
+@layout PrintLayout
 @using FRI_Quiz_Bakalarska_Praca.Data.Database
 @using FRI_Quiz_Bakalarska_Praca.Data.Model
 @using Microsoft.EntityFrameworkCore
@@ -8,7 +9,6 @@
 
 @if (liveQuiz)
 {
-    
     <div>
         <Label>QR kód kvízu</Label>
         <Blazorise.QRCode.QRCode Value="@($"/vyplnenieKvizu/{quiz.Hash}")"></Blazorise.QRCode.QRCode>
@@ -25,11 +25,11 @@
     </div>
 }
 
-
-
-
 <div class=""> 
-    <button class="btn btn-primary" type="submit" onclick="@ReturnToEditQuiz">Späť na editáciu kvízu</button>
+    <Buttons>
+        <Button Color="Color.Primary" Type="ButtonType.Submit" Clicked="@ReturnToEditQuiz">Späť na editáciu kvízu</Button>
+        <Button Color="Color.Secondary" Type="ButtonType.Link" Clicked="@RedirectToPrint" >Tlačiť</Button>
+    </Buttons>
 </div>
 
 
@@ -59,5 +59,9 @@
     private void ReturnToEditQuiz()
     {
         NavManager.NavigateTo($"/vytvorKviz/{quiz.Hash}");
+    }
+    private void RedirectToPrint()
+    {
+        NavManager.NavigateTo($"/printPage/{quiz.Hash}");
     }
 }
