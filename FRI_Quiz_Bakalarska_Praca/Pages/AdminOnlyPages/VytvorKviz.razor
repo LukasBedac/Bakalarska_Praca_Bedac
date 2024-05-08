@@ -15,7 +15,6 @@
 @inject IJSRuntime JSRuntime
 @attribute [Authorize(Roles = "Admin, Moderator")]
 <PageTitle>Vytvorenie Kvizu</PageTitle>
-<script src="~/tinyMCE.js"></script>
 <div>
     <div class="left_side_quiz">
         <Validations @ref="quizValidation" Mode="ValidationMode.Auto" ValidateOnLoad="true">
@@ -127,7 +126,7 @@
                 <TableRow>
                     <TableRowHeader>#@question.Order</TableRowHeader>
                         <TableRowCell>@(question.Text.Length > 20 ? ((MarkupString)question.Text.Substring(0, 20) + "...") : ((MarkupString)question.Text))</TableRowCell>
-                    <TableRowCell><Button Class="btn-secondary">Edit</Button></TableRowCell>
+                    <TableRowCell><Button Color="Color.Secondary" Clicked="(async() => await ScrollToElement(question.Order))">Edit</Button></TableRowCell>
                 </TableRow>
                 }        
             </TableBody>
@@ -143,7 +142,7 @@
                 {
                 <div>
                     <div class="mb-3">
-                        <label class="form-label">Otázka @question.Order</label>
+                        <label id="@($"#{question.Order}")" class="form-label">Otázka @question.Order</label>
                         <Editor @bind-Value="question.Text" Field="@(() => question.Text)" Conf="@textConf"></Editor>
                     </div>
                     <div>
@@ -151,7 +150,7 @@
                     </div>
                     <div class="odpovede-container">
                         <div class="answer-label">
-                            <h3 class="text-decoration-underline">Odpovede</h3>
+                            <h5 class="text-decoration-underline">Odpovede</h5>
                         </div>
                         @foreach (var answer in question.Answers)
                         {
@@ -222,6 +221,12 @@
     #endregion Fields
 
     #region HelpMethods
+
+    private async Task ScrollToElement(int elementId)
+    {
+        string element = "#" + elementId;
+        await JSRuntime.InvokeVoidAsync("ScrollTo", element);
+    }
 
     private bool SetDates()
     {
@@ -448,6 +453,7 @@
         {"menubar", false },
         {"toolbar", "undo redo | styles | bold italic underline | table | link image paste "},
         {"paste_data_images", true},
+        {"width", "100%"},
         {"height", "250px"},
         {"automatic_uploads", true },
         {"file_picker_types", "file image media"},

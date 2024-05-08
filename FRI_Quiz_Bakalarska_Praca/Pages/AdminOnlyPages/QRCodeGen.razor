@@ -5,37 +5,30 @@
 @using Microsoft.EntityFrameworkCore
 @inject NavigationManager NavManager
 @inject IDbContextFactory<ApplicationDbContext> DbFactory
-<h3>QRCode generator</h3>
-
 
 @if (liveQuiz)
 {
     <div>
        
         <Label>QR kód kvízu</Label>
-        <Blazorise.QRCode.QRCode Value="@($"/vyplnenieKvizu/{quiz.Hash}")"></Blazorise.QRCode.QRCode>
+        <Blazorise.QRCode.QRCode Value="@($"localhost:7166/vyplnenieKvizu/{quiz.Hash}")"></Blazorise.QRCode.QRCode>
         
     </div>
 } else
 {   
     <Label>QR kódy otázok</Label>
-    <div class="border-1 d-flex">
+    <div class="question-container">
         @foreach (var question in questions)
         {
-            <Label Class="d-flex flex-column">Otázka @question.Order</Label>
-            <Blazorise.QRCode.QRCode Value="@($"/vyplnenieKvizu/{question.Hash}")" Class="d-inline flex-column"></Blazorise.QRCode.QRCode>
+            <div>
+                <div>
+                    <label class="question">Otázka @question.Order</label>
+                </div>
+                <Blazorise.QRCode.QRCode Value="@($"https://locahost:7166/vyplnenieKvizu/{question.Hash}")" Class="d-inline flex-column"></Blazorise.QRCode.QRCode>
+            </div>
         }
     </div>
 }
-
-
-<div class=""> 
-    <Buttons>
-        <Button Color="Color.Primary" Type="ButtonType.Submit" Clicked="@ReturnToEditQuiz">Späť na editáciu kvízu</Button>
-        <Button Color="Color.Secondary" Type="ButtonType.Link" Clicked="@RedirectToPrint" >Tlačiť</Button>
-    </Buttons>
-</div>
-
 
 @code {
     private List<Question> questions = new List<Question>();
@@ -69,3 +62,17 @@
         NavManager.NavigateTo($"/printPage/{quiz.Hash}");
     }
 }
+<style>
+    .question-container {
+        display: flex;
+        position: center;
+        justify-content: center;
+        
+    }
+    .question {
+        display: flex;
+        position: center;
+        justify-content: center;
+        flex-direction: row;
+    }
+</style>

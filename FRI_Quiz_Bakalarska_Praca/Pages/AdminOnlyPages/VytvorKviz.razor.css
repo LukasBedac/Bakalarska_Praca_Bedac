@@ -84,7 +84,7 @@
 }
 .odpovede-container {
     display: flex;
-    width: 50%;
+    width: 75%;
     flex-direction: column;
     padding-top: 2rem;
 }
@@ -128,7 +128,7 @@
 }
 
 .odpoved-checkbox {
-    padding-left: 3rem;
+    padding-left: 0.5rem;
     padding-top: 4.5rem;
     align-items:center;
 }
