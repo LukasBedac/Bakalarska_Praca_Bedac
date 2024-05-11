@@ -4,11 +4,10 @@
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.EntityFrameworkCore
 @inject IDbContextFactory<ApplicationDbContext> DbFactory
-@attribute [Authorize(Roles = "Admin, Moderator")]
+@attribute [Authorize(Roles = "Admin")]
 <h3>Nastavenia uživateľov</h3>
 
 <div class="d-inline-flex">
-    <!--KeyDown="() => Filter(filter)" => funguje po stlaceni tlacitka ako filter -->
     <TextEdit Border="Border.Secondary" @bind-Text="@filter" Placeholder="meno..."></TextEdit>
 </div>
 <div class="d-inline-flex">

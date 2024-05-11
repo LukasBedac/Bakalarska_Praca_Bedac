@@ -2,7 +2,9 @@
 
 @using FRI_Quiz_Bakalarska_Praca.Data.Database
 @using FRI_Quiz_Bakalarska_Praca.Data.Model
+@using Microsoft.AspNetCore.Identity
 @using Microsoft.EntityFrameworkCore
+@using System.Security.Claims
 @inject IDbContextFactory<ApplicationDbContext> DbFactory
 @inject NavigationManager NavigationManager
 @attribute [Authorize(Roles = "Admin, Moderator")]
@@ -27,8 +29,10 @@
     </DataGridColumns>
      <ButtonRowTemplate>
          <Button Color="Color.Primary" Disabled="(selectedQuiz.Id == 0)" Clicked="() => EditQuiz(selectedQuiz.Hash)">Edit</Button>
-         <Button Color="Color.Danger" Disabled="(selectedQuiz.Id == 0)" Clicked="() => ShowModal(selectedQuiz.Hash)">Delete</Button>
-         @if (selectedQuiz.Id != 0 && selectedQuiz.Type == TypKvizu.livekviz)
+         <Button Color="Color.Danger" Disabled="(selectedQuiz.Id == 0)" Clicked="() => ShowModal(selectedQuiz.Hash)">Vymazať</Button>
+         <Button Color="Color.Success" Disabled="(selectedQuiz.Id == 0)" Clicked="() => NavigateToResult(selectedQuiz.Hash)">Výsledok kvízu</Button>
+
+        @if (selectedQuiz.Id != 0 && selectedQuiz.Type == TypKvizu.livekviz)
         {
             <Button Color="Color.Secondary" Clicked="() => EditLiveQuiz(selectedQuiz.Hash)">Spravovať livekvíz</Button>
         }    
@@ -51,13 +55,16 @@
         </ModalFooter>
     </ModalContent>
 </Modal>
- @code {
+@code {
     public Quiz? Quiz { get; set; }
     private List<Quiz> quizzes = new List<Quiz>();
     List<User_Question> user_Questions = new List<User_Question>();
     private Quiz selectedQuiz = new Quiz();
     private Modal modalRef;
     private bool cancelClose;
+
+    [CascadingParameter]
+    public Task<AuthenticationState>? authenticationState { get; set; }
 
     private Task ShowModal(Guid guid)
     {
@@ -92,12 +99,30 @@
     protected override async Task OnInitializedAsync()
     {
         using var dbContext = DbFactory.CreateDbContext();
-        quizzes = await dbContext.Quizzes
-        .Include(Kvizy => Kvizy.Questions)
-        .ThenInclude(Otazky => Otazky.Answers)
-        .Include(Kvizy => Kvizy.Moderators)
-        .ToListAsync();       
-        user_Questions = await dbContext.UserQuestions.Include(q => q.Question.Quiz).Include(q => q.User).ToListAsync();
+        var state = await authenticationState;
+        var user = state.User;
+        var userId = int.Parse(user.FindFirst(ClaimTypes.NameIdentifier).Value);
+        var actualUser = await dbContext.Users.FindAsync(userId);
+        IdentityUserRole<int> dbUserRole = await dbContext.UserRoles.FirstOrDefaultAsync(ur => ur.UserId == actualUser.Id);
+        if (dbUserRole.RoleId == 1)
+        {
+            quizzes = await dbContext.Quizzes
+            .Include(Kvizy => Kvizy.Questions)
+            .ThenInclude(Otazky => Otazky.Answers)
+            .Include(Kvizy => Kvizy.Moderators)
+            .ToListAsync();
+            user_Questions = await dbContext.UserQuestions.Include(q => q.Question.Quiz).Include(q => q.User).ToListAsync();
+        }
+        if (dbUserRole.RoleId == 2)
+        {
+            quizzes = await dbContext.Quizzes
+            .Include(Kvizy => Kvizy.Questions)
+            .ThenInclude(Otazky => Otazky.Answers)
+            .Include(Kvizy => Kvizy.Moderators)
+            .Where(Kvizy => Kvizy.Moderators.Contains(actualUser))
+            .ToListAsync();
+            user_Questions = await dbContext.UserQuestions.Include(q => q.Question.Quiz).Include(q => q.User).ToListAsync();
+        }
 
         foreach (var quiz in quizzes)
         {
@@ -172,6 +197,11 @@
             }           
         }      
         return users.Count();
+    }
+
+    private void NavigateToResult(Guid guid)
+    {
+        NavigationManager.NavigateTo($"vysledok/{guid}");
     }
 }
 

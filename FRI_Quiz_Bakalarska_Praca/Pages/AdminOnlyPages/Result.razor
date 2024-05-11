@@ -1,0 +1,188 @@
+﻿@page "/vysledok/{GuidQuiz:guid}"
+@using FRI_Quiz_Bakalarska_Praca.Data.Database
+@using FRI_Quiz_Bakalarska_Praca.Data.Model
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
+<Heading Class="d-flex align-content-center justify-content-center">@quiz.QuizName</Heading>
+<div class="d-flex align-center justify-content-center">
+    @if (usersOrder != null && usersOrder.Count() > 0)
+    {
+        <Table Border="Border.Is2.Primary" Width="Width.Is50">
+            <TableHeader>
+                <TableHeaderCell>Poradie</TableHeaderCell>
+                <TableHeaderCell>Používateľ</TableHeaderCell>
+                <TableHeaderCell>Body</TableHeaderCell>
+            </TableHeader>           
+                @foreach (var user in usersOrder)
+                {
+                    @if (user.Order == 1)
+                    {
+                    <TableBody>
+                        <TableRow Background="Background.Success">
+                            <TableRowCell>@user.Order</TableRowCell>
+                            <TableRowCell>@user.User</TableRowCell>
+                            <TableRowCell>@user.Points.ToString("F2") / @quiz.QuestionCount</TableRowCell>
+                        </TableRow>
+                    </TableBody>
+                    }
+                    @if (user.Order == 2)
+                    {
+                    <TableBody>
+                        <TableRow Background="Background.Warning">
+                            <TableRowCell>@user.Order</TableRowCell>
+                            <TableRowCell>@user.User</TableRowCell>
+                            <TableRowCell>@user.Points.ToString("F2") / @quiz.QuestionCount</TableRowCell>
+                        </TableRow>
+                    </TableBody>
+                    }
+                    @if (user.Order == 3)
+                    {
+                    <TableBody>
+                        <TableRow Background="Background.Info">
+                            <TableRowCell>@user.Order</TableRowCell>
+                            <TableRowCell>@user.User</TableRowCell>
+                            <TableRowCell>@user.Points.ToString("F2") / @quiz.QuestionCount</TableRowCell>
+                        </TableRow>
+                    </TableBody>
+                    }
+                    @if (user.Order > 3)
+                    {
+                    <TableBody>
+                        <TableRow>
+                            <TableRowCell>@user.Order</TableRowCell>
+                            <TableRowCell>@user.User</TableRowCell>
+                            <TableRowCell>@user.Points.ToString("F2") / @quiz.QuestionCount</TableRowCell>
+                        </TableRow>
+                    </TableBody>
+                    }
+                }
+               
+        </Table>
+    } else
+    {
+    <h3>Tento kvíz zatiaľ nevyplnili žiadny používatelia</h3>
+    }
+</div>
+<div class="footer-padding">
+
+</div>
+@code {
+
+    [Parameter]
+    public Guid GuidQuiz { get; set; }
+    private Quiz quiz = new Quiz();
+    private List<User_Question> user_Questions = new List<User_Question>();
+    private List<User_points> usersOrder = new List<User_points>();
+    protected override async Task OnInitializedAsync()
+    {
+        using var dbContext = DbFactory.CreateDbContext();
+        quiz = await dbContext.Quizzes.Include(q => q.User)
+        .Include(q => q.Questions)
+        .ThenInclude(qu => qu.Answers)
+        .FirstOrDefaultAsync(q => q.Hash == GuidQuiz);
+        user_Questions = await dbContext.UserQuestions
+        .Include(uQ => uQ.User)
+        .Include(uQ => uQ.Question)
+        .ThenInclude(q => q.Quiz)
+        .Where(uQ => uQ.Question.Quiz.Hash == GuidQuiz)
+        .ToListAsync();
+        await MakeTable();
+    }
+
+    private async Task MakeTable()
+    {
+        foreach (var uq in user_Questions)
+        {
+
+            if (usersOrder.Count() < 1)
+            {
+                User_points userp = new User_points();
+                userp.User = uq.User;
+                userp.Points = 0;
+                usersOrder.Add(userp);
+                await CalculatePoint(userp.User, userp);                
+                continue;
+            }
+            if (!usersOrder.Contains(usersOrder.Where(u => u.User == uq.User).FirstOrDefault()))
+            {
+                User_points userp2 = new User_points();
+                userp2.User = uq.User;
+                userp2.Points = 0;
+                usersOrder.Add(userp2);
+                await CalculatePoint(userp2.User, userp2);
+            }          
+        }
+        SortPoints();
+    }
+    private async Task CalculatePoint(User user, User_points userPoints)
+    {
+        foreach (var uq in user_Questions)
+        {
+            if (uq.User == user)
+            {
+                Question selectedQuestion = uq.Question;
+                double points = 0;
+                double correctAnswers = 0;
+                foreach (var answer in selectedQuestion.Answers)
+                {
+                    if (answer.Correct)
+                    {
+                        correctAnswers += 1;
+                    }
+                }
+                foreach (var answer in uq.CheckedAnswers)
+                {
+                    if (correctAnswers > 1)
+                    {
+                        if (answer.Correct)
+                        {
+                            points += 1 / correctAnswers;
+                        } else
+                        {
+                            points -= 1 / correctAnswers;
+                            if (points < 0)
+                            {
+                                points = 0;
+                            }
+                            continue;
+                        }
+                    } else
+                    {
+                        if (answer.Correct)
+                        {
+                            points += 1;
+                        } else
+                        {
+                            points -= 1;
+                        }
+                        if (points < 1)
+                        {
+                            points = 0;
+                        }
+                    }
+
+                }
+                userPoints.Points += points;
+            }
+        }
+    }
+    private void SortPoints()
+    {
+        var user_s = usersOrder.OrderByDescending(u => u.Points).ToList();
+        int i = 1;
+        foreach (var user in user_s)
+        {
+            user.Order = i;
+            i++;
+        }
+        usersOrder = user_s;
+    }
+
+    public class User_points
+    {
+        public double Points { get; set; }
+        public User User { get; set; }
+        public int Order { get; set; }
+    }
+}
+

@@ -23,9 +23,9 @@ namespace FRI_Quiz_Bakalarska_Praca.Data.Database
             base.OnModelCreating(builder);
             builder.Entity<IdentityRole<int>>().HasData(new IdentityRole<int> { Id = 1, Name = "Admin", NormalizedName = "ADMIN" });
             builder.Entity<IdentityRole<int>>().HasData(new IdentityRole<int> { Id = 2, Name = "Moderator", NormalizedName = "MODERATOR" });
-            //TOOO 5.1 Hash error - default value not specified
             builder.Entity<Quiz>().Property(x => x.Hash).ValueGeneratedOnAdd();
             builder.Entity<Question>().Property(x => x.Hash).ValueGeneratedOnAdd();
+
         }
 
         public DbSet<Answer> Answers { get; set; }

@@ -35,17 +35,17 @@
     </TableBody>   
     }
 </Table>
-
+<Buttons>
+    <Button Color="Color.Primary" Clicked="@SaveChanges">Uložiť zmeny</Button>
+    <Button Color="Color.Success" Clicked="HandleRedraw">Zobraziť výsledky</Button>
+</Buttons>
 <div>
     <BarChart @ref="barChart" Type="ChartType.Bar" TItem="int" Clicked="@OnClicked" />
 </div>
 
 
 <div class="footer-padding bottom-padding">
-    <Buttons>
-        <Button Color="Color.Primary" Clicked="@SaveChanges">Uložiť zmeny</Button>
-        <Button Color="Color.Success" Clicked="HandleRedraw">Zobraziť výsledky</Button>
-    </Buttons>
+    
 </div>
 
 

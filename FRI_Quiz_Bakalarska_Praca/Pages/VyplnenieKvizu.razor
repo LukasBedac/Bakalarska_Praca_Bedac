@@ -5,6 +5,7 @@
 @using Microsoft.EntityFrameworkCore
 @using System.Security.Claims
 @inject IDbContextFactory<ApplicationDbContext> DbFactory
+@inject NavigationManager NavManager
 @attribute [Authorize()]
 
 <div class="display-center">
@@ -177,6 +178,8 @@
             dbContext.UserQuestions.Attach(userQuestion);
         }
         await dbContext.SaveChangesAsync();
+        StateHasChanged();
+        NavManager.Refresh();
     }
    
 }

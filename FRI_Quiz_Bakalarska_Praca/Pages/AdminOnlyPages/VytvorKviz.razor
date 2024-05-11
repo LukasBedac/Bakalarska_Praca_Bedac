@@ -7,6 +7,7 @@
 @using Microsoft.EntityFrameworkCore
 @using System.Security.Claims
 @using Microsoft.Extensions.Hosting.Internal
+@using System.Text.RegularExpressions
 @using TinyMCE.Blazor;
 @inject AuthenticationStateProvider AuthProvider
 @inject IDbContextFactory<ApplicationDbContext> DbFactory
@@ -52,14 +53,10 @@
                         <label class="nastaveniaCasuText">Dátum pre kvíz:</label>
                         <Addons>
                             <Addon AddonType="AddonType.Body">                              
-                                <DatePicker @bind-Dates="@dates" @ref="@datePicker" Min="@(dates == null || dates.Count() < 1 ? DateTime.Today : dates[0])" Date="DateTime.Today" 
-                                SelectionMode="DateInputSelectionMode.Range" DisplayFormat="j/n/Y" Placeholder="DD/MM/YYYY" />   
-                                
+                                <DatePicker @bind-Dates="@dates" @ref="@datePicker" Min="@(dates == null || dates.Count() < 1 ? DateTime.Today : dates[0])" Date="DateTime.Today"
+                                            SelectionMode="DateInputSelectionMode.Range" DisplayFormat="j.n.Y" Placeholder="@placeholder" 
+                                            RangeSeparator=" do "/>
                             </Addon>   
-                            @if (GuidQuiz != null && editDates.Count() > 0)
-                            {
-                                <FieldLabel>Dátum začiatku je:@editDates[0] a dátum konca je:@(editDates.Count() < 2 ? editDates[0] : editDates[1]) </FieldLabel>
-                            }
                         </Addons>                       
                     </div>
                     
@@ -125,7 +122,7 @@
                 {
                 <TableRow>
                     <TableRowHeader>#@question.Order</TableRowHeader>
-                        <TableRowCell>@(question.Text.Length > 20 ? ((MarkupString)question.Text.Substring(0, 20) + "...") : ((MarkupString)question.Text))</TableRowCell>
+                        <TableRowCell>@(question.Text.Length > 20 ? (Regex.Replace(question.Text.Substring(0, 20) + "...", "<.*?>", String.Empty)) : (Regex.Replace(question.Text, "<.*?>", String.Empty)))</TableRowCell>
                     <TableRowCell><Button Color="Color.Secondary" Clicked="(async() => await ScrollToElement(question.Order))">Edit</Button></TableRowCell>
                 </TableRow>
                 }        
@@ -154,15 +151,19 @@
                         </div>
                         @foreach (var answer in question.Answers)
                         {
-                        <div>
-                            <label class="form-check-label">Odpoved @answer.Order</label
+                        <div class="d-inline-flex">
+                            <label class="form-check-label">Odpoved @answer.Order</label>
+                                <div class="odpoved-padding">
+                                    <input @bind="answer.Correct" type="checkbox" class="form-check" />
+                            </div>
+                                <label> <b>- Správna</b> </label>
                         </div>                        
                         <div class="odpoved">                       
                             <Editor @bind-Value="answer.Text" Field="(() => answer.Text)" Conf="@odpovedeConf"></Editor>
                             <div class="odpoved-checkbox">
-                                <label >Správna odpoveď</label>
-                                <div class="odpoved-padding">
-                                    <input @bind="answer.Correct" type="checkbox" class="form-check" />
+                                
+                                <div >
+                                    
                                 </div>
                             </div>
                         </div>                    
@@ -208,6 +209,7 @@
     private Validations? quizValidation;
     private User user;
     private User owner;
+    private string placeholder = "DD.MM.YYYY";
     public IEnumerable<User> users;
     public List<string?> SelectedSearchValue { get; set; } = new List<string?>() { };
     public List<string?> SelectedAutoCompleteText { get; set; } = new List<string?>() { };
@@ -277,6 +279,20 @@
     {
         using var dbContext = DbFactory.CreateDbContext();
         users = await dbContext.Users.ToListAsync();
+        List<User> filteredUsers = new List<User>();
+        foreach (var user in users)
+        {
+            IdentityUserRole<int> dbUserRole = await dbContext.UserRoles.FirstOrDefaultAsync(ur => ur.UserId == user.Id);
+            if (dbUserRole == null)
+            {
+                continue;
+            }
+            if (dbUserRole.RoleId == 1 || dbUserRole.RoleId == 2)
+            {
+                filteredUsers.Add(user);
+            }
+        }
+        users = filteredUsers;
         var state = await authenticationState;
         var ownerId = int.Parse(state.User.FindFirst(ClaimTypes.NameIdentifier).Value);
         owner = await dbContext.Users.FindAsync(ownerId);
@@ -310,6 +326,7 @@
                 isLiveKviz = false;
             }
             OnceSubmit = true;
+            placeholder = (quiz.DateFrom.ToString() +  " do "  + quiz.DateTo.ToString());
         } else
         {
             AddQuestion();
@@ -325,7 +342,6 @@
     }
 
     #endregion HelpMethods
-    //TODO 6 - Anchors
     #region QuizMethods
     private async Task SubmitQuiz()
     {
@@ -348,7 +364,7 @@
         }      
         if (GuidQuiz != null)
         {
-            AddModerators();
+            await AddModerators();
             dbContext.Quizzes.Update(newQuiz);
             await dbContext.SaveChangesAsync();
             return;
@@ -360,34 +376,43 @@
             dbContext.Users.Attach(owner);
             newQuiz.Hash = Guid.NewGuid();
             newQuiz.User = owner;
-            AddModerators();
+            await AddModerators();
             SubmitQuestion();                       
             dbContext.Quizzes.Attach(newQuiz);
             OnceSubmit = true;
             await dbContext.SaveChangesAsync();
+            GuidQuiz = dbContext.Quizzes.Find(newQuiz.Id).Hash;
         } else
         {
             SubmitQuestion();
             dbContext.Quizzes.Update(newQuiz);
             await dbContext.SaveChangesAsync();
+            GuidQuiz = dbContext.Quizzes.Find(newQuiz).Hash;
         }
     }
-    private async void AddModerators()
+    private async Task AddModerators()
     {
         using var dbContext = DbFactory.CreateDbContext();
-        for (int i = 0; i < SelectedAutoCompleteText.Count(); i++)
+    var moderatorsToRemove = newQuiz.Moderators
+        .Where(m => !SelectedAutoCompleteText.Contains(m.Email))
+        .ToList();
+
+    foreach (var moderator in moderatorsToRemove)
+    {
+        newQuiz.Moderators.Remove(moderator);
+    }
+
+    foreach (var email in SelectedAutoCompleteText)
+    {
+        if (!newQuiz.Moderators.Any(m => m.Email == email))
         {
-            if (dbContext.Users.Local.Contains(await dbContext.Users.FirstOrDefaultAsync(u => u.Email == SelectedAutoCompleteText[i])))
-            {
-                continue;
-            }
-            var user = await dbContext.Users.FirstOrDefaultAsync(u => u.Email == SelectedAutoCompleteText[i]);
+            var user = await dbContext.Users.FirstOrDefaultAsync(u => u.Email == email);
             if (user != null && user.Id != owner.Id)
             {
                 newQuiz.Moderators.Add(user);
             }
-
         }
+    }
     }
 
     #endregion QuizMethods

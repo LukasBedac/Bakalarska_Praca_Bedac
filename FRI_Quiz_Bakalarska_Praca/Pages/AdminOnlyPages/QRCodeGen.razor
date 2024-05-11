@@ -11,7 +11,7 @@
     <div>
        
         <Label>QR kód kvízu</Label>
-        <Blazorise.QRCode.QRCode Value="@($"localhost:7166/vyplnenieKvizu/{quiz.Hash}")"></Blazorise.QRCode.QRCode>
+        <Blazorise.QRCode.QRCode Value="@($"https://localhost:7166/vyplnKviz/{quiz.Hash}")"></Blazorise.QRCode.QRCode>
         
     </div>
 } else
@@ -24,7 +24,7 @@
                 <div>
                     <label class="question">Otázka @question.Order</label>
                 </div>
-                <Blazorise.QRCode.QRCode Value="@($"https://locahost:7166/vyplnenieKvizu/{question.Hash}")" Class="d-inline flex-column"></Blazorise.QRCode.QRCode>
+                <Blazorise.QRCode.QRCode Value="@($"https://locahost:7166/vyplnKviz/{question.Hash}")" Class="d-flex justify-content-center"></Blazorise.QRCode.QRCode>
             </div>
         }
     </div>
@@ -67,12 +67,13 @@
         display: flex;
         position: center;
         justify-content: center;
-        
+        justify-self:center;
+        flex-direction: column;
     }
     .question {
         display: flex;
         position: center;
         justify-content: center;
-        flex-direction: row;
+        
     }
 </style>

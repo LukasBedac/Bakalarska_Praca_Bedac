@@ -18,7 +18,7 @@ namespace FRI_Quiz_Bakalarska_Praca.Data.Model
         public Question Question { get; set; }
 
         [Required]
-        public List<Answer>? CheckedAnswers { get; set; } = new List<Answer>() { };
+        public virtual List<Answer>? CheckedAnswers { get; set; } = new List<Answer>() { };
 
         [Required]
         public DateTime? DateAnswered { get; set; } = DateTime.Today;

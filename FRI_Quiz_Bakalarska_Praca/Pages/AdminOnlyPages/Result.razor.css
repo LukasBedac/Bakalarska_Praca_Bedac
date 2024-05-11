@@ -1,0 +1,16 @@
+﻿body {
+}
+.footer-padding {
+    display:flex;
+    padding-top: 5rem;
+    padding-bottom: 1rem;
+}
+.first-color {
+    background-color: palegoldenrod;
+}
+.second-color {
+    background-color: silver ;
+}
+.third-color {
+    background-color: #CD7F32;
+}

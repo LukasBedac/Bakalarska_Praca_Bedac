@@ -59,7 +59,7 @@
         
     <NotAuthorized>
         <Heading TextAlignment="TextAlignment.Center">
-            Na zobrazenie vám priradených kvízov sa prosím prihláste.
+            Na zobrazenie Vám priradených kvízov sa prosím prihláste.
             <br />
             <div>
                 <a class="oi oi-account-login link-login" href="/login"> Prihlásiť sa</a>
@@ -116,8 +116,13 @@
         using var dbContext = DbFactory.CreateDbContext();
 
         List<User_Question> user_questions = new List<User_Question>() { };
-        user_questions = dbContext.UserQuestions.Include(u => u.User).Include(u => u.Question).ThenInclude(q => q.Answers).Include(u => u.CheckedAnswers).
-            Where(q => q.User.Id == userId).ToList();
+        user_questions = dbContext.UserQuestions
+        .Include(u => u.User)
+        .Include(u => u.Question)
+        .ThenInclude(q => q.Answers)
+        .Include(u => u.CheckedAnswers)
+        .Where(q => q.User.Id == userId)
+        .ToList();
         Quiz selectedQuiz = null;
         double points = 0;
         foreach (var quiz in liveQuizzes)
@@ -150,47 +155,41 @@
                     }
                     foreach (var answer in selectedQuestion.CheckedAnswers)
                     {
+                        double qpoints = 0;
                         if (correctAnswers > 1)
                         {
                             if (answer.Correct)
                             {
-                                points += 1 / correctAnswers;
+                                qpoints += 1 / correctAnswers;
                             } else
                             {
-                                if (points == 0)
-                                {
-                                    points = 0;
-                                } else
-                                {
-                                    points -= 1 / correctAnswers;
-                                }
+                                qpoints -= 1 / correctAnswers;                              
                             }                                                                                        
                         }
                         else
                         {
                             if (answer.Correct)
                             {
-                                points += 1;
+                                qpoints += 1;
                             }
                             else
                             {
-                                if (points == 0)
+                                qpoints -= 1;
+
+                                if (qpoints < 1)
                                 {
-                                    points = 0;
+                                    qpoints = 0;
                                 }
-                                else
-                                {
-                                    points -= 1;
-                                }
+
                             }
                         }
+                        points += qpoints;
                     }
                 }
             }
         }
 
         return points;
-
     }
 
     private List<Quiz> GetLiveQuizzes()
